@@ -1,0 +1,417 @@
+name: "forward"
+
+layer{
+  type: "PlaceholderOp"
+  top: "arg0_1"
+  layer_param{
+    shape: [32, 3, 3, 3]
+    dtype: TensorDType.Float32
+  }
+}
+
+layer{
+  type: "PlaceholderOp"
+  top: "arg1_1"
+  layer_param{
+    shape: [32]
+    dtype: TensorDType.Float32
+  }
+}
+
+layer{
+  type: "PlaceholderOp"
+  top: "arg2_1"
+  layer_param{
+    shape: [1, 3, 224, 224]
+    dtype: TensorDType.Float32
+  }
+}
+
+layer{
+  type: "PlaceholderOp"
+  top: "arg3_1"
+  layer_param{
+    shape: [32, 1, 3, 3]
+    dtype: TensorDType.Float32
+  }
+}
+
+layer{
+  type: "PlaceholderOp"
+  top: "arg4_1"
+  layer_param{
+    shape: []
+    dtype: TensorDType.Int64
+  }
+}
+
+layer{
+  type: "PlaceholderOp"
+  top: "arg5_1"
+  layer_param{
+    shape: [32]
+    dtype: TensorDType.Float32
+  }
+}
+
+layer{
+  type: "PlaceholderOp"
+  top: "arg6_1"
+  layer_param{
+    shape: [32]
+    dtype: TensorDType.Float32
+  }
+}
+
+layer{
+  type: "PlaceholderOp"
+  top: "arg7_1"
+  layer_param{
+    shape: [32]
+    dtype: TensorDType.Float32
+  }
+}
+
+layer{
+  type: "PlaceholderOp"
+  top: "arg8_1"
+  layer_param{
+    shape: [32]
+    dtype: TensorDType.Float32
+  }
+}
+
+layer{
+  type: "PlaceholderOp"
+  top: "arg9_1"
+  layer_param{
+    shape: [64, 32, 1, 1]
+    dtype: TensorDType.Float32
+  }
+}
+
+layer{
+  type: "PlaceholderOp"
+  top: "arg10_1"
+  layer_param{
+    shape: []
+    dtype: TensorDType.Int64
+  }
+}
+
+layer{
+  type: "PlaceholderOp"
+  top: "arg11_1"
+  layer_param{
+    shape: [64]
+    dtype: TensorDType.Float32
+  }
+}
+
+layer{
+  type: "PlaceholderOp"
+  top: "arg12_1"
+  layer_param{
+    shape: [64]
+    dtype: TensorDType.Float32
+  }
+}
+
+layer{
+  type: "PlaceholderOp"
+  top: "arg13_1"
+  layer_param{
+    shape: [64]
+    dtype: TensorDType.Float32
+  }
+}
+
+layer{
+  type: "PlaceholderOp"
+  top: "arg14_1"
+  layer_param{
+    shape: [64]
+    dtype: TensorDType.Float32
+  }
+}
+
+layer{
+  type: "PlaceholderOp"
+  top: "arg15_1"
+  layer_param{
+    shape: [10, 16384]
+    dtype: TensorDType.Float32
+  }
+}
+
+layer{
+  type: "PlaceholderOp"
+  top: "arg16_1"
+  layer_param{
+    shape: [10]
+    dtype: TensorDType.Float32
+  }
+}
+
+layer{
+  type: "Conv2dOp"
+  top: "convolution"
+  bottom: "arg2_1"
+  bottom: "arg0_1"
+  bottom: "arg1_1"
+  layer_param{
+    attr_0: [2, 2]
+    attr_1: [1, 1]
+    attr_2: [1, 1]
+    attr_3: False
+    attr_4: [0, 0]
+    attr_5: 1
+    shape: [1, 32, 112, 112]
+    dtype: TensorDType.Float32
+  }
+}
+
+layer{
+  type: "Conv2dOp"
+  top: "convolution_1"
+  bottom: "convolution"
+  bottom: "arg3_1"
+  layer_param{
+    attr_0: None
+    attr_1: [1, 1]
+    attr_2: [1, 1]
+    attr_3: [1, 1]
+    attr_4: False
+    attr_5: [0, 0]
+    attr_6: 32
+    shape: [1, 32, 112, 112]
+    dtype: TensorDType.Float32
+  }
+}
+
+layer{
+  type: "AddOp"
+  top: "add"
+  bottom: "arg4_1"
+  layer_param{
+    attr_0: 1
+    shape: []
+    dtype: TensorDType.Int64
+  }
+}
+
+layer{
+  type: "BatchNormOp"
+  top: "_native_batch_norm_legit_functional"
+  bottom: "convolution_1"
+  bottom: "arg7_1"
+  bottom: "arg8_1"
+  bottom: "arg5_1"
+  bottom: "arg6_1"
+  layer_param{
+    attr_0: True
+    attr_1: 0.1
+    attr_2: 1e-05
+    shape{
+      output_0: [1, 32, 112, 112]
+      output_1: [32]
+      output_2: [32]
+      output_3: [32]
+      output_4: [32]
+    }
+  }
+}
+
+layer{
+  type: "GetItemOp"
+  top: "getitem"
+  bottom: "_native_batch_norm_legit_functional"
+  layer_param{
+    attr_0: 0
+    shape: [1, 32, 112, 112]
+    dtype: TensorDType.Float32
+  }
+}
+
+layer{
+  type: "GetItemOp"
+  top: "getitem_3"
+  bottom: "_native_batch_norm_legit_functional"
+  layer_param{
+    attr_0: 3
+    shape: [32]
+    dtype: TensorDType.Float32
+  }
+}
+
+layer{
+  type: "GetItemOp"
+  top: "getitem_4"
+  bottom: "_native_batch_norm_legit_functional"
+  layer_param{
+    attr_0: 4
+    shape: [32]
+    dtype: TensorDType.Float32
+  }
+}
+
+layer{
+  type: "ReluOp"
+  top: "relu"
+  bottom: "getitem"
+  layer_param{
+    shape: [1, 32, 112, 112]
+    dtype: TensorDType.Float32
+  }
+}
+
+layer{
+  type: "Conv2dOp"
+  top: "convolution_2"
+  bottom: "relu"
+  bottom: "arg9_1"
+  layer_param{
+    attr_0: None
+    attr_1: [1, 1]
+    attr_2: [0, 0]
+    attr_3: [1, 1]
+    attr_4: False
+    attr_5: [0, 0]
+    attr_6: 1
+    shape: [1, 64, 112, 112]
+    dtype: TensorDType.Float32
+  }
+}
+
+layer{
+  type: "AddOp"
+  top: "add_1"
+  bottom: "arg10_1"
+  layer_param{
+    attr_0: 1
+    shape: []
+    dtype: TensorDType.Int64
+  }
+}
+
+layer{
+  type: "BatchNormOp"
+  top: "_native_batch_norm_legit_functional_1"
+  bottom: "convolution_2"
+  bottom: "arg13_1"
+  bottom: "arg14_1"
+  bottom: "arg11_1"
+  bottom: "arg12_1"
+  layer_param{
+    attr_0: True
+    attr_1: 0.1
+    attr_2: 1e-05
+    shape{
+      output_0: [1, 64, 112, 112]
+      output_1: [64]
+      output_2: [64]
+      output_3: [64]
+      output_4: [64]
+    }
+  }
+}
+
+layer{
+  type: "GetItemOp"
+  top: "getitem_5"
+  bottom: "_native_batch_norm_legit_functional_1"
+  layer_param{
+    attr_0: 0
+    shape: [1, 64, 112, 112]
+    dtype: TensorDType.Float32
+  }
+}
+
+layer{
+  type: "GetItemOp"
+  top: "getitem_8"
+  bottom: "_native_batch_norm_legit_functional_1"
+  layer_param{
+    attr_0: 3
+    shape: [64]
+    dtype: TensorDType.Float32
+  }
+}
+
+layer{
+  type: "GetItemOp"
+  top: "getitem_9"
+  bottom: "_native_batch_norm_legit_functional_1"
+  layer_param{
+    attr_0: 4
+    shape: [64]
+    dtype: TensorDType.Float32
+  }
+}
+
+layer{
+  type: "ReluOp"
+  top: "relu_1"
+  bottom: "getitem_5"
+  layer_param{
+    shape: [1, 64, 112, 112]
+    dtype: TensorDType.Float32
+  }
+}
+
+layer{
+  type: "AvgPool2dOp"
+  top: "avg_pool2d"
+  bottom: "relu_1"
+  layer_param{
+    attr_0: [7, 7]
+    attr_1: [7, 7]
+    shape: [1, 64, 16, 16]
+    dtype: TensorDType.Float32
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "view"
+  bottom: "avg_pool2d"
+  layer_param{
+    attr_0: [1, 16384]
+    shape: [1, 16384]
+    dtype: TensorDType.Float32
+  }
+}
+
+layer{
+  type: "TransposeOp"
+  top: "t"
+  bottom: "arg15_1"
+  layer_param{
+    shape: [16384, 10]
+    dtype: TensorDType.Float32
+  }
+}
+
+layer{
+  type: "AddMMOp"
+  top: "addmm"
+  bottom: "arg16_1"
+  bottom: "view"
+  bottom: "t"
+  layer_param{
+    shape: [1, 10]
+    dtype: TensorDType.Float32
+  }
+}
+
+layer{
+  type: "OutputOp"
+  top: "output"
+  bottom: "add"
+  bottom: "getitem_3"
+  bottom: "getitem_4"
+  bottom: "add_1"
+  bottom: "getitem_8"
+  bottom: "getitem_9"
+  bottom: "addmm"
+}
