@@ -21,15 +21,18 @@ class Value:
         self.key = key
         if isinstance(value, str):
             value = "\"" + value + "\""
-        elif isinstance(value, list):
-            value = "[" + ", ".join([str(v) for v in value]) + "]"
+        elif isinstance(value, (list, tuple)):
+            value = "[" + ", ".join(["\"" + i + "\"" if "(" in i else i for i in [str(v) for v in value]]) + "]"
         elif isinstance(value, ne.Expr):
             value = value.simplify()
             data = value.export("cpp")
-            if isinstance(data, str):
-                value = value if isinstance(value, ne.Var) else f"\"{value}\""
-            else:
-                value = data
+            if "(" in data:
+                data = "\"" + data + "\""
+            value = data 
+            # if isinstance(data, str):
+            #     value = data
+            # else:
+            #     value = value if isinstance(value, ne.Var) else f"\"{value}\""
         self.value = value
 
     def export(self, tab_numb=0, tab="  "):

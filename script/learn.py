@@ -15,7 +15,7 @@ from dlavm import device
 from dlavm import transform
 
 last_token = ne.Var("last_token", max_data=2048) # 定义last_token，统一加载到所有计算图的节点中
-c = transform.infer_type(c, device.hbm_accel.HBM0923, attrs={"last_token": last_token})
+c = transform.infer_type(c, device.hbm_accel.EdgeLLM, attrs={"last_token": last_token})
 
 print(c)
 
@@ -27,11 +27,19 @@ init_addr = {"global": 0x0, "weight": "global", "runtime": "weight", "insts": "r
 build_config = {"wt2hbm": True, "debug": True, "ddr_base": 0x20000_0000, "hbm_base": 0x0, "align": 0x4000}
 mod = backend.build(c, init_addr, "model_mvm", True, target, build_config)
 
+vis_source = backend.visualize(c, "model_mvm", build_config)
+
 source = mod.get_source()
 insts = mod.get_insts_bin()
 
-with open("src.inc.h", "w") as f:
+# 请手动新建test目录
+with open("test/src.inc.h", "w") as f:
     f.write(source)
 
-with open("inst.bin", "wb") as f:
+with open("test/inst.bin", "wb") as f:
     f.write(insts)
+
+with open("test/src.inc.prototxt", "w") as f:
+    f.write(vis_source)
+
+

@@ -5,7 +5,7 @@ from ..utils import LOG_WITH_PREFIX
 
 class GraphBuild(Functor):
 
-    def __init__(self, debug=True, onchip=False, align=0x10, output_name="output"):
+    def __init__(self, debug=True, onchip=False, align=0x10, output_name="output", **kwargs):
         super().__init__()
         self.output_name = output_name
         self.align = align
@@ -24,20 +24,23 @@ class GraphBuild(Functor):
         self.info_memo = info.memo
 
         expr = self.visit(expr)
-        self.wrap_output(expr.checked_type)
+        self.wrap_output(expr)
 
         return self.graphs
 
-    def wrap_output(self, tensor):
+    def wrap_output(self, expr):
+        tensor = expr.checked_type
         if isinstance(tensor, Tensor):
             self.graphs.append({
+                "args": expr.ir_name,
                 "type": "output",
                 "name": self.output_name,
                 "tensor": tensor,
             })
         elif isinstance(tensor, Tuple):
-            for t, num in enumerate(tensor.tensors):
+            for num, t in enumerate(tensor.tensors):
                 self.graphs.append({
+                    "args": expr.ir_name + f"_{num}",
                     "type": "output",
                     "name": f"{self.output_name}_{num}",
                     "tensor": t,
@@ -158,6 +161,7 @@ class GraphBuild(Functor):
             "args": [arg.ir_name for arg in expr.args],
             "ir_name": expr.ir_name,
             "tensor": expr.checked_type,
+            "attrs": expr.attrs,
         })
         return expr
 
@@ -199,6 +203,7 @@ class GraphBuild(Functor):
             "args": [arg.ir_name for arg in expr.args],
             "ir_name": expr.ir_name,
             "tensor": expr.checked_type,
+            "attrs": expr.attrs
         })
         return expr
 

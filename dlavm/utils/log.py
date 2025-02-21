@@ -5,7 +5,7 @@ def LOG_WITH_PREFIX(prefix, log):
     global _logs
     if prefix not in _logs:
         _logs[prefix] = []
-    _logs[prefix].append(log)
+    _logs[prefix].append(str(log))
 
 
 def LOG_CLEAR():

@@ -140,6 +140,14 @@ build_config = {"wt2hbm": True, "debug": True, "ddr_base": 0x20000_0000, "hbm_ba
 mod = backend.build(c, init_addr, "model_mvm", True, target, build_config) # 实际编译
 ```
 
+除此之外，可以将编写的计算图导出为prototxt格式，通过netron打开，以进行可视化，具体操作代码如下：
+
+```python
+vis_source = backend.visualize(c, "model_mvm", build_config)
+```
+
+其中，vis_source即为prototxt模型的text代码，保存为*.prototxt格式即可通过netron打开。
+
 4. 编译目标生成与保存
 
 上述生成的mod即为最终的编译目标，根据需要可以进行进一步的工作，主要包括：代码生成、指令生成(aux模式)等，后续考虑更新直接运行、可视化算子计算图等等。
@@ -150,11 +158,15 @@ mod = backend.build(c, init_addr, "model_mvm", True, target, build_config) # 实
 source = mod.get_source()
 insts = mod.get_insts_bin()
 
+# 请手动新建test目录
 with open("src.inc.h", "w") as f:
     f.write(source)
 
 with open("inst.bin", "wb") as f:
     f.write(insts)
+
+with open("src.inc.prototxt", "w") as f:
+    f.write(vis_source)
 ```
 
 5. 编译生成的头文件简介
@@ -191,6 +203,7 @@ void model_mvm(HANDLE& device) {
 
 其中，runtime0、hbm0等即为内存块，a、output为输入、输出的实际地址（或输出函数封装），而xxxx_load_params和xxxx即为封装好的权重加载和模型运行函数。
 
+此部分主要介绍了一个算子的完整编译流程。在实际开发中，我们主要关注计算图部分的编写，此处可以参考dlavm/llm的一些已经release的计算图编写，而编译代码和一些配置代码比较简单且可以复用。
 
 ## 编译器开发细节指南
 

@@ -43,8 +43,9 @@ class RegsBuild(GraphBuild):
         lib.body = [self.storage.export(), self.inputs, self.outputs, self.load_params, self.model_run]
         return lib, graphs, self.storage, None, None
 
-    def wrap_output(self, tensor):
-        super().wrap_output(tensor)
+    def wrap_output(self, expr):
+        super().wrap_output(expr)
+        tensor = expr.checked_type
         if isinstance(tensor, Tensor):
             if hasattr(tensor, "csb_read"):
                 with ir.Function([], ret="int", name="wrap_" + self.output_name) as f:

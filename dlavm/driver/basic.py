@@ -2,6 +2,7 @@ from functools import reduce
 import subprocess
 from .. import ne
 from ..adr import DataEnum, DataType
+from ..utils import LOG_WITH_PREFIX
 
 
 def CSB_For(expr, tag):
@@ -98,6 +99,7 @@ class Tasks:
 
     @classmethod
     def Get(cls, op_name, device):
+        log_driver_device = "op-driver-version"
         if op_name not in cls.memo[device.name].keys():
             msg = f"no found op \"{op_name}\", please register first"
             raise RuntimeError(msg)
@@ -105,10 +107,16 @@ class Tasks:
             for i in range(len(cls.memo[device.name][op_name]) - 1):
                 if cls.memo[device.name][op_name][i][1] < device.version:
                     if cls.memo[device.name][op_name][i+1][1] > device.version:
+                        version = cls.memo[device.name][op_name][i][1]
+                        LOG_WITH_PREFIX(log_driver_device, [op_name, device.name, version])
                         return cls.memo[device.name][op_name][i][0]
                     elif cls.memo[device.name][op_name][i+1][1] == device.version:
+                        version = cls.memo[device.name][op_name][i+1][1]
+                        LOG_WITH_PREFIX(log_driver_device, [op_name, device.name, version])
                         return cls.memo[device.name][op_name][i+1][0]
                 elif cls.memo[device.name][op_name][i][1] == device.version:
+                    version = cls.memo[device.name][op_name][i][1]
+                    LOG_WITH_PREFIX(log_driver_device, [op_name, device.name, version])
                     return cls.memo[device.name][op_name][i][0]
                 else:
                     msg = f"no available task version \"{op_name}\" for {device.version}, please register first"
@@ -116,6 +124,8 @@ class Tasks:
             return cls.memo[device.name][op_name][i+1][0]
         else:
             if cls.memo[device.name][op_name][0][1] <= device.version:
+                version = cls.memo[device.name][op_name][0][1]
+                LOG_WITH_PREFIX(log_driver_device, [op_name, device.name, version])
                 return cls.memo[device.name][op_name][0][0]
             else:
                 msg = f"no available task version \"{op_name}\" for {device.version}, please register first"

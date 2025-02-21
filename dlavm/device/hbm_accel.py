@@ -185,3 +185,18 @@ class HBM0923(HBM0912):
     """
 
 HBM0921BackUp = HBM0923
+
+
+class HBM1128(HBM0923):
+    version = 20241128
+
+    sCONV_OUT_DW = 20
+    DAT_BRAM_DEPTH = (1<<23)//HBM0923.base_Tin//HBM0923.MAX_DAT_DW//HBM0923.DAT_BRAM_NUM
+    WT_BRAM_DEPTH = (1<<24)//HBM0923.HBM_AXI_DATA_WIDTH//HBM0923.WT_BRAM_NUM
+
+    description = """
+        作为VCU128 FPGA板DDR-HBM大模型边缘加速器demo的release版本支持，以上版本均为Debug的旧版本
+        在本项目中，此加速器设备命名为EdgeLLM，可通过使用EdgeLLM调用
+    """
+
+EdgeLLM = HBM1128

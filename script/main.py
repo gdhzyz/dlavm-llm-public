@@ -66,6 +66,14 @@ def main_compile(device, args):
     save_path = os.path.join(args.save, name + ".h")
     inst_path = os.path.join(args.save, name + ".bin")
     log_path = os.path.join(args.save, name + ".log")
+
+    if args.prototxt:
+        vis_path = os.path.join(args.save, name + ".prototxt")
+        vis_source = backend.visualize(output, name, build_config)
+        with open(vis_path, "w") as f:
+            f.write(vis_source)
+            cout += f"Prototxt saved in {vis_path}"
+
     with open(save_path, "w") as f:
         f.write(source)
         cout += f"Saved in {save_path}"
@@ -84,7 +92,7 @@ def main_compile(device, args):
 
 
 if __name__ == "__main__":
-    device = dlavm.device.hbm_accel.HBM0923
+    device = dlavm.device.hbm_accel.EdgeLLM
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--py", action="store_true", default=False, help="python backend mode")
@@ -96,7 +104,7 @@ if __name__ == "__main__":
     parser.add_argument("--wt2hbm", action="store_true", default=False, help="wt2hbm backend mode")
     parser.add_argument("--onchip", action="store_true", default=False, help="onchip mode enable")
     parser.add_argument("--prototxt", action="store_true", default=False, help="visualizes for prototxt model")
-    parser.add_argument("--model", type=str, default="chatglm", help="set compile model")
+    parser.add_argument("--model", type=str, default="chatglm", help="set compile model, support " + ", ".join(config.keys()))
     parser.add_argument("--prefix", type=str, default="BLOCK_write_data", help="set datapath prefix")
     parser.add_argument("--save", type=str, default="../output", help="set save path prefix")
     parser.add_argument("--maxtoken", type=int, default=device.MAX_TOKEN, help="set max token")

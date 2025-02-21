@@ -1,0 +1,1 @@
+python 需要把mytokens整个文件夹和client_v1.py一起打包，需要的库为transformers==4.42.3，numpy等常规库

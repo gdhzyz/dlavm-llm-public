@@ -3,6 +3,7 @@ from dlavm.adr import Tensor, Op
 from .. import ir
 from ..basic import Ceil
 from .tasks_0922 import *
+from .tasks_1128 import *
 
 
 def get_vars(targets):
@@ -45,7 +46,7 @@ def MVM(args, outputs, full=None, **attrs):
     with ir.Function(get_vars([args[0].shape, attrs])) as func:
         out_w_slice            = w_slice
         min_dat_depth          = Win*WT_CHin_div_Tin
-        Wout_Split_Times_minus1= (min_dat_depth+(out_w_slice*WT_CHin_div_Tin)-1)//(out_w_slice*WT_CHin_div_Tin) -1
+        Wout_Split_Times_minus1= (min_dat_depth+(out_w_slice*WT_CHin_div_Tin))//(out_w_slice*WT_CHin_div_Tin)-1
         Wout_Split_Times_minus1= func.assign("wout_split_times_minus1", Wout_Split_Times_minus1, "int")
         Wout_Split_Times       = Wout_Split_Times_minus1 + 1
         out_w_slice_last       = (min_dat_depth-(Wout_Split_Times_minus1)*out_w_slice*WT_CHin_div_Tin)//WT_CHin_div_Tin
