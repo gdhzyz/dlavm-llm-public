@@ -30,12 +30,15 @@ class LoopSimplify(ir.Functor):
         return new_expr
 
     def VisitFor(self, stmt: ir.For):
-        new_stmt = super().VisitFor(stmt)
+        new_stmt = deepcopy(stmt)
+        new_stmt.init = self.Visit(stmt.init)
+        new_stmt.extent = self.Visit(stmt.extent)
+        new_stmt.stride = self.Visit(stmt.stride)
         if self.eliminate:
             with ir.Block() as block:
                 functor = FunctorLoop(var_map={new_stmt.var.name : new_stmt.init})
-                for b in new_stmt.body:
-                    block += functor.Visit(b)
+                for b in stmt.body:
+                    block += self.Visit(functor.Visit(b))
             return block
         elif isinstance(new_stmt.init, (int, float)) and \
            isinstance(new_stmt.extent, (int, float)) and \
@@ -46,8 +49,10 @@ class LoopSimplify(ir.Functor):
                 with ir.Block() as block:
                     for i in py_loop:
                         functor = FunctorLoop(var_map={new_stmt.var.name : i})
-                        for b in new_stmt.body:
-                            block += functor.Visit(b)
+                        for b in stmt.body:
+                            block += self.Visit(functor.Visit(b))
                 return block
+        else:
+            new_stmt.body = self.RmEmpty([self.Visit(b) for b in stmt.body])
         return new_stmt
 

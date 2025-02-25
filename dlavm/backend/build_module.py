@@ -1,5 +1,6 @@
 from time import strftime, localtime
 from .plan_memory import Storage
+from .visualize import VisualizePrototxt
 from ..driver import ir, transform
 from ..target import CodeGenEngine
 from dlavm import adr
@@ -34,3 +35,6 @@ class BuildModule:
                 else:
                     return data.tobytes()
             return _wrap(self.insts)
+
+    def get_prototxt(self):
+        return VisualizePrototxt().build(self.graph, "main")

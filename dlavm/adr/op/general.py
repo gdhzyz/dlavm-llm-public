@@ -1,6 +1,34 @@
 from ..base import Op, VM, Call, Var, Constant, DataEnum, DataType
 
 
+def var_hbm(name, shape, dtype=DataEnum.fp16):
+    dtype = DataType(dtype, DataEnum.hbm)
+    expr = Var(name, shape, dtype)
+    expr.prefix = "runtime"
+    return expr
+
+
+def var_ddr(name, shape, dtype=DataEnum.fp16):
+    dtype = DataType(dtype, DataEnum.ddr)
+    expr = Var(name, shape, dtype)
+    expr.prefix = "runtime"
+    return expr
+
+
+def const_ddr(name, data, shape=None, dtype=DataEnum.fp16):
+    dtype = DataType(dtype, DataEnum.ddr)
+    expr = Constant(name, data, shape, dtype)
+    expr.prefix = "weight"
+    return expr
+
+
+def const_hbm(name, data, shape=None, dtype=DataEnum.int4):
+    dtype = DataType(dtype, DataEnum.hbm)
+    expr = Constant(name, data, shape, dtype)
+    expr.prefix = "hbm"
+    return expr
+
+
 def split(data, axis, new_chs=[], dynamic=True):
     attrs = {
         "axis": axis,

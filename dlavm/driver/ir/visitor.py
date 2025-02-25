@@ -68,6 +68,11 @@ class Visitor(Functor):
         self.Visit(stmt.value)
         return new_stmt
 
+    def VisitAssignVar(self, stmt: ir.AssignVar):
+        new_stmt = stmt
+        self.Visit(stmt.value)
+        return new_stmt
+
     def VisitCSBWrite(self, stmt: ir.CSB_Write):
         new_stmt = stmt
         self.Visit(stmt.addr)

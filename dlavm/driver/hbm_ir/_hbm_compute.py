@@ -25,7 +25,7 @@ def replace(list, num, target):
     return new_list
 
 
-def MVM(args, outputs, full=None, **attrs):
+def MVM(args, outputs, attrs):
     device = args[0].device
     Hin, Win = 1, args[0].shape[-2]
     CHin, CHout = args[1].shape
@@ -38,11 +38,6 @@ def MVM(args, outputs, full=None, **attrs):
     if DAT_BRAM_DEPTH < WT_CHin_div_Tin:
         raise RuntimeError("Could not split now for MVM")
     w_slice = DAT_BRAM_DEPTH // WT_CHin_div_Tin
-    if full is None:
-        full = False
-        if isinstance(Win, ne.Expr) and not isinstance(Win, ne.Numb):
-            if Win.simplify(1) > w_slice:
-                full = True
     with ir.Function(get_vars([args[0].shape, attrs])) as func:
         out_w_slice            = w_slice
         min_dat_depth          = Win*WT_CHin_div_Tin
@@ -66,7 +61,7 @@ def MVM(args, outputs, full=None, **attrs):
 
 
 @Op.RegisterAttrs("accel.hbm.layer_norm", "compute")
-def LayerNorm(args, outputs, **attrs):
+def LayerNorm(args, outputs, attrs):
     device = args[0].device
     with ir.Function(get_vars([args[0].shape, attrs])) as func:
         new_args = [arg for arg in args]
@@ -83,7 +78,7 @@ def LayerNorm(args, outputs, **attrs):
 
 
 @Op.RegisterAttrs("accel.hbm.pos_emb", "compute")
-def PosEmb(args, outputs, **attrs):
+def PosEmb(args, outputs, attrs):
     device = args[0].device
     with ir.Function(get_vars([args[0].shape, attrs])) as func:
         Tasks.Get("atom.hbm.pos_emb", device)(func, args, outputs, device, **attrs)
@@ -91,7 +86,7 @@ def PosEmb(args, outputs, **attrs):
 
 
 @Op.RegisterAttrs("accel.hbm.softmax", "compute")
-def Softmax(args, outputs, **attrs):
+def Softmax(args, outputs, attrs):
     device = args[0].device
     with ir.Function(get_vars([args[0].shape, attrs])) as func:
         Tasks.Get("atom.hbm.softmax", device)(func, args, outputs, device, **attrs)
@@ -99,7 +94,7 @@ def Softmax(args, outputs, **attrs):
 
 
 @Op.RegisterAttrs("accel.hbm.activate", "compute")
-def Act(args, outputs, **attrs):
+def Act(args, outputs, attrs):
     device = args[0].device
     with ir.Function(get_vars([args[0].shape, attrs])) as func:
         Tasks.Get("atom.hbm.act", device)(func, args, outputs, device, **attrs)
@@ -107,7 +102,7 @@ def Act(args, outputs, **attrs):
 
 
 @Op.RegisterAttrs("accel.hbm.dat_hbm", "compute")
-def Dat2HBM(args, outputs, **attrs):
+def Dat2HBM(args, outputs, attrs):
     device = args[0].device
     with ir.Function(get_vars([args[0].shape, attrs])) as func:
         Tasks.Get("atom.hbm.dat2hbm", device)(func, args, outputs, device, **attrs)
@@ -115,7 +110,7 @@ def Dat2HBM(args, outputs, **attrs):
 
 
 @Op.RegisterAttrs("accel.hbm.trp_mvm", "compute")
-def TRP_MVM(args, outputs, **attrs):
+def TRP_MVM(args, outputs, attrs):
     device = args[0].device
     PixelBytes, Tout = device.Pixel_Data_Bytes, device.Tout
     s_DAT_BRAM_DEPTH, s_DAT_BRAM_NUM = device.s_DAT_BRAM_DEPTH, device.s_DAT_BRAM_NUM
@@ -168,7 +163,7 @@ def TRP_MVM(args, outputs, **attrs):
 
 
 @Op.RegisterAttrs("accel.hbm.f2w_mvm", "compute")
-def F2W_MVM(args, outputs, **attrs):
+def F2W_MVM(args, outputs, attrs):
     device = args[0].device
     PixelBytes, Tout = device.Pixel_Data_Bytes, device.Tout
     s_DAT_BRAM_DEPTH, s_DAT_BRAM_NUM = device.s_DAT_BRAM_DEPTH, device.s_DAT_BRAM_NUM

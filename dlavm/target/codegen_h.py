@@ -85,14 +85,14 @@ class CodeGenH(CodeGenBase):
         then_block = [self.Visit(b) for b in stmt.then_block.body]
         else_block = [self.Visit(b) for b in stmt.else_block.body]
         self.tab_num -= 1
-        if len(then_block) == 1:
+        if len(then_block) == 1 and not isinstance(stmt.then_block.body[0], ir.Block):
             then_src = then_block[0][(self.tab_num+1)*len(self.tab):]
             source = tabs + f"if ({judge}) {then_src}"
         else:
             source = tabs + f"if ({judge})" + " {\n"
             source += "\n".join(then_block) + "\n"
             source += tabs + "}"
-        if len(else_block) == 1:
+        if len(else_block) == 1 and not isinstance(stmt.then_block.body[0], ir.Block):
             source += f" else {else_block[0]}"
         elif len(else_block) == 0:
             pass
@@ -135,6 +135,11 @@ class CodeGenH(CodeGenBase):
         if stmt.dtype in self.data_type.keys():
             dtype = self.data_type[stmt.dtype]
         return tabs + f"{dtype} {stmt.var.name} = {value};"
+
+    def VisitAssignVar(self, stmt: ir.AssignVar):
+        tabs = self.tab * self.tab_num
+        value = self.Visit(stmt.value)
+        return tabs + f"{stmt.var.name} = {value};"
 
     def VisitCSBWrite(self, stmt: ir.CSB_Write):
         tabs = self.tab * self.tab_num

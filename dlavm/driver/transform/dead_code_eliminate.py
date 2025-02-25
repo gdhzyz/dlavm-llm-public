@@ -45,3 +45,12 @@ class DeadCodeEliminate(ir.Functor):
                 return ir.Empty
         new_stmt = super().VisitAssign(stmt)
         return new_stmt
+
+    def VisitAssignVar(self, stmt: ir.AssignVar):
+        def check(t, s):
+            return t.var == s.var
+        for i in self.unused_assign:
+            if check(i, stmt):
+                return ir.Empty
+        new_stmt = super().VisitAssignVar(stmt)
+        return new_stmt

@@ -3,7 +3,7 @@ from ..adr import Functor, Call, VM, Tensor, Function
 
 class InferType(Functor):
 
-    def __init__(self, device=None, attrs={}):
+    def __init__(self, device, attrs={}):
         super(InferType, self).__init__()
         self.device = device
         self.attrs = attrs
@@ -56,7 +56,9 @@ class InferType(Functor):
         new_attrs = self.set_attrs(expr.attrs)
         new_args = [self.visit(arg) for arg in expr.args]
         new_type = [arg.get_checked_type() for arg in new_args]
-        func = expr.op.attrs["rel"]
+        # func = expr.op.attrs["rel"]
+        # if self.device is not None:
+        func = expr.op.get_attr("rel", self.device)
         state, checked_type = func(new_type, new_attrs)
         if state:
             new_expr = Call(expr.op, new_args, new_attrs, expr.prefix, checked_type)
@@ -77,6 +79,6 @@ class InferType(Functor):
             raise RuntimeError("Check Error! " + expr.op.name + ", " + checked_type)
 
 
-def infer_type(expr, device=None, attrs={}):
+def infer_type(expr, device, attrs={}):
     expr = InferType(device, attrs).visit(expr)
     return expr

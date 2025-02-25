@@ -1,0 +1,33 @@
+#!/bin/bash
+
+function basic_tasks() {
+  sed -i "s/AXI_GP_Master_CPU.Xil_Out32(addr<<2,data);/\$display(\"csb_rtl.append([1, %0d, %0d])\", addr, data);/" $1
+  sed -i "s/AXI_GP_Master_CPU.Xil_In32(addr<<2,data);/\$display(\"csb_rtl.append([0, %0d, %0d])\", addr, 1); data = 1;/" $1
+}
+
+# 定义一个递归函数来遍历目录
+function getdir() {
+  for element in `ls $1`
+  do
+    dir_or_file=$1"/"$element
+    if [ -d $dir_or_file ]
+    then
+      getdir $dir_or_file $2 $3
+    else
+      if [[ $dir_or_file == *.vh ]]; then
+        cp $dir_or_file $2
+        if [[ $element == basic_tasks.vh ]]; then
+          basic_tasks $2"/"$element
+        fi
+      elif [[ $dir_or_file == *.sv ]]; then
+        cp $dir_or_file $3
+      else
+        echo Error: $dir_or_file
+      fi
+    fi
+  done
+}
+
+# 设置根目录路径
+# root_dir="/home/shenao/dlavm-llm-public/tbsim/testbench"
+getdir $1 $2 $3

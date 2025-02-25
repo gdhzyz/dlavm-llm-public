@@ -1,4 +1,4 @@
 from .base import *
 from .op import hbm
-from .op import general
+from .op import nn
 from .op.general import *

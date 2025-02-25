@@ -70,6 +70,8 @@ class Functor:
             result = self.VisitIf(stmt)
         elif isinstance(stmt, ir.Assign):
             result = self.VisitAssign(stmt)
+        elif isinstance(stmt, ir.AssignVar):
+            result = self.VisitAssignVar(stmt)
         elif isinstance(stmt, ir.Annotation):
             result = self.VisitAnnotation(stmt)
         elif isinstance(stmt, ir.CSB_Write):
@@ -151,6 +153,11 @@ class Functor:
         return new_stmt
 
     def VisitAssign(self, stmt: ir.Assign):
+        new_stmt = deepcopy(stmt)
+        new_stmt.value = self.Visit(stmt.value)
+        return new_stmt
+
+    def VisitAssignVar(self, stmt: ir.AssignVar):
         new_stmt = deepcopy(stmt)
         new_stmt.value = self.Visit(stmt.value)
         return new_stmt

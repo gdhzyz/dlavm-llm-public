@@ -13,6 +13,9 @@ class CodeGenBase(ir.Functor):
         self.source = ""
         self.module = []
 
+    def _clean(self, srcs):
+        return [s for s in srcs if len(s)]
+
     def main(self, stmt: ir.Function):
         pass
 
@@ -24,29 +27,29 @@ class CodeGenBase(ir.Functor):
 
     def VisitFunction(self, stmt: ir.Function):
         self.tab_num += 1
-        body = "\n".join([self.Visit(b) for b in stmt.body])
+        body = "\n".join(self._clean([self.Visit(b) for b in stmt.body]))
         self.tab_num -= 1
         self.id += 1
         return body
 
     def VisitBlockSplit(self, stmt: ir.BlockSplit):
-        body = "\n\n".join([self.Visit(b) for b in stmt.body])
+        body = "\n\n".join(self._clean([self.Visit(b) for b in stmt.body]))
         return body
 
     def VisitBlock(self, stmt: ir.Block):
-        body = "\n".join([self.Visit(b) for b in stmt.body])
+        body = "\n".join(self._clean([self.Visit(b) for b in stmt.body]))
         return body
 
     def VisitFor(self, stmt: ir.For):
         self.tab_num += 1
-        body = "\n".join([self.Visit(b) for b in stmt.body])
+        body = "\n".join(self._clean([self.Visit(b) for b in stmt.body]))
         self.tab_num -= 1
         return body
 
     def VisitWhile(self, stmt: ir.While):
         if stmt.body:
             self.tab_num += 1
-            body = "\n".join([self.Visit(b) for b in stmt.body])
+            body = "\n".join(self._clean([self.Visit(b) for b in stmt.body]))
             self.tab_num -= 1
             return body
         return ""

@@ -32,20 +32,35 @@ class Attrs:
 
     default = {}
 
-    def __init__(self, attrs):
-        self._attrs = attrs
+    def __init__(self, attrs:dict):
+        self._attrs = {**self.default, **attrs}
 
     def __str__(self) -> str:
-        str_out = ""
-        for k, v in self._attrs:
-            if k in self.default and self.default[k] != v:
-                str_out += f"{k}={v} "
-        return str_out[:-1]
+        str_out = []
+        for k, v in self._attrs.items():
+            if k not in self.default.keys(): 
+                str_out.append(f"{k}={v}")
+            elif self.default[k] != v:
+                str_out.append(f"{k}={v}")
+        return "{" + ", ".join(str_out) + "}"
+
+    def get(self, key, value=None):
+        return self._attrs.get(key, value)
+
+    def items(self):
+        return self._attrs.items()
+
+    def keys(self):
+        return self._attrs.keys()
+
+    def values(self):
+        return self._attrs.values()
 
     def __getitem__(self, key):
-        if key not in self._attrs:
-            return self.default[key]
         return self._attrs[key]
+
+    def __setitem__(self, key, value):
+        self._attrs[key] = value
 
     def __len__(self):
         return len(self._attrs)
@@ -59,19 +74,34 @@ class Op:
         self.name = name
         self.attrs = {}
 
-    @classmethod
-    def Register(cls, op_name, rel_func):
-        cls.memo[op_name] = Op(op_name)
-        cls.memo[op_name].attrs["rel"] = rel_func
+    def get_attr(self, attr_name, device=None):
+        if device is None:
+            attr = self.attrs.get(attr_name)
+        else:
+            attr = self.attrs.get(device.name, {}).get(attr_name)
+            if attr is None:
+                attr = self.attrs.get(attr_name)
+        return attr
 
     @classmethod
-    def RegisterAttrs(cls, op_name, attr_name):
+    def Register(cls, op_name, rel_func=None):
+        cls.memo[op_name] = Op(op_name)
+        if rel_func is not None:
+            cls.memo[op_name].attrs["rel"] = rel_func
+
+    @classmethod
+    def RegisterAttrs(cls, op_name, attr_name, device=None):
         def _register_attrs(obj):
             if op_name not in cls.memo.keys():
                 msg = f"Please register op {op_name} firsitly before set attribute {attr_name}"
                 raise RuntimeError(msg)
             else:
-                cls.memo[op_name].attrs[attr_name] = obj
+                if device is None:
+                    cls.memo[op_name].attrs[attr_name] = obj
+                else:
+                    if device.name not in cls.memo[op_name].attrs.keys():
+                        cls.memo[op_name].attrs[device.name] = {}
+                    cls.memo[op_name].attrs[device.name][attr_name] = obj
         return _register_attrs
 
     @classmethod
@@ -169,7 +199,7 @@ class Tensor(Base):
 
 class Var(Base):
 
-    def __init__(self, name, shape, dtype, device, prefix="runtime", checked_type=None):
+    def __init__(self, name, shape, dtype, device=None, prefix="runtime", checked_type=None):
         self.name = name
         self.shape = shape
         self.dtype = dtype
@@ -333,6 +363,8 @@ class PrintExpr(Functor):
         ret_name = "%" + str(self.id)
         self.id += 1
         func = f"  {ret_name} = {expr.op.name}({arg_str})"
+        if isinstance(expr.attrs, Attrs):
+            func += f"{str(expr.attrs)}"
         if expr.checked_type:
             func += " " + str(expr.checked_type)
         self.body.append(func)
@@ -343,6 +375,8 @@ class PrintExpr(Functor):
         ret_name = "%" + str(self.id)
         self.id += 1
         func = f"  {ret_name} = {expr.op.name}({arg_str})"
+        if isinstance(expr.attrs, Attrs):
+            func += f"{str(expr.attrs)}"
         if expr.checked_type:
             func += " " + str(expr.checked_type)
         self.body.append(func)

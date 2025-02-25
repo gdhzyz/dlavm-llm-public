@@ -32,7 +32,7 @@ class StorageNode:
 
 class Storage:
 
-    pingpong = ["runtime", "onchip"]
+    pingpong = ["runtime", "onchip", "hbm_rt"]
 
     def __init__(self):
         self.memo_ = {}

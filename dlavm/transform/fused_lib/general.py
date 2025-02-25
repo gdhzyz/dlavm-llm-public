@@ -1,6 +1,7 @@
 import numpy as np
 from .register import ConvertCall, FusedStrategy
-from ...adr import Constant, Call, Op, hbm, general
+from ...adr import Constant, Call, Op, hbm
+from ...adr.op import general
 
 
 def fused_reshape(root, leaf):

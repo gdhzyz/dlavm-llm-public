@@ -4,12 +4,12 @@ from dlavm.driver import Tasks, ir, transform
 from dlavm import ne
 from ..utils.prototxt import Module, Value, List
 
-class VisualizeBuild(GraphBuild):
+class VisualizePrototxt:
 
-    def build(self, expr, mod_name):
-        self.tab = "  "
+    tab = "  "
+
+    def build(self, graphs, mod_name):
         self.enum_nodes = [[], [], [], []]
-        graphs = super().build(expr)
         self.prototxt = Module()
         self.prototxt.append(Value("name", mod_name))
         for node in graphs:

@@ -150,6 +150,21 @@ class Assign(Stmt):
         return " "*tab_num + f"{self.dtype} {self.var.name} = {self.value}"
 
 
+class AssignVar(Stmt):
+
+    def __init__(
+            self,
+            var: Union[ne.Var],
+            value: Union[ne.Expr, Expr, int, float, str],
+        ):
+        super().__init__()
+        self.var = var
+        self.value = value
+
+    def _str_tab(self, tab_num):
+        return " "*tab_num + f"{self.var.name} = {self.value}"
+
+
 class StrFormat(Stmt):
 
     def __init__(
@@ -176,6 +191,11 @@ class Block(Stmt):
 
     def assign(self, name, value, dtype):
         var = Assign(name, value, dtype)
+        self.body.append(var)
+        return var.var
+
+    def assign_var(self, var, value):
+        var = AssignVar(var, value)
         self.body.append(var)
         return var.var
 

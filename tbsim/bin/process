@@ -1,0 +1,90 @@
+#!/usr/bin/python3
+import os
+import re
+import sys
+
+class TBProcess:
+
+    init_saved = ["rst_n=", "Finish"]
+    task_hard = [
+        "Run_Softmax_Hardware", "Run_LN", "Run_PosEmb_Hardware", "RunHBM_MVM_BN_Res_Argmax",
+        "RunHBM_MVM_BN_Res", "RunHBM_MVM_BN", "RunHBM_MVM_afterTRP", "RunHBM_MVM_afterF2W",
+        "RunHBM_MVM", "RunElementwise_Hardware", "RunCFG_MVM_BN_Res", "Run_Activation_Hardware",
+        "RunHBM_MVM_hardware", "RunHBM_MVM_BN_hardware", "RunHBM_MVM_BN_Argmax_hardware", "RunHBM_CONV_BN_hardware",
+        "Run_Elementwise_Hardware", "Run_GLM_PosEmb_Hardware", "Run_Qwen_PosEmb_Hardware",
+    ]
+
+    def __init__(self):
+        pass
+
+    def batch_process(self, src_path, tag_path, name_check):
+        flist = [i for i in os.listdir(src_path) if name_check(i)]
+        # flist = ["testbench_HBM_MVM.sv"]
+        for fname in flist:
+            with open(os.path.join(src_path, fname), "r") as f:
+                source = f.readlines()
+            self.checked_task = []
+            new_source = self.process(source)
+            print(fname, self.checked_task)
+            with open(os.path.join(tag_path, fname), "w") as f:
+                f.write(new_source)
+
+    def process(self, source):
+        self.source_iter = iter(source)
+        self.begin = 0
+        new_source = []
+        while 1:
+            code = self.analysis()
+            if "initial" in code:
+                codes = self.tb_init()
+                if len(codes):
+                    new_source += codes
+                    new_source.append("endmodule")
+                    break
+                else:
+                    continue
+            new_source.append(code)
+        return "".join(new_source)
+
+    def tb_init(self):
+        saved = []
+        code = self.analysis()
+        while self.begin:
+            for i in self.init_saved:
+                if i in code:
+                    saved.append(code)
+                    break
+            for i in self.task_hard:
+                if i + "(" in code:
+                    self.checked_task.append(i)
+                    new_code = code
+                    while ";" not in new_code:
+                        saved.append(new_code)
+                        new_code = self.analysis()
+                        if self.begin == 0:
+                            print("*ERROR*")
+                            exit(-1)
+                    saved.append(new_code)
+                    break
+            if len(self.checked_task):
+                break
+            code = self.analysis()
+        if len(saved):
+            return ["initial begin\n"] + saved + ["    $finish;\n", "end\n"]
+        return []
+
+
+    def analysis(self):
+        code = next(self.source_iter)
+        if "//" not in code[:2]:
+            if re.search("begin", code):
+                self.begin += 1
+            if re.search("end", code) and "_end_" not in code and "endif" not in code:
+                self.begin -= 1
+            return code
+        else:
+            return ""
+    
+
+if __name__ == "__main__":
+    TBProcess().batch_process(sys.argv[1], sys.argv[2], lambda x: "testbench_" in x)

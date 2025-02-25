@@ -69,7 +69,7 @@ def main_compile(device, args):
 
     if args.prototxt:
         vis_path = os.path.join(args.save, name + ".prototxt")
-        vis_source = backend.visualize(output, name, build_config)
+        vis_source = mod.get_prototxt()
         with open(vis_path, "w") as f:
             f.write(vis_source)
             cout += f"Prototxt saved in {vis_path}"
