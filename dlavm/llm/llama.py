@@ -19,7 +19,7 @@ def llama_block_hbm(data, pos_weight, silu_weight, token, index, path_prefix="BL
     h_to_4h_wt_1 = adr.hbm.const_hbm(prefix + "h_to_4h_wt_1", data_path + "MVM_BN_RES_write_to_HBM_bin/MVMBNRES1_HBM_DDR_%02d.bin", [4096, 11008])
     h_to_4h_bn_1 = adr.hbm.const_ddr(prefix + "h_to_4h_bn_1", data_path + "MVM_BN_RES_DDR_bin/MVMBNRES1_wt_and_bias_in_DDR.bin", [11008*2])
     dense_4h_to_4h_wt = adr.hbm.const_hbm(prefix + "dense_4h_to_h_wt", data_path + "MVM_BN_RES_write_to_HBM_bin/MVMBNRES2_HBM_DDR_%02d.bin", [11008, 4096])
-    bn_zeros = adr.hbm.const_ddr(prefix + "bn_zeros", data_path + "MVM_BN_RES_DDR_bin/DDR_BN_zeros.bin", [4096*2])
+    bn_zeros = adr.hbm.const_ddr(prefix + "bn_zeros", data_path + "MVM_BN_RES_DDR_bin/MVMBNRES2_wt_and_bias_in_DDR.bin", [4096*2])
 
     ln_out = adr.hbm.rms_norm(data, ln_k_bias)
 

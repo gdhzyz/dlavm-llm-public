@@ -38,11 +38,15 @@ class Attrs:
     def __str__(self) -> str:
         str_out = []
         for k, v in self._attrs.items():
-            if k not in self.default.keys(): 
+            if k in self.default.keys() and self.default[k] == v: 
+                continue
+            else:
+                if isinstance(v, list):
+                    v = "[" + ", ".join([str(_v) for _v in v]) + "]"
                 str_out.append(f"{k}={v}")
-            elif self.default[k] != v:
-                str_out.append(f"{k}={v}")
-        return "{" + ", ".join(str_out) + "}"
+        if len(str_out):
+            return "{" + ", ".join(str_out) + "}"
+        return ""
 
     def get(self, key, value=None):
         return self._attrs.get(key, value)

@@ -74,15 +74,16 @@ def PCIe2MEM(addr, fname, total_bytes, addr_base, device, is_hbm):
     with ir.Function([ne.Var("prefix", -1, "char*")]) as func:
         path = func.args[0]
         addr = ne.Var(addr, -1)
-        addr = ir.Cast(addr + addr_base, "uint64_t")
         if is_hbm:
-            with ir.For("port", 0, device.HBM_Port, 1, "int") as port:
+            with ir.For("port", 0, device.HBM_Port, 1, "uint64_t") as port:
+                real_addr = addr + addr_base + port.var*(1 << device.log2_Bank_Step)
                 real_path = port[ir.StrFormat("real_path", "%s/"+fname, path, port.var)]
-                port += ir.MemWriteFile(addr, real_path.var, total_bytes)
+                port += ir.MemWriteFile(ir.Cast(real_addr, "uint64_t"), real_path.var, total_bytes)
             func += port
         else:
+            real_addr = addr + addr_base
             real_path = func[ir.StrFormat("real_path", "%s/"+fname, path)]
-            func += ir.MemWriteFile(addr, real_path.var, total_bytes)
+            func += ir.MemWriteFile(ir.Cast(real_addr, "uint64_t"), real_path.var, total_bytes)
     return func
 
 

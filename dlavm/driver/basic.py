@@ -53,13 +53,16 @@ def make_define(define: dict, simulator: str) -> str:
     return "\"" + define_str + "\""
 
 
-def TestbenchSIM(tb_name: str, define: dict) -> list:
+def TestbenchSIM(tb_name: str, define: dict, debug: bool=True) -> list:
     from .config import template_rtl, tb_sim_path, tb_debug, tb_macro_log, sim_tool
     if tb_debug:
         tb_macro_log.append({"name": tb_name, "testbench": define})
     csb_rtl = []
     define_str = make_define(define, sim_tool)
     cmd = f"make -C {tb_sim_path} TOP_MODULE={tb_name} SIM_DEFINE={define_str}"
+    if debug:
+        print(cmd)
+        LOG_WITH_PREFIX("TestbenchSIM", cmd)
     p_rtl = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
     out_rtl, rtl_err = p_rtl.communicate()
     saved_out_rtl = out_rtl.decode("utf-8")

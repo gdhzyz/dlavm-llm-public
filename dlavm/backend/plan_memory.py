@@ -151,8 +151,8 @@ class Storage:
                 memo = self.memo_[prefix]
                 source += ir.Annotation(f"{prefix} storage define")
                 for id, storage in memo.items():
-                    addr_hex = "0x%09x" % (storage.address)
-                    source += ir.Assign(str(id), addr_hex, "uint64_t")
+                    addr_hex = "0x%08x" % (storage.address)
+                    source += ir.Assign(str(id), addr_hex, "uint32_t")
         return source
 
     def __str__(self):

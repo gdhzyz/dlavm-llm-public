@@ -70,7 +70,7 @@ class InferType(Functor):
         new_attrs = self.set_attrs(expr.attrs)
         new_args = [self.visit(arg) for arg in expr.args]
         new_type = [arg.get_checked_type() for arg in new_args]
-        func = expr.op.attrs["rel"]
+        func = expr.op.get_attr("rel", self.device)
         state, checked_type = func(new_type, new_attrs)
         if state:
             new_expr = VM(expr.op, new_args, new_attrs, checked_type)

@@ -21,7 +21,7 @@ function getdir() {
         fi
       elif [[ $dir_or_file == *.sv ]]; then
         cp $dir_or_file $3
-      else
+      elif [[ $dir_or_file != *.v ]]; then
         echo Error: $dir_or_file
       fi
     fi

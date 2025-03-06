@@ -3,6 +3,7 @@ from functools import reduce
 from dlavm.adr.base import DataType, DataEnum
 from .. import ne
 from .base_accel import Accel
+from ..utils import tools
 
 
 class OHBM(Accel):
@@ -21,8 +22,9 @@ class OHBM(Accel):
     ASYN_FACTOR                 = 2
     log2_CH                     = 19
     Pixel_Data_Width            = HBM_AXI_DATA_WIDTH
-    Pixel_Data_Bytes            = int((HBM_AXI_DATA_WIDTH)>>3)
+    HBM_1Row_Bytes              = int((HBM_AXI_DATA_WIDTH)>>3)
 
+    MAX_BN_CH                   = 1024
     DAT_BRAM_NUM                = HBM_Port
     log2_DAT_BRAM_NUM           = int(math.log2(DAT_BRAM_NUM))
     log2_TOTAL_DAT_BRAM_BITS    = (23) #23= 8Mb for VCU128, single BRAM buf is 512(depth)*72(width)= 36864 bit
@@ -77,6 +79,30 @@ class OHBM(Accel):
     def malloc_bytes(cls, shape, dtype, dynamic=False):
         if not dynamic:
             shape = [i.simplify(1).data if isinstance(i, ne.Expr) else i for i in shape]
-        return 10000
+        if dtype.dtype == DataEnum.fp16 and dtype.mapped == DataEnum.hbm:
+            if len(shape) == 1: # BN
+                bsize = (((shape[0] // 2) + cls.Tout - 1)// cls.Tout) * cls.Tout * 2 * 2 * cls.MAX_BN_DW // cls.HBM_Port
+            elif len(shape) == 3: # Feature
+                bsize = (((shape[0] * shape[-1]) + cls.L_Tout - 1)// cls.L_Tout) * cls.L_Tout * cls.MAX_DAT_DW // 8 * shape[1] // cls.HBM_Port
+            elif len(shape) == 2: # Feature
+                bsize = (((shape[-1]) + cls.L_Tout - 1)// cls.L_Tout) * cls.L_Tout * cls.MAX_DAT_DW // 8 * shape[0] // cls.HBM_Port
+            else:
+                raise RuntimeError(f"Unsupport ndim of shape {shape} in malloc bytes")
+            return bsize
+        elif dtype.dtype == DataEnum.int4 and dtype.mapped == DataEnum.hbm:
+            Sparsity_Factor = 1
+            CHout, CHin = shape
+            CHout_div_Tout = tools.Ceil(CHout, cls.Tout)
+            WT_CHin_div_Tin = tools.Ceil(CHin, cls.Tin)
+            WT_CHin_Padding_with_Tin = WT_CHin_div_Tin*cls.Tin
+            WT_CHout_Padding_with_Tout = CHout_div_Tout*cls.Tout
+
+            WT_CH_Tgroup = (cls.T_quant_block*Sparsity_Factor*cls.HBM_AXI_DATA_WIDTH//cls.WT_quant_scale_DW)
+            WT_scale_group_nums = ((WT_CHin_Padding_with_Tin+WT_CH_Tgroup-1)//WT_CH_Tgroup)
+            WT_scale_bits = (WT_CHout_Padding_with_Tout*cls.HBM_AXI_DATA_WIDTH*WT_scale_group_nums)
+            WT_SIZE_IN_BYTES = (((WT_CHout_Padding_with_Tout*WT_CHin_Padding_with_Tin*cls.MAX_WT_DW)>>3)+((WT_scale_bits)>>3))
+            return WT_SIZE_IN_BYTES
+        else:
+            raise RuntimeError(f"Unsupport dtype of {dtype.dtype} and mapped of {dtype.mapped} in malloc bytes")
 
 

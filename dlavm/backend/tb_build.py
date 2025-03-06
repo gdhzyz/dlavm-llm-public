@@ -85,7 +85,8 @@ class TbBuild(GraphBuild):
             else:
                 func = Tasks.Get("atom.hbm.pcie2mem", device)(storage_id, expr.data, total_bytes, self.hbm_base, device, True)
         else:
-            func = Tasks.Get("atom.hbm.pcie2mem", device)(storage_id, expr.data, total_bytes, self.ddr_base, device, False)
+            is_hbm = expr.dtype.mapped == DataEnum.hbm
+            func = Tasks.Get("atom.hbm.pcie2mem", device)(storage_id, expr.data, total_bytes, self.ddr_base, device, is_hbm)
         func.name = expr.ir_name
         func_ir = self.opt_pass(func)
         self.load_params += ir.Call(func_ir)

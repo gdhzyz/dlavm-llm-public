@@ -233,9 +233,9 @@ class AuxBuild(RegsBuild, GraphBuild):
         expr = GraphBuild.visit_call(self, expr)
         args = [arg.checked_type for arg in expr.args]
         if isinstance(expr.checked_type, Tuple):
-            func = expr.op.attrs["compute"](args, expr.checked_type.tensors, **expr.attrs)
+            func = expr.op.attrs["compute"](args, expr.checked_type.tensors, expr.attrs)
         elif isinstance(expr.checked_type, Tensor):
-            func = expr.op.attrs["compute"](args, [expr.checked_type], **expr.attrs)
+            func = expr.op.attrs["compute"](args, [expr.checked_type], expr.attrs)
         else:
             raise RuntimeError("GraphModule: infer_type first!")
         func.name = expr.ir_name

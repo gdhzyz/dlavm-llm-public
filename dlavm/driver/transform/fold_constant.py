@@ -5,8 +5,9 @@ from .. import ir
 
 class FoldConstant(ir.Functor):
 
-    def __init__(self):
+    def __init__(self, const={}):
         super().__init__()
+        self.const = const
         self.branch = False
 
     def VisitFunction(self, stmt: ir.Function):
@@ -37,6 +38,7 @@ class FoldConstant(ir.Functor):
 
     def VisitNe(self, expr: ne.Expr):
         new_expr = ne.expr_var_from_dict(expr, self.var2numb).simplify()
+        new_expr = ne.expr_var_from_dict(new_expr, self.const).simplify()
         if isinstance(new_expr, ne.Numb):
             new_expr = new_expr.data
         return new_expr

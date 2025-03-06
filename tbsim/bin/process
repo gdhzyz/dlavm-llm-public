@@ -12,6 +12,10 @@ class TBProcess:
         "RunHBM_MVM", "RunElementwise_Hardware", "RunCFG_MVM_BN_Res", "Run_Activation_Hardware",
         "RunHBM_MVM_hardware", "RunHBM_MVM_BN_hardware", "RunHBM_MVM_BN_Argmax_hardware", "RunHBM_CONV_BN_hardware",
         "Run_Elementwise_Hardware", "Run_GLM_PosEmb_Hardware", "Run_Qwen_PosEmb_Hardware",
+        "Run_EMB_GLM_inout_head_mode_Hardware", "Run_EMB_Qwen_inout_head_mode_Hardware",
+        "RunHBM_MVM_afterF2W_output_head_mode_hardware", "RunHBM_MVM_afterTRP_input_head_mode_hardware",
+        "RunHBM_MVM_BN_Argmax_hardware", "RunHBM_MVM_BN_input_head_mode_hardware",
+        "RunHBM_MVM_BN_output_head_mode_hardware", "Run_KVcache2HBM_hardware",
     ]
 
     def __init__(self):

@@ -12,6 +12,7 @@ all:RUN
 RUN:WORK_DIR ${TEMP_DIR}
 	@${PWD_DIR}/bin/install ${TESTBENCH} ${WORK_DIR} ${TEMP_DIR}
 	@${PWD_DIR}/bin/process ${TEMP_DIR} ${WORK_DIR}
+	@rm -r ${TEMP_DIR}
 
 WORK_DIR:
 	@mkdir -p ${WORK_DIR}
@@ -21,7 +22,7 @@ ${TEMP_DIR}:
 	@mkdir -p ${TEMP_DIR}
 
 clean:
-	rm -rf ${PREFIX}*
+	rm -rf ${WORK_DIR}
 	rm -rf ${TEMP_DIR}
 
 .PHONY: RUN NAME

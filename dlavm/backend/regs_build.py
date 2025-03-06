@@ -81,8 +81,12 @@ class RegsBuild(GraphBuild):
                 func = Tasks.Get("atom.hbm.wt2hbm", device)("runtime0", storage_id, expr.data, total_bytes, self.ddr_base, device)
             else:
                 func = Tasks.Get("atom.hbm.pcie2mem", device)(storage_id, expr.data, total_bytes, self.hbm_base, device, True)
-        else:
+        elif expr.dtype.mapped == DataEnum.hbm:
+            func = Tasks.Get("atom.hbm.pcie2mem", device)(storage_id, expr.data, total_bytes, self.hbm_base, device, True)
+        elif expr.dtype.mapped == DataEnum.ddr:
             func = Tasks.Get("atom.hbm.pcie2mem", device)(storage_id, expr.data, total_bytes, self.ddr_base, device, False)
+        else:
+            raise RuntimeError("Unsupport!")
         func.name = expr.ir_name
         func_ir = self.opt_pass(func)
         self.load_params += ir.Call(func_ir)

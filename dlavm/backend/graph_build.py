@@ -194,7 +194,10 @@ class GraphBuild(Functor):
             exit(-1)
         self._link_storage(new_args[0], expr)
         tensors = [arg.checked_type for arg in expr.args]
-        new_checked_type = expr.op.attrs["driver"](tensors, expr.checked_type, expr.attrs)
+        func = expr.op.get_attr("driver", tensors[0].device)
+        if func is None:
+            func = expr.op.get_attr("compute", tensors[0].device)
+        new_checked_type = func(tensors, expr.checked_type, expr.attrs)
         expr.checked_type = new_checked_type
         setattr(expr, "ir_name", ("." + expr.op.name).split(".")[-1] + f"_{self._vm_name()}")
         self.graphs.append({
