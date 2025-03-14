@@ -55,3 +55,17 @@ class KvcacheAttrs(Attrs):
         "cache_len": 0,
         "cache_size": ohbm_accel.OHBM.MAX_TOKEN,
     }
+
+
+class RoPEMode:
+
+    init = -1
+    qwen = 0
+    glm = 1
+
+class RoPEAttrs(Attrs):
+
+    default = {
+        "mode": RoPEMode.init,
+        "last_token": 0,
+    }

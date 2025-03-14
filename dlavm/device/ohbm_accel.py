@@ -8,7 +8,7 @@ from ..utils import tools
 
 class OHBM(Accel):
     name = "ohbm"
-    version = 20250305
+    version = 20250312
     description = """
         Only HBM EdgeLLM FPGA Accelerator, 存储设备从DDR-HBM变为Only-HBM
     """
@@ -30,11 +30,17 @@ class OHBM(Accel):
     MAX_CH_per_HEAD             = 128
     Pixel_Data_Width            = HBM_AXI_DATA_WIDTH
     HBM_1Row_Bytes              = int((HBM_AXI_DATA_WIDTH)>>3)
+    MAX_WT_DW                   = 4
+    MAX_BN_DW                   = 16
+    T_quant_block               = 128
+    log2_T_quant_block          = 7
 
     log2_P                      = 8
     log2_S                      = 8
     log2_K                      = 8
+    log2_Bank_Step              = 28
 
+    WT_quant_scale_DW           = 16
     MAX_BN_CH                   = 1024
     DAT_BRAM_NUM                = HBM_Port
     log2_DAT_BRAM_NUM           = int(math.log2(DAT_BRAM_NUM))
@@ -62,29 +68,6 @@ class OHBM(Accel):
     log2_ID1_BRAM_DEPTH         = (log2_SINGLE_WT_BRAM_DEPTH    )
     ID1_BRAM_DEPTH              = (1<<log2_ID1_BRAM_DEPTH       )
     ID1_BRAM_WIDTH              = (HBM_AXI_DATA_WIDTH*HBM_Port )
-
-    log2_Tout = 5
-    MAX_WT_DW = 4
-    MAX_BN_DW = 16
-    T_quant_block = 128
-    log2_T_quant_block = 7
-    WT_quant_scale_DW = 16
-    DAT_BRAM_NUM = 1
-    log2_Bank_Step = 28
-    WT_BRAM_NUM = HBM_Port
-    AXI_BURST_LEN = Tout
-    log2_AXI_BURST_LEN = log2_Tout
-    WT_CH_Tgroup = T_quant_block*HBM_AXI_DATA_WIDTH//WT_quant_scale_DW
-    log2_WT_CH_Tgroup = 11
-    DAT_BRAM_DEPTH = (1<<23)//base_Tin//MAX_DAT_DW//DAT_BRAM_NUM
-    WT_BRAM_DEPTH = (1<<22)//HBM_AXI_DATA_WIDTH//WT_BRAM_NUM
-    AXI_DAT_WIDTH = MAX_DAT_DW*Tout*Tb
-    AXI_BN_WIDTH = MAX_BN_DW*Tout*Tb
-
-    AXI_BURST_LEN_SOFTMAX = 4
-    SINGLE_BN_FIFO_DEP = (AXI_BURST_LEN*MAX_DAT_DW*Tb)//(MAX_BN_DW*2)
-    BN_FIFO_DEP = SINGLE_BN_FIFO_DEP * 4
-    BN_FIFO_NUM = (MAX_BN_DW*2)//(MAX_DAT_DW*Tb)
 
     @classmethod
     def malloc_bytes(cls, shape, dtype, dynamic=False):
@@ -115,5 +98,13 @@ class OHBM(Accel):
             return WT_SIZE_IN_BYTES // cls.HBM_Port
         else:
             raise RuntimeError(f"Unsupport dtype of {dtype.dtype} and mapped of {dtype.mapped} in malloc bytes")
+
+
+class OHBM0314(OHBM):
+
+    version = 20250314
+    description = """
+        update Feature_Head in testbench into Original_Feature_Head and Padding_Feature_Head
+    """
 
 

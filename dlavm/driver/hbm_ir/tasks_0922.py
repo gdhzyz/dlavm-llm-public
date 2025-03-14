@@ -754,3 +754,69 @@ def ACT_v2(block, args, outputs, device, kvcache=0, last_token=0, **attrs):
     block += CSB_Write(act_reg_bias+17,                0b01_0000)
     block += While(CSB_Read(act_reg_bias+1) != 1)
 
+
+@Tasks.Register("atom.hbm.elementwise", hbm_accel.EdgeLLMv2)
+def PosEmb_v2(block, args, outputs, device, mode=0, **attrs):
+    Token = args[0].shape[-2]
+    Feature_Head = args[0].shape[0]
+    A_DAT_IN_BASE_ADDR = args[0].get_address()
+    B_DAT_IN_BASE_ADDR = args[1].get_address()
+    DAT_OUT_BASE_ADDR = outputs[0].get_address()
+    DAT_IN_ONCHIP = attrs.get("DAT_IN_ONCHIP")
+    DAT_OUT_ONCHIP = attrs.get("DAT_OUT_ONCHIP")
+
+    Tout = device.Tout
+    Pixel_Data_Bytes = device.Pixel_Data_Bytes
+    MAX_TOKEN = device.MAX_TOKEN
+    MAX_CH_per_HEAD = device.MAX_CH_per_HEAD
+
+    Dynamic_Token = Token
+    Win = Dynamic_Token
+    Hin = 1
+    CHin = args[0].shape[-1]
+    CHout = CHin
+    Wout = Win
+    Hout = Hin
+    CHout_div_Tout = ((CHout + Tout - 1) // Tout)
+    CHin_div_Tout = ((CHin + Tout - 1) // Tout)
+    DAT_IN_LINE_STRIDE = Pixel_Data_Bytes * Win
+    DAT_IN_SURFACE_STRIDE = Pixel_Data_Bytes * Win * Hin
+    DAT_OUT_LINE_STRIDE = Pixel_Data_Bytes * Wout
+    DAT_OUT_SURFACE_STRIDE = Pixel_Data_Bytes * Wout * Hout
+    if hasattr(args[0], "strides"):
+        DAT_IN_LINE_STRIDE = args[0].strides[-2]
+        DAT_IN_SURFACE_STRIDE = args[0].strides[-3]
+    if hasattr(outputs[0], "strides"):
+        DAT_OUT_LINE_STRIDE = outputs[0].strides[-2]
+        DAT_OUT_SURFACE_STRIDE = outputs[0].strides[-3]
+
+    ## Hardware Testbench
+    Elementwise_reg_bias=128
+
+    onchip = 0
+    if DAT_IN_ONCHIP is not None:
+        onchip += 0b1
+        feature_in_base = ne.If(kvcache, DAT_IN_ONCHIP, feature_in_base)
+    if DAT_OUT_ONCHIP is not None:
+        onchip += 0b10
+        feature_out_base = ne.If(kvcache, DAT_OUT_ONCHIP, feature_out_base)
+
+    if onchip:
+        onchip = ne.If(kvcache, onchip, 0)
+
+    block += CSB_Write(Elementwise_reg_bias+2 ,mode                   )
+    block += CSB_Write(Elementwise_reg_bias+3 ,A_DAT_IN_BASE_ADDR     )
+    block += CSB_Write(Elementwise_reg_bias+4 ,DAT_IN_SURFACE_STRIDE  )
+    block += CSB_Write(Elementwise_reg_bias+5 ,DAT_IN_LINE_STRIDE     )
+    block += CSB_Write(Elementwise_reg_bias+6 ,DAT_OUT_BASE_ADDR      )
+    block += CSB_Write(Elementwise_reg_bias+7 ,DAT_OUT_SURFACE_STRIDE )
+    block += CSB_Write(Elementwise_reg_bias+8 ,DAT_OUT_LINE_STRIDE    )
+    block += CSB_Write(Elementwise_reg_bias+9 ,CHin_div_Tout          )
+    block += CSB_Write(Elementwise_reg_bias+10,Hin                    )
+    block += CSB_Write(Elementwise_reg_bias+11,Win                    )
+    block += CSB_Write(Elementwise_reg_bias+12,B_DAT_IN_BASE_ADDR     )
+    block += CSB_Write(Elementwise_reg_bias+13,0                      )
+    block += CSB_Write(Elementwise_reg_bias+14,0b01                   )
+    block += While(CSB_Read(Elementwise_reg_bias+1) != 1)
+
+

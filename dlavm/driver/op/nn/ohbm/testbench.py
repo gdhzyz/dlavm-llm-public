@@ -1,5 +1,6 @@
 from dlavm import ne
 from dlavm.adr import Op, Attrs
+from dlavm.op.nn.attrs import RoPEMode
 from dlavm.device import ohbm_accel
 from .... import ir
 from ....ir import CSB_Write, CSB_Read, While
@@ -70,6 +71,63 @@ def MVMF16xI4(args, output, attrs):
     else:
         raise RuntimeError("not support mvm with bn or res in tb")
 
+@Tasks.Register("tb.nn.mvm_f16xi4.ohbm", ohbm_accel.OHBM0314)
+def MVMF16xI4(args, output, attrs):
+    if len(args) == 2:
+        dtensor, wtensor = args[0], args[1]
+        dshape, wshape = dtensor.shape, wtensor.shape
+        daddr = dtensor.static_address
+        waddr = wtensor.static_address
+        oaddr = output[0].static_address
+        macro_define = {
+            "last_token" : attrs.get("last_token", 0),
+            "Token" : dshape[-2] + attrs.get("last_token", 0),
+            "RELU_EN" : 1 if attrs.get("relu") else 0,
+            "Width_in" : dshape[-1],
+            "Width_out" : wshape[0],
+            "BN_RELU_EN" : 0,
+            "RELU_EN" : 0,
+            # "DAT_IN_BASE_ADDR" : daddr,
+            # "HBM_WT_BASE_ADDR" : waddr,
+            # "DAT_OUT_BASE_ADDR" : oaddr,
+        }
+        return TestbenchSIM("testbench_HBM_MVM", macro_define)
+    elif len(args) == 3:
+        dtensor, wtensor = args[0], args[1]
+        dshape, wshape = dtensor.shape, wtensor.shape
+        daddr = dtensor.static_address
+        waddr = wtensor.static_address
+        oaddr = output[0].static_address
+        macro_define = {
+            "last_token" : attrs.get("last_token", 0),
+            "Token" : dshape[-2] + attrs.get("last_token", 0),
+            "RELU_EN" : 1 if attrs.get("relu") else 0,
+            "Width_in" : dshape[-1],
+            "Width_out" : wshape[0],
+            "BN_RELU_EN" : 0,
+            "RELU_EN" : 0,
+            # "DAT_IN_BASE_ADDR" : daddr,
+            # "HBM_WT_BASE_ADDR" : waddr,
+            # "DAT_OUT_BASE_ADDR" : oaddr,
+        }
+        if attrs.get("argmax"):
+            return TestbenchSIM("testbench_HBM_MVM_BN_Argmax", macro_define)
+        else:
+            if attrs.get("out_heads") is not None:
+                del macro_define["Width_out"]
+                macro_define["Original_Feature_Head"] = attrs.get("out_heads")[0]
+                macro_define["Weight_Head"] = attrs.get("out_heads")[1]
+                return TestbenchSIM("testbench_HBM_MVM_BN_output_head_mode", macro_define)
+            if hasattr(dtensor, "heads"):
+                del macro_define["Width_in"]
+                macro_define["Original_Feature_Head"] = dtensor.heads[0]
+                macro_define["Weight_Head"] = dtensor.heads[1]
+                return TestbenchSIM("testbench_HBM_MVM_BN_input_head_mode", macro_define)
+            return TestbenchSIM("testbench_HBM_MVM_BN", macro_define)
+    else:
+        raise RuntimeError("not support mvm with bn or res in tb")
+
+
 @Op.RegisterAttrs("nn.mvm_f16xi4", "testbench", ohbm_accel.OHBM)
 def tb_nn_mvm_f16xi4(args, output, attrs):
     if len(get_vars([args[0].shape, attrs])):
@@ -131,6 +189,24 @@ def Softmax(args, output, attrs):
         "Token" : dshape[-1],
         "Width_in" : dshape[-1],
         "Feature_Head" : dshape[0],
+        "Need_Mask" : 1 if attrs.get("mask") else 0,
+        # "DAT_IN_BASE_ADDR" : daddr,
+        # "HBM_WT_BASE_ADDR" : waddr,
+        # "DAT_OUT_BASE_ADDR" : oaddr,
+    }
+    return TestbenchSIM("testbench_SOFTMAX", macro_define)
+
+@Tasks.Register("tb.nn.softmax.ohbm", ohbm_accel.OHBM0314)
+def Softmax(args, output, attrs):
+    dtensor = args[0]
+    dshape = dtensor.shape
+    daddr = dtensor.static_address
+    oaddr = output[0].static_address
+    macro_define = {
+        "last_token" : dshape[-1] - dshape[-2],
+        "Token" : dshape[-1],
+        "Width_in" : dshape[-1],
+        "Original_Feature_Head" : dshape[0],
         "Need_Mask" : 1 if attrs.get("mask") else 0,
         # "DAT_IN_BASE_ADDR" : daddr,
         # "HBM_WT_BASE_ADDR" : waddr,
@@ -260,6 +336,43 @@ def MVMF16xF16(args, output, attrs):
         }
         return TestbenchSIM("testbench_HBM_MVM_afterF2W_output_head_mode", macro_define)
 
+@Tasks.Register("tb.nn.mvm_f16xf16.ohbm", ohbm_accel.OHBM0314)
+def MVMF16xF16(args, output, attrs):
+    dtensor, wtensor = args[0], args[1]
+    dshape, wshape = dtensor.shape, wtensor.shape
+    daddr = dtensor.static_address
+    waddr = wtensor.static_address
+    oaddr = output[0].static_address
+    if attrs.get("w_trp"):
+        macro_define = {
+            "last_token" : wshape[-2] - dshape[-2],
+            "Token" : wshape[-2],
+            "Width_in" : dshape[-1],
+            "Width_out" : wshape[-2],
+            "Original_Feature_Head" : dshape[0],
+            "Weight_Head" : wshape[0],
+            "MAX_TOKEN" : dtensor.device.MAX_TOKEN,
+            # "DAT_IN_BASE_ADDR" : daddr,
+            # "HBM_WT_BASE_ADDR" : waddr,
+            # "DAT_OUT_BASE_ADDR" : oaddr,
+        }
+        if hasattr(dtensor, "heads"):
+            macro_define["Feature_Head"] = dtensor.heads[0]
+        return TestbenchSIM("testbench_HBM_MVM_afterTRP_input_head_mode", macro_define)
+    else:
+        macro_define = {
+            "last_token" : wshape[-2] - dshape[-2],
+            "Token" : wshape[-2],
+            "Width_in" : dshape[-1],
+            "Width_out" : wshape[-1],
+            "Original_Feature_Head" : dshape[0],
+            "Weight_Head" : wshape[0],
+            "MAX_TOKEN" : dtensor.device.MAX_TOKEN,
+            # "DAT_IN_BASE_ADDR" : daddr,
+            # "HBM_WT_BASE_ADDR" : waddr,
+            # "DAT_OUT_BASE_ADDR" : oaddr,
+        }
+        return TestbenchSIM("testbench_HBM_MVM_afterF2W_output_head_mode", macro_define)
 
 @Op.RegisterAttrs("nn.mvm_f16xf16", "testbench", ohbm_accel.OHBM)
 def tb_nn_mm_f16xf16(args, output, attrs):
@@ -310,3 +423,69 @@ def tb_nn_kvcache2hbm(args, output, attrs):
             else:
                 func += While(CSB_Read(csb[1]) != 1)
     return func
+
+
+#####################################################################
+@Tasks.Register("tb.nn.rope.ohbm", ohbm_accel.OHBM)
+def PosEmb(args, output, attrs):
+    dtensor, wtensor = args[0], args[1]
+    dshape, wshape = dtensor.shape, wtensor.shape
+    daddr = dtensor.static_address
+    waddr = wtensor.static_address
+    oaddr = output[0].static_address
+    macro_define = {
+        "last_token" : attrs.get("last_token"),
+        "Token" : dshape[-2] + attrs.get("last_token", 0),
+        "Feature_Head" : dshape[0],
+        "MAX_TOKEN" : dtensor.device.MAX_TOKEN,
+        # "DAT_IN_BASE_ADDR" : daddr,
+        # "HBM_WT_BASE_ADDR" : waddr,
+        # "DAT_OUT_BASE_ADDR" : oaddr,
+    }
+    if attrs.get("mode") == RoPEMode.glm:
+        return TestbenchSIM("testbench_EMB_GLM_inout_head_mode", macro_define)
+    elif attrs.get("mode") == RoPEMode.qwen:
+        return TestbenchSIM("testbench_EMB_Qwen_inout_head_mode", macro_define)
+    else:
+        raise RuntimeError("no found realize for this mode: " + attrs.get("mode"))
+        return TestbenchSIM("testbench_EMB_Qwen_inout_head_mode", macro_define)
+
+@Tasks.Register("tb.nn.rope.ohbm", ohbm_accel.OHBM0314)
+def PosEmb(args, output, attrs):
+    dtensor, wtensor = args[0], args[1]
+    dshape, wshape = dtensor.shape, wtensor.shape
+    daddr = dtensor.static_address
+    waddr = wtensor.static_address
+    oaddr = output[0].static_address
+    macro_define = {
+        "last_token" : attrs.get("last_token"),
+        "Token" : dshape[-2] + attrs.get("last_token", 0),
+        "Padding_Feature_Head" : dshape[0],
+        "MAX_TOKEN" : dtensor.device.MAX_TOKEN,
+        # "DAT_IN_BASE_ADDR" : daddr,
+        # "HBM_WT_BASE_ADDR" : waddr,
+        # "DAT_OUT_BASE_ADDR" : oaddr,
+    }
+    if attrs.get("mode") == RoPEMode.glm:
+        return TestbenchSIM("testbench_EMB_GLM_inout_head_mode", macro_define)
+    elif attrs.get("mode") == RoPEMode.qwen:
+        return TestbenchSIM("testbench_EMB_Qwen_inout_head_mode", macro_define)
+    else:
+        raise RuntimeError("no found realize for this mode: " + attrs.get("mode"))
+        return TestbenchSIM("testbench_EMB_Qwen_inout_head_mode", macro_define)
+
+@Op.RegisterAttrs("nn.rope", "testbench", ohbm_accel.OHBM)
+def tb_glm_pos_emb(args, output, attrs):
+    if len(get_vars([args[0].shape, attrs])):
+        raise RuntimeError("Unsupport dynamic symbol control in testbench simulation")
+    device = args[0].device
+    with ir.Function([]) as func:
+        csbs = Tasks.Get("tb.nn.rope.ohbm", device)(args, output, attrs)
+        for csb in csbs:
+            if csb[0]:
+                func += ir.CSB_Write(csb[1], csb[2])
+            else:
+                func += While(CSB_Read(csb[1]) != 1)
+    return func
+
+

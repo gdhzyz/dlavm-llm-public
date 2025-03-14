@@ -62,3 +62,11 @@ def Kvcache2hbm(args, outputs, attrs):
     with ir.Function(get_vars([args[0].shape, attrs])) as func:
         Tasks.Get("ohbm.nn.kvcache2hbm", device)(func, args, outputs, attrs)
     return func
+
+
+@Op.RegisterAttrs("nn.rope", "compute", ohbm_accel.OHBM)
+def PosEmb(args, outputs, attrs):
+    device = args[0].device
+    with ir.Function(get_vars([args[0].shape, attrs])) as func:
+        Tasks.Get("ohbm.nn.rope", device)(func, args, outputs, attrs)
+    return func

@@ -59,3 +59,15 @@ def vcache2hbm(data, **kwargs):
     node = Call(Op.Get("nn.kvcache2hbm"), [data], KvcacheAttrs(kwargs))
     node.prefix = "hbm_cache"
     return node
+
+
+def rope_glm(*args, **kwargs):
+    kwargs["mode"] = RoPEMode.glm
+    return Call(Op.Get("nn.rope"), args, RoPEAttrs(kwargs))
+
+
+def rope_qwen(*args, **kwargs):
+    kwargs["mode"] = RoPEMode.qwen
+    return Call(Op.Get("nn.rope"), args, RoPEAttrs(kwargs))
+
+

@@ -20,7 +20,8 @@ last_token = 0
 f_head, w_head = [32, 2]
 
 from dlavm.driver import config
-config.tb_sim_path = "/home/shenao/dlavm-llm-public/tbsim/workspace_2025_0312"
+config.tb_sim_path = "/home/shenao/dlavm-llm-public/tbsim/workspace_2025_0314"
+device = ohbm_accel.OHBM0314
 
 init_addr = {"hbm": 0x0, "runtime": "hbm", "hbm_cache": "hbm"}
 configs = {"wt2hbm":False, "hbm_base": 0x0, "ddr_base": 0x0, "min_loop": -1}
@@ -35,7 +36,6 @@ def run_check(fn):
     print(graph)
     regs1 = mod1.reg_serialization()
     regs2 = mod2.reg_serialization()
-    print(regs1)
     if RegsCheckSame(regs1, regs2, ignores):
         success = f"\033[36;32m Check Success!\033[36;0m "
         finish = f" Check Finish: \033[36;32m{name}\033[36;0m "
@@ -47,20 +47,39 @@ def run_check(fn):
     print(f"{finish:=^135}\n")
 
 
+def run_expr_check(fn):
+    name = fn.__name__
+    start = f" Check Start: \033[36;34m{name}\033[36;0m "
+    print(f"{start:=^135}")
+    expr, ignores = fn()
+    output = transform.infer_type(expr, device)
+    print(output)
+    mod1 = backend.build_tb(output, init_addr, name, target, configs)
+    mod2 = backend.build(output, init_addr, name, False, target, configs)
+    regs1 = mod1.reg_serialization()
+    regs2 = mod2.reg_serialization()
+    if RegsCheckSame(regs1, regs2, ignores):
+        success = f"\033[36;32m Check Success!\033[36;0m "
+        finish = f" Check Finish: \033[36;32m{name}\033[36;0m "
+        print(f"{success:-^135}")
+    else:
+        fail = f"\033[36;31m Check Fail! \033[36;0m"
+        finish = f" Check Finish: \033[36;31m{name}\033[36;0m "
+        print(f"{fail:*^135}")
+    print(f"{finish:=^135}\n")
+
+
+@run_expr_check
 def mvm_out_heads_atten_compare():
     qw   = adr.const_hbm("qweight", "test", [4096, 4096])
     qb   = adr.const_hbm("qbias", "test", [2*4096], dtype=de.fp16)
 
     ln_out = adr.var_hbm("input", [1, token, 4096])
     output = dlavm.nn.mvm_f16xi4(ln_out, qw, qb, out_heads=[32, 2])
-
-    output = transform.infer_type(output, ohbm_accel.OHBM)
-    mod1 = backend.build_tb(output, init_addr, name, target, configs)
-    mod2 = backend.build(output, init_addr, name, False, target, configs)
-    return output, mod1, mod2, []
+    return output, []
 
 
-# @run_check
+@run_expr_check
 def glm_atten_compare():
     pew = adr.const_hbm("pos_emb_weight", "test", [256, 4096], dtype=de.fp16)
     qw   = adr.const_hbm("qweight", "test", [4096, 4096])
@@ -80,8 +99,8 @@ def glm_atten_compare():
     k_data = dlavm.reshape(k_data, new_shape=[2, -1, 128])
     v_data = dlavm.reshape(v_data, new_shape=[2, -1, 128])
 
-    q_data = dlavm.glm.pos_emb(q_data, pew)
-    k_data = dlavm.glm.pos_emb(k_data, pew)
+    q_data = dlavm.nn.rope_glm(q_data, pew, last_token=last_token)
+    k_data = dlavm.nn.rope_glm(k_data, pew, last_token=last_token)
 
     k_data = dlavm.nn.kcache2hbm(k_data, cache_len=last_token)
     v_data = dlavm.nn.vcache2hbm(v_data, cache_len=last_token)
@@ -89,13 +108,9 @@ def glm_atten_compare():
     qk_data = dlavm.nn.mvm_f16xf16(q_data, k_data, w_trp=True)
     qk_data = dlavm.nn.softmax(qk_data)
     o_data  = dlavm.nn.mvm_f16xf16(qk_data, v_data)
-
     output = dlavm.nn.mvm_f16xi4(o_data, ow, ob)
 
-    output = transform.infer_type(output, ohbm_accel.OHBM)
-    mod1 = backend.build_tb(output, init_addr, name, target, configs)
-    mod2 = backend.build(output, init_addr, name, False, target, configs)
-    return output, mod1, mod2, []
+    return output, []
 
 
 @run_check
@@ -103,7 +118,7 @@ def kcache_compare():
     input_k = adr.var_hbm("input_k", [w_head, token, 128])
     output = dlavm.op.nn.kcache2hbm(input_k, cache_len=last_token)
 
-    output = transform.infer_type(output, ohbm_accel.OHBM)
+    output = transform.infer_type(output, device)
     mod1 = backend.build_tb(output, init_addr, name, target, configs)
     mod2 = backend.build(output, init_addr, name, False, target, configs)
     return output, mod1, mod2, [131, 134]
@@ -114,7 +129,7 @@ def vcache_compare():
     input_v = adr.var_hbm("input_v", [w_head, token, 128])
     output = dlavm.op.nn.vcache2hbm(input_v, cache_len=last_token)
 
-    output = transform.infer_type(output, ohbm_accel.OHBM)
+    output = transform.infer_type(output, device)
     mod1 = backend.build_tb(output, init_addr, name, target, configs)
     mod2 = backend.build(output, init_addr, name, False, target, configs)
     return output, mod1, mod2, [131, 134]
@@ -126,7 +141,7 @@ def trp_mvm_compare():
     input_k = adr.var_hbm("input_k", [w_head, token+last_token, 128])
     output = dlavm.op.nn.mvm_f16xf16(input_q, input_k, w_trp=True)
 
-    output = transform.infer_type(output, ohbm_accel.OHBM)
+    output = transform.infer_type(output, device)
     mod1 = backend.build_tb(output, init_addr, name, target, configs)
     mod2 = backend.build(output, init_addr, name, False, target, configs)
     return output, mod1, mod2, [10, 11, 13]
@@ -138,7 +153,7 @@ def f2w_mvm_compare():
     input_v = adr.var_hbm("input_v", [w_head, token+last_token, 128])
     output = dlavm.op.nn.mvm_f16xf16(input_a, input_v)
 
-    output = transform.infer_type(output, ohbm_accel.OHBM)
+    output = transform.infer_type(output, device)
     mod1 = backend.build_tb(output, init_addr, name, target, configs)
     mod2 = backend.build(output, init_addr, name, False, target, configs)
     return output, mod1, mod2, [10, 11, 13]
@@ -150,7 +165,7 @@ def ln_compare():
     weight = adr.const_hbm("weight1", "test", [2*chin], dtype=de.fp16)
     output = dlavm.op.nn.layer_norm(input, weight)
 
-    output = transform.infer_type(output, ohbm_accel.OHBM)
+    output = transform.infer_type(output, device)
     mod1 = backend.build_tb(output, init_addr, name, target, configs)
     mod2 = backend.build(output, init_addr, name, False, target, configs)
     return output, mod1, mod2, [130, 131, 134]
@@ -162,7 +177,7 @@ def rms_compare():
     weight = adr.const_hbm("weight1", "test", [2*chin], dtype=de.fp16)
     output = dlavm.op.nn.rms_norm(input, weight)
 
-    output = transform.infer_type(output, ohbm_accel.OHBM)
+    output = transform.infer_type(output, device)
     mod1 = backend.build_tb(output, init_addr, name, target, configs)
     mod2 = backend.build(output, init_addr, name, False, target, configs)
     return output, mod1, mod2, [130, 131, 134]
@@ -174,7 +189,7 @@ def mvm_compare():
     weight = adr.const_hbm("weight", "test", [chout, chin])
     output = dlavm.op.nn.mvm_f16xi4(input, weight)
 
-    output = transform.infer_type(output, ohbm_accel.OHBM)
+    output = transform.infer_type(output, device)
     mod1 = backend.build_tb(output, init_addr, name, target, configs)
     mod2 = backend.build(output, init_addr, name, False, target, configs)
     return output, mod1, mod2, [10, 11, 13, 25]
@@ -187,7 +202,7 @@ def mvm_bn_compare():
     bn = adr.const_hbm("bn", "test", [2*chout], dtype=de.fp16)
     output = dlavm.op.nn.mvm_f16xi4(input, weight, bn)
 
-    output = transform.infer_type(output, ohbm_accel.OHBM)
+    output = transform.infer_type(output, device)
     mod1 = backend.build_tb(output, init_addr, name, target, configs)
     mod2 = backend.build(output, init_addr, name, False, target, configs)
     return output, mod1, mod2, [10, 11, 13, 25]
@@ -200,7 +215,7 @@ def mvm_bn_argmax_compare():
     bn = adr.const_hbm("bn", "test", [2*chout], dtype=de.fp16)
     output = dlavm.op.nn.mvm_f16xi4(input, weight, bn, argmax=True)
 
-    output = transform.infer_type(output, ohbm_accel.OHBM)
+    output = transform.infer_type(output, device)
     mod1 = backend.build_tb(output, init_addr, name, target, configs)
     mod2 = backend.build(output, init_addr, name, False, target, configs)
     return output, mod1, mod2, [10, 11, 13, 25]
@@ -211,7 +226,7 @@ def softmax_compare():
     input = adr.var_hbm("input", [f_head, token, token+last_token])
     output = dlavm.op.nn.softmax(input, mask=True)
 
-    output = transform.infer_type(output, ohbm_accel.OHBM)
+    output = transform.infer_type(output, device)
     mod1 = backend.build_tb(output, init_addr, name, target, configs)
     mod2 = backend.build(output, init_addr, name, False, target, configs)
     return output, mod1, mod2, [131, 134]
@@ -223,7 +238,7 @@ def elementwise_compare():
     input2 = adr.var_hbm("input2", [1, token, chin])
     output = dlavm.op.nn.add(input1, input2)
 
-    output = transform.infer_type(output, ohbm_accel.OHBM)
+    output = transform.infer_type(output, device)
     mod1 = backend.build_tb(output, init_addr, name, target, configs)
     mod2 = backend.build(output, init_addr, name, False, target, configs)
     return output, mod1, mod2, [131, 134, 140]
@@ -235,7 +250,7 @@ def activate_compare():
     weight = adr.const_hbm("weight1", "test", [chin], dtype=de.fp16)
     output = dlavm.op.nn.activate(input, weight)
 
-    output = transform.infer_type(output, ohbm_accel.OHBM)
+    output = transform.infer_type(output, device)
     mod1 = backend.build_tb(output, init_addr, name, target, configs)
     mod2 = backend.build(output, init_addr, name, False, target, configs)
     return output, mod1, mod2, [130, 131, 134]
@@ -245,9 +260,9 @@ def activate_compare():
 def emb_glm_compare():
     input = adr.var_hbm("input", [f_head, token, 128])
     weight = adr.const_hbm("weight1", "test", [100, 128], dtype=de.fp16)
-    output = dlavm.op.glm.pos_emb(input, weight)
+    output = dlavm.op.nn.rope_glm(input, weight, last_token=last_token)
 
-    output = transform.infer_type(output, ohbm_accel.OHBM)
+    output = transform.infer_type(output, device)
     mod1 = backend.build_tb(output, init_addr, name, target, configs)
     mod2 = backend.build(output, init_addr, name, False, target, configs)
     return output, mod1, mod2, [130, 131, 134]
