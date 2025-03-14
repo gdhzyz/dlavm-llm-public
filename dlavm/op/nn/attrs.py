@@ -1,14 +1,15 @@
 from ...adr.base import Attrs
+from dlavm.device import ohbm_accel
 
 
 class MVMF16xI4Attrs(Attrs):
 
     default = {
         "relu": False,
-        "arg_max": False,
+        "argmax": False,
         # attention
-        "out_head": False,
-        "ch_head": 128,
+        "out_heads": None, # want list, [Feature_Head, Weight_Head]
+        "ch_head": ohbm_accel.OHBM.MAX_CH_per_HEAD,
     }
 
 
@@ -44,4 +45,13 @@ class ElementwiseAttrs(Attrs):
 
     default = {
         "mode": ElementwiseMode.init,
+    }
+
+
+class KvcacheAttrs(Attrs):
+
+    default = {
+        "k_mode": None,
+        "cache_len": 0,
+        "cache_size": ohbm_accel.OHBM.MAX_TOKEN,
     }

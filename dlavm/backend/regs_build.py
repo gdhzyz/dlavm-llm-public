@@ -16,6 +16,7 @@ class RegsBuild(GraphBuild):
             transform.FoldConstant(),
             transform.LoopSimplify(min_loop=min_loop, eliminate=lite),
             transform.DeadCodeEliminate(),
+            transform.FoldConstant(),
         ])
 
     def _base_addr(self, tensor):
@@ -55,13 +56,13 @@ class RegsBuild(GraphBuild):
                 address = ne.Var(tensor.storage_id, -1, "uint64_t")+tensor.offset + self._base_addr(tensor)
                 self.outputs += ir.Assign("output", address, "uint64_t")
         elif isinstance(tensor, Tuple):
-            for t, num in enumerate(tensor.tensors):
+            for num, t in enumerate(tensor.tensors):
                 if hasattr(t, "csb_read"):
                     with ir.Function([], ret="int", name="wrap_" + self.output_name) as f:
                         f += ir.Return(ir.CSB_Read(t.csb_read))
                     self.outputs += f
                 else:
-                    address = ne.Var(t.storage_id, -1, "uint64_t")+t.offset + self._base_addr(tensor)
+                    address = ne.Var(t.storage_id, -1, "uint64_t")+t.offset + self._base_addr(t)
                     self.outputs += ir.Assign(f"{self.output_name}_{num}", address, "uint64_t")
 
     def visit_var(self, expr):

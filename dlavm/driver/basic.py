@@ -1,10 +1,12 @@
 from functools import reduce
 import subprocess
 from .. import ne
-from ..adr import DataEnum, DataType
+from ..adr import DataEnum, DataType, Attrs
 from ..utils import LOG_WITH_PREFIX
 
-
+#################################################################################
+# Start: Codegen module basic methods, which are useless in driver.IR           #
+#################################################################################
 def CSB_For(expr, tag):
     tag.append([-2, expr])
 
@@ -29,6 +31,9 @@ def CSB_Read(regs, addr, data):
         regs.append([0, addr, data.simplify()])
     else:
         regs.append([0, addr, data & 0xffffffff])
+#################################################################################
+# Finish: Codegen module basic methods, which are useless in driver.IR          #
+#################################################################################
 
 
 def Ceil(data0, data1):
@@ -37,6 +42,19 @@ def Ceil(data0, data1):
 
 def Ceil_Padding(data0, data1):
     return ((data0 + data1 - 1) // data1) * data1
+
+
+def get_vars(targets):
+    vars = []
+    func = lambda n : [i for i in n if i not in vars]
+    for n in targets:
+        if isinstance(n, list):
+            vars += func(get_vars(n))
+        elif isinstance(n, Attrs):
+            vars += func(get_vars(n.values()))
+        elif isinstance(n, ne.Expr):
+            vars += func(n.get_vars(True))
+    return vars
 
 
 def make_define(define: dict, simulator: str) -> str:

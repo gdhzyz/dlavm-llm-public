@@ -38,3 +38,6 @@ class BuildModule:
 
     def get_prototxt(self):
         return VisualizePrototxt().build(self.graph, "main")
+
+    def reg_serialization(self):
+        return transform.Serialization().main(self.lib)

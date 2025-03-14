@@ -1,0 +1,4402 @@
+name: "forward"
+
+layer{
+  type: "PlaceholderOp"
+  top: "arg0_1"
+  layer_param{
+    shape: [1, 1, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "PlaceholderOp"
+  top: "arg1_1"
+  layer_param{
+    shape: [1, 65, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "PlaceholderOp"
+  top: "arg2_1"
+  layer_param{
+    shape: [3072]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "PlaceholderOp"
+  top: "arg3_1"
+  layer_param{
+    shape: [3072]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "PlaceholderOp"
+  top: "arg4_1"
+  layer_param{
+    shape: [1024, 3072]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "PlaceholderOp"
+  top: "arg5_1"
+  layer_param{
+    shape: [1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "PlaceholderOp"
+  top: "arg6_1"
+  layer_param{
+    shape: [1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "PlaceholderOp"
+  top: "arg7_1"
+  layer_param{
+    shape: [1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "PlaceholderOp"
+  top: "arg8_1"
+  layer_param{
+    shape: [1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "PlaceholderOp"
+  top: "arg9_1"
+  layer_param{
+    shape: [1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "PlaceholderOp"
+  top: "arg10_1"
+  layer_param{
+    shape: [3072, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "PlaceholderOp"
+  top: "arg11_1"
+  layer_param{
+    shape: [1024, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "PlaceholderOp"
+  top: "arg12_1"
+  layer_param{
+    shape: [1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "PlaceholderOp"
+  top: "arg13_1"
+  layer_param{
+    shape: [1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "PlaceholderOp"
+  top: "arg14_1"
+  layer_param{
+    shape: [1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "PlaceholderOp"
+  top: "arg15_1"
+  layer_param{
+    shape: [2048, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "PlaceholderOp"
+  top: "arg16_1"
+  layer_param{
+    shape: [2048]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "PlaceholderOp"
+  top: "arg17_1"
+  layer_param{
+    shape: [1024, 2048]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "PlaceholderOp"
+  top: "arg18_1"
+  layer_param{
+    shape: [1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "PlaceholderOp"
+  top: "arg19_1"
+  layer_param{
+    shape: [1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "PlaceholderOp"
+  top: "arg20_1"
+  layer_param{
+    shape: [1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "PlaceholderOp"
+  top: "arg21_1"
+  layer_param{
+    shape: [3072, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "PlaceholderOp"
+  top: "arg22_1"
+  layer_param{
+    shape: [1024, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "PlaceholderOp"
+  top: "arg23_1"
+  layer_param{
+    shape: [1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "PlaceholderOp"
+  top: "arg24_1"
+  layer_param{
+    shape: [1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "PlaceholderOp"
+  top: "arg25_1"
+  layer_param{
+    shape: [1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "PlaceholderOp"
+  top: "arg26_1"
+  layer_param{
+    shape: [2048, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "PlaceholderOp"
+  top: "arg27_1"
+  layer_param{
+    shape: [2048]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "PlaceholderOp"
+  top: "arg28_1"
+  layer_param{
+    shape: [1024, 2048]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "PlaceholderOp"
+  top: "arg29_1"
+  layer_param{
+    shape: [1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "PlaceholderOp"
+  top: "arg30_1"
+  layer_param{
+    shape: [1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "PlaceholderOp"
+  top: "arg31_1"
+  layer_param{
+    shape: [1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "PlaceholderOp"
+  top: "arg32_1"
+  layer_param{
+    shape: [3072, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "PlaceholderOp"
+  top: "arg33_1"
+  layer_param{
+    shape: [1024, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "PlaceholderOp"
+  top: "arg34_1"
+  layer_param{
+    shape: [1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "PlaceholderOp"
+  top: "arg35_1"
+  layer_param{
+    shape: [1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "PlaceholderOp"
+  top: "arg36_1"
+  layer_param{
+    shape: [1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "PlaceholderOp"
+  top: "arg37_1"
+  layer_param{
+    shape: [2048, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "PlaceholderOp"
+  top: "arg38_1"
+  layer_param{
+    shape: [2048]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "PlaceholderOp"
+  top: "arg39_1"
+  layer_param{
+    shape: [1024, 2048]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "PlaceholderOp"
+  top: "arg40_1"
+  layer_param{
+    shape: [1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "PlaceholderOp"
+  top: "arg41_1"
+  layer_param{
+    shape: [1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "PlaceholderOp"
+  top: "arg42_1"
+  layer_param{
+    shape: [1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "PlaceholderOp"
+  top: "arg43_1"
+  layer_param{
+    shape: [3072, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "PlaceholderOp"
+  top: "arg44_1"
+  layer_param{
+    shape: [1024, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "PlaceholderOp"
+  top: "arg45_1"
+  layer_param{
+    shape: [1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "PlaceholderOp"
+  top: "arg46_1"
+  layer_param{
+    shape: [1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "PlaceholderOp"
+  top: "arg47_1"
+  layer_param{
+    shape: [1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "PlaceholderOp"
+  top: "arg48_1"
+  layer_param{
+    shape: [2048, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "PlaceholderOp"
+  top: "arg49_1"
+  layer_param{
+    shape: [2048]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "PlaceholderOp"
+  top: "arg50_1"
+  layer_param{
+    shape: [1024, 2048]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "PlaceholderOp"
+  top: "arg51_1"
+  layer_param{
+    shape: [1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "PlaceholderOp"
+  top: "arg52_1"
+  layer_param{
+    shape: [1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "PlaceholderOp"
+  top: "arg53_1"
+  layer_param{
+    shape: [1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "PlaceholderOp"
+  top: "arg54_1"
+  layer_param{
+    shape: [3072, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "PlaceholderOp"
+  top: "arg55_1"
+  layer_param{
+    shape: [1024, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "PlaceholderOp"
+  top: "arg56_1"
+  layer_param{
+    shape: [1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "PlaceholderOp"
+  top: "arg57_1"
+  layer_param{
+    shape: [1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "PlaceholderOp"
+  top: "arg58_1"
+  layer_param{
+    shape: [1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "PlaceholderOp"
+  top: "arg59_1"
+  layer_param{
+    shape: [2048, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "PlaceholderOp"
+  top: "arg60_1"
+  layer_param{
+    shape: [2048]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "PlaceholderOp"
+  top: "arg61_1"
+  layer_param{
+    shape: [1024, 2048]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "PlaceholderOp"
+  top: "arg62_1"
+  layer_param{
+    shape: [1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "PlaceholderOp"
+  top: "arg63_1"
+  layer_param{
+    shape: [1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "PlaceholderOp"
+  top: "arg64_1"
+  layer_param{
+    shape: [1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "PlaceholderOp"
+  top: "arg65_1"
+  layer_param{
+    shape: [3072, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "PlaceholderOp"
+  top: "arg66_1"
+  layer_param{
+    shape: [1024, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "PlaceholderOp"
+  top: "arg67_1"
+  layer_param{
+    shape: [1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "PlaceholderOp"
+  top: "arg68_1"
+  layer_param{
+    shape: [1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "PlaceholderOp"
+  top: "arg69_1"
+  layer_param{
+    shape: [1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "PlaceholderOp"
+  top: "arg70_1"
+  layer_param{
+    shape: [2048, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "PlaceholderOp"
+  top: "arg71_1"
+  layer_param{
+    shape: [2048]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "PlaceholderOp"
+  top: "arg72_1"
+  layer_param{
+    shape: [1024, 2048]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "PlaceholderOp"
+  top: "arg73_1"
+  layer_param{
+    shape: [1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "PlaceholderOp"
+  top: "arg74_1"
+  layer_param{
+    shape: [1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "PlaceholderOp"
+  top: "arg75_1"
+  layer_param{
+    shape: [1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "PlaceholderOp"
+  top: "arg76_1"
+  layer_param{
+    shape: [1000, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "PlaceholderOp"
+  top: "arg77_1"
+  layer_param{
+    shape: [1000]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "PlaceholderOp"
+  top: "arg78_1"
+  layer_param{
+    shape: [1, 3, 256, 256]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "view"
+  bottom: "arg78_1"
+  layer_param{
+    attr_0: [1, 3, 8, 32, 8, 32]
+    shape: [1, 3, 8, 32, 8, 32]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "PermuteOp"
+  top: "permute"
+  bottom: "view"
+  layer_param{
+    attr_0: [0, 2, 4, 3, 5, 1]
+    shape: [1, 8, 8, 32, 32, 3]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "_unsafe_view"
+  bottom: "permute"
+  layer_param{
+    attr_0: [1, 64, 3072]
+    shape: [1, 64, 3072]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "LayerNormOp"
+  top: "native_layer_norm"
+  bottom: "_unsafe_view"
+  bottom: "arg2_1"
+  bottom: "arg3_1"
+  layer_param{
+    attr_0: "arg3_1"
+    attr_1: 1e-05
+    shape{
+      output_0: [1, 64, 3072]
+      output_1: [1, 64, 1]
+      output_2: [1, 64, 1]
+    }
+  }
+}
+
+layer{
+  type: "GetItemOp"
+  top: "getitem"
+  bottom: "native_layer_norm"
+  layer_param{
+    attr_0: 0
+    shape: [1, 64, 3072]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "view_1"
+  bottom: "getitem"
+  layer_param{
+    attr_0: [64, 3072]
+    shape: [64, 3072]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "TransposeOp"
+  top: "t"
+  bottom: "arg4_1"
+  layer_param{
+    shape: [3072, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "AddMMOp"
+  top: "addmm"
+  bottom: "arg5_1"
+  bottom: "view_1"
+  bottom: "t"
+  layer_param{
+    shape: [64, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "view_2"
+  bottom: "addmm"
+  layer_param{
+    attr_0: [1, 64, 1024]
+    shape: [1, 64, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "LayerNormOp"
+  top: "native_layer_norm_1"
+  bottom: "view_2"
+  bottom: "arg6_1"
+  bottom: "arg7_1"
+  layer_param{
+    attr_0: "arg7_1"
+    attr_1: 1e-05
+    shape{
+      output_0: [1, 64, 1024]
+      output_1: [1, 64, 1]
+      output_2: [1, 64, 1]
+    }
+  }
+}
+
+layer{
+  type: "GetItemOp"
+  top: "getitem_3"
+  bottom: "native_layer_norm_1"
+  layer_param{
+    attr_0: 0
+    shape: [1, 64, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "view_3"
+  bottom: "arg0_1"
+  layer_param{
+    attr_0: [1024]
+    shape: [1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "UnsqueezeOp"
+  top: "unsqueeze"
+  bottom: "view_3"
+  layer_param{
+    attr_0: 0
+    shape: [1, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ExpandOp"
+  top: "expand"
+  bottom: "unsqueeze"
+  layer_param{
+    attr_0: [1, -1]
+    shape: [1, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "view_4"
+  bottom: "expand"
+  layer_param{
+    attr_0: [1, 1, 1024]
+    shape: [1, 1, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "CatOp"
+  top: "cat"
+  bottom: "view_4"
+  bottom: "getitem_3"
+  layer_param{
+    attr_0: 1
+    shape: [1, 65, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "SliceOp"
+  top: "slice_1"
+  bottom: "arg1_1"
+  layer_param{
+    attr_0: 0
+    attr_1: 0
+    attr_2: 9223372036854775807
+    shape: [1, 65, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "AddOp"
+  top: "add"
+  bottom: "cat"
+  bottom: "slice_1"
+  layer_param{
+    shape: [1, 65, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "LayerNormOp"
+  top: "native_layer_norm_2"
+  bottom: "add"
+  bottom: "arg8_1"
+  bottom: "arg9_1"
+  layer_param{
+    attr_0: "arg9_1"
+    attr_1: 1e-05
+    shape{
+      output_0: [1, 65, 1024]
+      output_1: [1, 65, 1]
+      output_2: [1, 65, 1]
+    }
+  }
+}
+
+layer{
+  type: "GetItemOp"
+  top: "getitem_6"
+  bottom: "native_layer_norm_2"
+  layer_param{
+    attr_0: 0
+    shape: [1, 65, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "TransposeOp"
+  top: "t_1"
+  bottom: "arg10_1"
+  layer_param{
+    shape: [1024, 3072]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "view_5"
+  bottom: "getitem_6"
+  layer_param{
+    attr_0: [65, 1024]
+    shape: [65, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "MatmulOp"
+  top: "mm"
+  bottom: "view_5"
+  bottom: "t_1"
+  layer_param{
+    shape: [65, 3072]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "view_6"
+  bottom: "mm"
+  layer_param{
+    attr_0: [1, 65, 3072]
+    shape: [1, 65, 3072]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "SplitOp"
+  top: "split"
+  bottom: "view_6"
+  layer_param{
+    attr_0: 1024
+    attr_1: -1
+    shape{
+      output_0: [1, 65, 1024]
+      output_1: [1, 65, 1024]
+      output_2: [1, 65, 1024]
+    }
+  }
+}
+
+layer{
+  type: "GetItemOp"
+  top: "getitem_9"
+  bottom: "split"
+  layer_param{
+    attr_0: 0
+    shape: [1, 65, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "GetItemOp"
+  top: "getitem_10"
+  bottom: "split"
+  layer_param{
+    attr_0: 1
+    shape: [1, 65, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "GetItemOp"
+  top: "getitem_11"
+  bottom: "split"
+  layer_param{
+    attr_0: 2
+    shape: [1, 65, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "view_7"
+  bottom: "getitem_9"
+  layer_param{
+    attr_0: [1, 65, 16, 64]
+    shape: [1, 65, 16, 64]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "PermuteOp"
+  top: "permute_1"
+  bottom: "view_7"
+  layer_param{
+    attr_0: [0, 2, 1, 3]
+    shape: [1, 16, 65, 64]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "view_8"
+  bottom: "getitem_10"
+  layer_param{
+    attr_0: [1, 65, 16, 64]
+    shape: [1, 65, 16, 64]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "PermuteOp"
+  top: "permute_2"
+  bottom: "view_8"
+  layer_param{
+    attr_0: [0, 2, 1, 3]
+    shape: [1, 16, 65, 64]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "view_9"
+  bottom: "getitem_11"
+  layer_param{
+    attr_0: [1, 65, 16, 64]
+    shape: [1, 65, 16, 64]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "PermuteOp"
+  top: "permute_3"
+  bottom: "view_9"
+  layer_param{
+    attr_0: [0, 2, 1, 3]
+    shape: [1, 16, 65, 64]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "TransposeOp"
+  top: "transpose"
+  bottom: "permute_2"
+  layer_param{
+    attr_0: -1
+    attr_1: -2
+    shape: [1, 16, 64, 65]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ExpandOp"
+  top: "expand_1"
+  bottom: "permute_1"
+  layer_param{
+    attr_0: [1, 16, 65, 64]
+    shape: [1, 16, 65, 64]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "view_10"
+  bottom: "expand_1"
+  layer_param{
+    attr_0: [16, 65, 64]
+    shape: [16, 65, 64]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ExpandOp"
+  top: "expand_2"
+  bottom: "transpose"
+  layer_param{
+    attr_0: [1, 16, 64, 65]
+    shape: [1, 16, 64, 65]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "view_11"
+  bottom: "expand_2"
+  layer_param{
+    attr_0: [16, 64, 65]
+    shape: [16, 64, 65]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "BatchMatmulOp"
+  top: "bmm"
+  bottom: "view_10"
+  bottom: "view_11"
+  layer_param{
+    shape: [16, 65, 65]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "view_12"
+  bottom: "bmm"
+  layer_param{
+    attr_0: [1, 16, 65, 65]
+    shape: [1, 16, 65, 65]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "MulOp"
+  top: "mul"
+  bottom: "view_12"
+  layer_param{
+    attr_0: 0.125
+    shape: [1, 16, 65, 65]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "SoftmaxOp"
+  top: "_softmax"
+  bottom: "mul"
+  layer_param{
+    attr_0: -1
+    attr_1: False
+    shape: [1, 16, 65, 65]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ExpandOp"
+  top: "expand_3"
+  bottom: "_softmax"
+  layer_param{
+    attr_0: [1, 16, 65, 65]
+    shape: [1, 16, 65, 65]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "view_13"
+  bottom: "expand_3"
+  layer_param{
+    attr_0: [16, 65, 65]
+    shape: [16, 65, 65]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ExpandOp"
+  top: "expand_4"
+  bottom: "permute_3"
+  layer_param{
+    attr_0: [1, 16, 65, 64]
+    shape: [1, 16, 65, 64]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "view_14"
+  bottom: "expand_4"
+  layer_param{
+    attr_0: [16, 65, 64]
+    shape: [16, 65, 64]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "BatchMatmulOp"
+  top: "bmm_1"
+  bottom: "view_13"
+  bottom: "view_14"
+  layer_param{
+    shape: [16, 65, 64]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "view_15"
+  bottom: "bmm_1"
+  layer_param{
+    attr_0: [1, 16, 65, 64]
+    shape: [1, 16, 65, 64]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "PermuteOp"
+  top: "permute_4"
+  bottom: "view_15"
+  layer_param{
+    attr_0: [0, 2, 1, 3]
+    shape: [1, 65, 16, 64]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "_unsafe_view_1"
+  bottom: "permute_4"
+  layer_param{
+    attr_0: [1, 65, 1024]
+    shape: [1, 65, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "view_16"
+  bottom: "_unsafe_view_1"
+  layer_param{
+    attr_0: [65, 1024]
+    shape: [65, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "TransposeOp"
+  top: "t_2"
+  bottom: "arg11_1"
+  layer_param{
+    shape: [1024, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "AddMMOp"
+  top: "addmm_1"
+  bottom: "arg12_1"
+  bottom: "view_16"
+  bottom: "t_2"
+  layer_param{
+    shape: [65, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "view_17"
+  bottom: "addmm_1"
+  layer_param{
+    attr_0: [1, 65, 1024]
+    shape: [1, 65, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "AddOp"
+  top: "add_1"
+  bottom: "view_17"
+  bottom: "add"
+  layer_param{
+    shape: [1, 65, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "LayerNormOp"
+  top: "native_layer_norm_3"
+  bottom: "add_1"
+  bottom: "arg13_1"
+  bottom: "arg14_1"
+  layer_param{
+    attr_0: "arg14_1"
+    attr_1: 1e-05
+    shape{
+      output_0: [1, 65, 1024]
+      output_1: [1, 65, 1]
+      output_2: [1, 65, 1]
+    }
+  }
+}
+
+layer{
+  type: "GetItemOp"
+  top: "getitem_12"
+  bottom: "native_layer_norm_3"
+  layer_param{
+    attr_0: 0
+    shape: [1, 65, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "view_18"
+  bottom: "getitem_12"
+  layer_param{
+    attr_0: [65, 1024]
+    shape: [65, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "TransposeOp"
+  top: "t_3"
+  bottom: "arg15_1"
+  layer_param{
+    shape: [1024, 2048]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "AddMMOp"
+  top: "addmm_2"
+  bottom: "arg16_1"
+  bottom: "view_18"
+  bottom: "t_3"
+  layer_param{
+    shape: [65, 2048]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "view_19"
+  bottom: "addmm_2"
+  layer_param{
+    attr_0: [1, 65, 2048]
+    shape: [1, 65, 2048]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "GeluOp"
+  top: "gelu"
+  bottom: "view_19"
+  layer_param{
+    shape: [1, 65, 2048]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "view_20"
+  bottom: "gelu"
+  layer_param{
+    attr_0: [65, 2048]
+    shape: [65, 2048]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "TransposeOp"
+  top: "t_4"
+  bottom: "arg17_1"
+  layer_param{
+    shape: [2048, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "AddMMOp"
+  top: "addmm_3"
+  bottom: "arg18_1"
+  bottom: "view_20"
+  bottom: "t_4"
+  layer_param{
+    shape: [65, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "view_21"
+  bottom: "addmm_3"
+  layer_param{
+    attr_0: [1, 65, 1024]
+    shape: [1, 65, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "AddOp"
+  top: "add_2"
+  bottom: "view_21"
+  bottom: "add_1"
+  layer_param{
+    shape: [1, 65, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "LayerNormOp"
+  top: "native_layer_norm_4"
+  bottom: "add_2"
+  bottom: "arg19_1"
+  bottom: "arg20_1"
+  layer_param{
+    attr_0: "arg20_1"
+    attr_1: 1e-05
+    shape{
+      output_0: [1, 65, 1024]
+      output_1: [1, 65, 1]
+      output_2: [1, 65, 1]
+    }
+  }
+}
+
+layer{
+  type: "GetItemOp"
+  top: "getitem_15"
+  bottom: "native_layer_norm_4"
+  layer_param{
+    attr_0: 0
+    shape: [1, 65, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "TransposeOp"
+  top: "t_5"
+  bottom: "arg21_1"
+  layer_param{
+    shape: [1024, 3072]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "view_22"
+  bottom: "getitem_15"
+  layer_param{
+    attr_0: [65, 1024]
+    shape: [65, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "MatmulOp"
+  top: "mm_1"
+  bottom: "view_22"
+  bottom: "t_5"
+  layer_param{
+    shape: [65, 3072]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "view_23"
+  bottom: "mm_1"
+  layer_param{
+    attr_0: [1, 65, 3072]
+    shape: [1, 65, 3072]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "SplitOp"
+  top: "split_1"
+  bottom: "view_23"
+  layer_param{
+    attr_0: 1024
+    attr_1: -1
+    shape{
+      output_0: [1, 65, 1024]
+      output_1: [1, 65, 1024]
+      output_2: [1, 65, 1024]
+    }
+  }
+}
+
+layer{
+  type: "GetItemOp"
+  top: "getitem_18"
+  bottom: "split_1"
+  layer_param{
+    attr_0: 0
+    shape: [1, 65, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "GetItemOp"
+  top: "getitem_19"
+  bottom: "split_1"
+  layer_param{
+    attr_0: 1
+    shape: [1, 65, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "GetItemOp"
+  top: "getitem_20"
+  bottom: "split_1"
+  layer_param{
+    attr_0: 2
+    shape: [1, 65, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "view_24"
+  bottom: "getitem_18"
+  layer_param{
+    attr_0: [1, 65, 16, 64]
+    shape: [1, 65, 16, 64]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "PermuteOp"
+  top: "permute_5"
+  bottom: "view_24"
+  layer_param{
+    attr_0: [0, 2, 1, 3]
+    shape: [1, 16, 65, 64]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "view_25"
+  bottom: "getitem_19"
+  layer_param{
+    attr_0: [1, 65, 16, 64]
+    shape: [1, 65, 16, 64]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "PermuteOp"
+  top: "permute_6"
+  bottom: "view_25"
+  layer_param{
+    attr_0: [0, 2, 1, 3]
+    shape: [1, 16, 65, 64]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "view_26"
+  bottom: "getitem_20"
+  layer_param{
+    attr_0: [1, 65, 16, 64]
+    shape: [1, 65, 16, 64]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "PermuteOp"
+  top: "permute_7"
+  bottom: "view_26"
+  layer_param{
+    attr_0: [0, 2, 1, 3]
+    shape: [1, 16, 65, 64]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "TransposeOp"
+  top: "transpose_1"
+  bottom: "permute_6"
+  layer_param{
+    attr_0: -1
+    attr_1: -2
+    shape: [1, 16, 64, 65]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ExpandOp"
+  top: "expand_5"
+  bottom: "permute_5"
+  layer_param{
+    attr_0: [1, 16, 65, 64]
+    shape: [1, 16, 65, 64]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "view_27"
+  bottom: "expand_5"
+  layer_param{
+    attr_0: [16, 65, 64]
+    shape: [16, 65, 64]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ExpandOp"
+  top: "expand_6"
+  bottom: "transpose_1"
+  layer_param{
+    attr_0: [1, 16, 64, 65]
+    shape: [1, 16, 64, 65]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "view_28"
+  bottom: "expand_6"
+  layer_param{
+    attr_0: [16, 64, 65]
+    shape: [16, 64, 65]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "BatchMatmulOp"
+  top: "bmm_2"
+  bottom: "view_27"
+  bottom: "view_28"
+  layer_param{
+    shape: [16, 65, 65]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "view_29"
+  bottom: "bmm_2"
+  layer_param{
+    attr_0: [1, 16, 65, 65]
+    shape: [1, 16, 65, 65]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "MulOp"
+  top: "mul_1"
+  bottom: "view_29"
+  layer_param{
+    attr_0: 0.125
+    shape: [1, 16, 65, 65]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "SoftmaxOp"
+  top: "_softmax_1"
+  bottom: "mul_1"
+  layer_param{
+    attr_0: -1
+    attr_1: False
+    shape: [1, 16, 65, 65]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ExpandOp"
+  top: "expand_7"
+  bottom: "_softmax_1"
+  layer_param{
+    attr_0: [1, 16, 65, 65]
+    shape: [1, 16, 65, 65]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "view_30"
+  bottom: "expand_7"
+  layer_param{
+    attr_0: [16, 65, 65]
+    shape: [16, 65, 65]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ExpandOp"
+  top: "expand_8"
+  bottom: "permute_7"
+  layer_param{
+    attr_0: [1, 16, 65, 64]
+    shape: [1, 16, 65, 64]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "view_31"
+  bottom: "expand_8"
+  layer_param{
+    attr_0: [16, 65, 64]
+    shape: [16, 65, 64]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "BatchMatmulOp"
+  top: "bmm_3"
+  bottom: "view_30"
+  bottom: "view_31"
+  layer_param{
+    shape: [16, 65, 64]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "view_32"
+  bottom: "bmm_3"
+  layer_param{
+    attr_0: [1, 16, 65, 64]
+    shape: [1, 16, 65, 64]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "PermuteOp"
+  top: "permute_8"
+  bottom: "view_32"
+  layer_param{
+    attr_0: [0, 2, 1, 3]
+    shape: [1, 65, 16, 64]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "_unsafe_view_2"
+  bottom: "permute_8"
+  layer_param{
+    attr_0: [1, 65, 1024]
+    shape: [1, 65, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "view_33"
+  bottom: "_unsafe_view_2"
+  layer_param{
+    attr_0: [65, 1024]
+    shape: [65, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "TransposeOp"
+  top: "t_6"
+  bottom: "arg22_1"
+  layer_param{
+    shape: [1024, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "AddMMOp"
+  top: "addmm_4"
+  bottom: "arg23_1"
+  bottom: "view_33"
+  bottom: "t_6"
+  layer_param{
+    shape: [65, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "view_34"
+  bottom: "addmm_4"
+  layer_param{
+    attr_0: [1, 65, 1024]
+    shape: [1, 65, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "AddOp"
+  top: "add_3"
+  bottom: "view_34"
+  bottom: "add_2"
+  layer_param{
+    shape: [1, 65, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "LayerNormOp"
+  top: "native_layer_norm_5"
+  bottom: "add_3"
+  bottom: "arg24_1"
+  bottom: "arg25_1"
+  layer_param{
+    attr_0: "arg25_1"
+    attr_1: 1e-05
+    shape{
+      output_0: [1, 65, 1024]
+      output_1: [1, 65, 1]
+      output_2: [1, 65, 1]
+    }
+  }
+}
+
+layer{
+  type: "GetItemOp"
+  top: "getitem_21"
+  bottom: "native_layer_norm_5"
+  layer_param{
+    attr_0: 0
+    shape: [1, 65, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "view_35"
+  bottom: "getitem_21"
+  layer_param{
+    attr_0: [65, 1024]
+    shape: [65, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "TransposeOp"
+  top: "t_7"
+  bottom: "arg26_1"
+  layer_param{
+    shape: [1024, 2048]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "AddMMOp"
+  top: "addmm_5"
+  bottom: "arg27_1"
+  bottom: "view_35"
+  bottom: "t_7"
+  layer_param{
+    shape: [65, 2048]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "view_36"
+  bottom: "addmm_5"
+  layer_param{
+    attr_0: [1, 65, 2048]
+    shape: [1, 65, 2048]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "GeluOp"
+  top: "gelu_1"
+  bottom: "view_36"
+  layer_param{
+    shape: [1, 65, 2048]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "view_37"
+  bottom: "gelu_1"
+  layer_param{
+    attr_0: [65, 2048]
+    shape: [65, 2048]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "TransposeOp"
+  top: "t_8"
+  bottom: "arg28_1"
+  layer_param{
+    shape: [2048, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "AddMMOp"
+  top: "addmm_6"
+  bottom: "arg29_1"
+  bottom: "view_37"
+  bottom: "t_8"
+  layer_param{
+    shape: [65, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "view_38"
+  bottom: "addmm_6"
+  layer_param{
+    attr_0: [1, 65, 1024]
+    shape: [1, 65, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "AddOp"
+  top: "add_4"
+  bottom: "view_38"
+  bottom: "add_3"
+  layer_param{
+    shape: [1, 65, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "LayerNormOp"
+  top: "native_layer_norm_6"
+  bottom: "add_4"
+  bottom: "arg30_1"
+  bottom: "arg31_1"
+  layer_param{
+    attr_0: "arg31_1"
+    attr_1: 1e-05
+    shape{
+      output_0: [1, 65, 1024]
+      output_1: [1, 65, 1]
+      output_2: [1, 65, 1]
+    }
+  }
+}
+
+layer{
+  type: "GetItemOp"
+  top: "getitem_24"
+  bottom: "native_layer_norm_6"
+  layer_param{
+    attr_0: 0
+    shape: [1, 65, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "TransposeOp"
+  top: "t_9"
+  bottom: "arg32_1"
+  layer_param{
+    shape: [1024, 3072]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "view_39"
+  bottom: "getitem_24"
+  layer_param{
+    attr_0: [65, 1024]
+    shape: [65, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "MatmulOp"
+  top: "mm_2"
+  bottom: "view_39"
+  bottom: "t_9"
+  layer_param{
+    shape: [65, 3072]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "view_40"
+  bottom: "mm_2"
+  layer_param{
+    attr_0: [1, 65, 3072]
+    shape: [1, 65, 3072]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "SplitOp"
+  top: "split_2"
+  bottom: "view_40"
+  layer_param{
+    attr_0: 1024
+    attr_1: -1
+    shape{
+      output_0: [1, 65, 1024]
+      output_1: [1, 65, 1024]
+      output_2: [1, 65, 1024]
+    }
+  }
+}
+
+layer{
+  type: "GetItemOp"
+  top: "getitem_27"
+  bottom: "split_2"
+  layer_param{
+    attr_0: 0
+    shape: [1, 65, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "GetItemOp"
+  top: "getitem_28"
+  bottom: "split_2"
+  layer_param{
+    attr_0: 1
+    shape: [1, 65, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "GetItemOp"
+  top: "getitem_29"
+  bottom: "split_2"
+  layer_param{
+    attr_0: 2
+    shape: [1, 65, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "view_41"
+  bottom: "getitem_27"
+  layer_param{
+    attr_0: [1, 65, 16, 64]
+    shape: [1, 65, 16, 64]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "PermuteOp"
+  top: "permute_9"
+  bottom: "view_41"
+  layer_param{
+    attr_0: [0, 2, 1, 3]
+    shape: [1, 16, 65, 64]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "view_42"
+  bottom: "getitem_28"
+  layer_param{
+    attr_0: [1, 65, 16, 64]
+    shape: [1, 65, 16, 64]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "PermuteOp"
+  top: "permute_10"
+  bottom: "view_42"
+  layer_param{
+    attr_0: [0, 2, 1, 3]
+    shape: [1, 16, 65, 64]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "view_43"
+  bottom: "getitem_29"
+  layer_param{
+    attr_0: [1, 65, 16, 64]
+    shape: [1, 65, 16, 64]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "PermuteOp"
+  top: "permute_11"
+  bottom: "view_43"
+  layer_param{
+    attr_0: [0, 2, 1, 3]
+    shape: [1, 16, 65, 64]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "TransposeOp"
+  top: "transpose_2"
+  bottom: "permute_10"
+  layer_param{
+    attr_0: -1
+    attr_1: -2
+    shape: [1, 16, 64, 65]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ExpandOp"
+  top: "expand_9"
+  bottom: "permute_9"
+  layer_param{
+    attr_0: [1, 16, 65, 64]
+    shape: [1, 16, 65, 64]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "view_44"
+  bottom: "expand_9"
+  layer_param{
+    attr_0: [16, 65, 64]
+    shape: [16, 65, 64]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ExpandOp"
+  top: "expand_10"
+  bottom: "transpose_2"
+  layer_param{
+    attr_0: [1, 16, 64, 65]
+    shape: [1, 16, 64, 65]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "view_45"
+  bottom: "expand_10"
+  layer_param{
+    attr_0: [16, 64, 65]
+    shape: [16, 64, 65]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "BatchMatmulOp"
+  top: "bmm_4"
+  bottom: "view_44"
+  bottom: "view_45"
+  layer_param{
+    shape: [16, 65, 65]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "view_46"
+  bottom: "bmm_4"
+  layer_param{
+    attr_0: [1, 16, 65, 65]
+    shape: [1, 16, 65, 65]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "MulOp"
+  top: "mul_2"
+  bottom: "view_46"
+  layer_param{
+    attr_0: 0.125
+    shape: [1, 16, 65, 65]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "SoftmaxOp"
+  top: "_softmax_2"
+  bottom: "mul_2"
+  layer_param{
+    attr_0: -1
+    attr_1: False
+    shape: [1, 16, 65, 65]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ExpandOp"
+  top: "expand_11"
+  bottom: "_softmax_2"
+  layer_param{
+    attr_0: [1, 16, 65, 65]
+    shape: [1, 16, 65, 65]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "view_47"
+  bottom: "expand_11"
+  layer_param{
+    attr_0: [16, 65, 65]
+    shape: [16, 65, 65]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ExpandOp"
+  top: "expand_12"
+  bottom: "permute_11"
+  layer_param{
+    attr_0: [1, 16, 65, 64]
+    shape: [1, 16, 65, 64]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "view_48"
+  bottom: "expand_12"
+  layer_param{
+    attr_0: [16, 65, 64]
+    shape: [16, 65, 64]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "BatchMatmulOp"
+  top: "bmm_5"
+  bottom: "view_47"
+  bottom: "view_48"
+  layer_param{
+    shape: [16, 65, 64]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "view_49"
+  bottom: "bmm_5"
+  layer_param{
+    attr_0: [1, 16, 65, 64]
+    shape: [1, 16, 65, 64]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "PermuteOp"
+  top: "permute_12"
+  bottom: "view_49"
+  layer_param{
+    attr_0: [0, 2, 1, 3]
+    shape: [1, 65, 16, 64]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "_unsafe_view_3"
+  bottom: "permute_12"
+  layer_param{
+    attr_0: [1, 65, 1024]
+    shape: [1, 65, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "view_50"
+  bottom: "_unsafe_view_3"
+  layer_param{
+    attr_0: [65, 1024]
+    shape: [65, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "TransposeOp"
+  top: "t_10"
+  bottom: "arg33_1"
+  layer_param{
+    shape: [1024, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "AddMMOp"
+  top: "addmm_7"
+  bottom: "arg34_1"
+  bottom: "view_50"
+  bottom: "t_10"
+  layer_param{
+    shape: [65, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "view_51"
+  bottom: "addmm_7"
+  layer_param{
+    attr_0: [1, 65, 1024]
+    shape: [1, 65, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "AddOp"
+  top: "add_5"
+  bottom: "view_51"
+  bottom: "add_4"
+  layer_param{
+    shape: [1, 65, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "LayerNormOp"
+  top: "native_layer_norm_7"
+  bottom: "add_5"
+  bottom: "arg35_1"
+  bottom: "arg36_1"
+  layer_param{
+    attr_0: "arg36_1"
+    attr_1: 1e-05
+    shape{
+      output_0: [1, 65, 1024]
+      output_1: [1, 65, 1]
+      output_2: [1, 65, 1]
+    }
+  }
+}
+
+layer{
+  type: "GetItemOp"
+  top: "getitem_30"
+  bottom: "native_layer_norm_7"
+  layer_param{
+    attr_0: 0
+    shape: [1, 65, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "view_52"
+  bottom: "getitem_30"
+  layer_param{
+    attr_0: [65, 1024]
+    shape: [65, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "TransposeOp"
+  top: "t_11"
+  bottom: "arg37_1"
+  layer_param{
+    shape: [1024, 2048]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "AddMMOp"
+  top: "addmm_8"
+  bottom: "arg38_1"
+  bottom: "view_52"
+  bottom: "t_11"
+  layer_param{
+    shape: [65, 2048]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "view_53"
+  bottom: "addmm_8"
+  layer_param{
+    attr_0: [1, 65, 2048]
+    shape: [1, 65, 2048]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "GeluOp"
+  top: "gelu_2"
+  bottom: "view_53"
+  layer_param{
+    shape: [1, 65, 2048]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "view_54"
+  bottom: "gelu_2"
+  layer_param{
+    attr_0: [65, 2048]
+    shape: [65, 2048]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "TransposeOp"
+  top: "t_12"
+  bottom: "arg39_1"
+  layer_param{
+    shape: [2048, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "AddMMOp"
+  top: "addmm_9"
+  bottom: "arg40_1"
+  bottom: "view_54"
+  bottom: "t_12"
+  layer_param{
+    shape: [65, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "view_55"
+  bottom: "addmm_9"
+  layer_param{
+    attr_0: [1, 65, 1024]
+    shape: [1, 65, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "AddOp"
+  top: "add_6"
+  bottom: "view_55"
+  bottom: "add_5"
+  layer_param{
+    shape: [1, 65, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "LayerNormOp"
+  top: "native_layer_norm_8"
+  bottom: "add_6"
+  bottom: "arg41_1"
+  bottom: "arg42_1"
+  layer_param{
+    attr_0: "arg42_1"
+    attr_1: 1e-05
+    shape{
+      output_0: [1, 65, 1024]
+      output_1: [1, 65, 1]
+      output_2: [1, 65, 1]
+    }
+  }
+}
+
+layer{
+  type: "GetItemOp"
+  top: "getitem_33"
+  bottom: "native_layer_norm_8"
+  layer_param{
+    attr_0: 0
+    shape: [1, 65, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "TransposeOp"
+  top: "t_13"
+  bottom: "arg43_1"
+  layer_param{
+    shape: [1024, 3072]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "view_56"
+  bottom: "getitem_33"
+  layer_param{
+    attr_0: [65, 1024]
+    shape: [65, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "MatmulOp"
+  top: "mm_3"
+  bottom: "view_56"
+  bottom: "t_13"
+  layer_param{
+    shape: [65, 3072]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "view_57"
+  bottom: "mm_3"
+  layer_param{
+    attr_0: [1, 65, 3072]
+    shape: [1, 65, 3072]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "SplitOp"
+  top: "split_3"
+  bottom: "view_57"
+  layer_param{
+    attr_0: 1024
+    attr_1: -1
+    shape{
+      output_0: [1, 65, 1024]
+      output_1: [1, 65, 1024]
+      output_2: [1, 65, 1024]
+    }
+  }
+}
+
+layer{
+  type: "GetItemOp"
+  top: "getitem_36"
+  bottom: "split_3"
+  layer_param{
+    attr_0: 0
+    shape: [1, 65, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "GetItemOp"
+  top: "getitem_37"
+  bottom: "split_3"
+  layer_param{
+    attr_0: 1
+    shape: [1, 65, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "GetItemOp"
+  top: "getitem_38"
+  bottom: "split_3"
+  layer_param{
+    attr_0: 2
+    shape: [1, 65, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "view_58"
+  bottom: "getitem_36"
+  layer_param{
+    attr_0: [1, 65, 16, 64]
+    shape: [1, 65, 16, 64]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "PermuteOp"
+  top: "permute_13"
+  bottom: "view_58"
+  layer_param{
+    attr_0: [0, 2, 1, 3]
+    shape: [1, 16, 65, 64]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "view_59"
+  bottom: "getitem_37"
+  layer_param{
+    attr_0: [1, 65, 16, 64]
+    shape: [1, 65, 16, 64]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "PermuteOp"
+  top: "permute_14"
+  bottom: "view_59"
+  layer_param{
+    attr_0: [0, 2, 1, 3]
+    shape: [1, 16, 65, 64]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "view_60"
+  bottom: "getitem_38"
+  layer_param{
+    attr_0: [1, 65, 16, 64]
+    shape: [1, 65, 16, 64]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "PermuteOp"
+  top: "permute_15"
+  bottom: "view_60"
+  layer_param{
+    attr_0: [0, 2, 1, 3]
+    shape: [1, 16, 65, 64]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "TransposeOp"
+  top: "transpose_3"
+  bottom: "permute_14"
+  layer_param{
+    attr_0: -1
+    attr_1: -2
+    shape: [1, 16, 64, 65]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ExpandOp"
+  top: "expand_13"
+  bottom: "permute_13"
+  layer_param{
+    attr_0: [1, 16, 65, 64]
+    shape: [1, 16, 65, 64]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "view_61"
+  bottom: "expand_13"
+  layer_param{
+    attr_0: [16, 65, 64]
+    shape: [16, 65, 64]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ExpandOp"
+  top: "expand_14"
+  bottom: "transpose_3"
+  layer_param{
+    attr_0: [1, 16, 64, 65]
+    shape: [1, 16, 64, 65]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "view_62"
+  bottom: "expand_14"
+  layer_param{
+    attr_0: [16, 64, 65]
+    shape: [16, 64, 65]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "BatchMatmulOp"
+  top: "bmm_6"
+  bottom: "view_61"
+  bottom: "view_62"
+  layer_param{
+    shape: [16, 65, 65]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "view_63"
+  bottom: "bmm_6"
+  layer_param{
+    attr_0: [1, 16, 65, 65]
+    shape: [1, 16, 65, 65]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "MulOp"
+  top: "mul_3"
+  bottom: "view_63"
+  layer_param{
+    attr_0: 0.125
+    shape: [1, 16, 65, 65]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "SoftmaxOp"
+  top: "_softmax_3"
+  bottom: "mul_3"
+  layer_param{
+    attr_0: -1
+    attr_1: False
+    shape: [1, 16, 65, 65]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ExpandOp"
+  top: "expand_15"
+  bottom: "_softmax_3"
+  layer_param{
+    attr_0: [1, 16, 65, 65]
+    shape: [1, 16, 65, 65]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "view_64"
+  bottom: "expand_15"
+  layer_param{
+    attr_0: [16, 65, 65]
+    shape: [16, 65, 65]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ExpandOp"
+  top: "expand_16"
+  bottom: "permute_15"
+  layer_param{
+    attr_0: [1, 16, 65, 64]
+    shape: [1, 16, 65, 64]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "view_65"
+  bottom: "expand_16"
+  layer_param{
+    attr_0: [16, 65, 64]
+    shape: [16, 65, 64]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "BatchMatmulOp"
+  top: "bmm_7"
+  bottom: "view_64"
+  bottom: "view_65"
+  layer_param{
+    shape: [16, 65, 64]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "view_66"
+  bottom: "bmm_7"
+  layer_param{
+    attr_0: [1, 16, 65, 64]
+    shape: [1, 16, 65, 64]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "PermuteOp"
+  top: "permute_16"
+  bottom: "view_66"
+  layer_param{
+    attr_0: [0, 2, 1, 3]
+    shape: [1, 65, 16, 64]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "_unsafe_view_4"
+  bottom: "permute_16"
+  layer_param{
+    attr_0: [1, 65, 1024]
+    shape: [1, 65, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "view_67"
+  bottom: "_unsafe_view_4"
+  layer_param{
+    attr_0: [65, 1024]
+    shape: [65, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "TransposeOp"
+  top: "t_14"
+  bottom: "arg44_1"
+  layer_param{
+    shape: [1024, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "AddMMOp"
+  top: "addmm_10"
+  bottom: "arg45_1"
+  bottom: "view_67"
+  bottom: "t_14"
+  layer_param{
+    shape: [65, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "view_68"
+  bottom: "addmm_10"
+  layer_param{
+    attr_0: [1, 65, 1024]
+    shape: [1, 65, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "AddOp"
+  top: "add_7"
+  bottom: "view_68"
+  bottom: "add_6"
+  layer_param{
+    shape: [1, 65, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "LayerNormOp"
+  top: "native_layer_norm_9"
+  bottom: "add_7"
+  bottom: "arg46_1"
+  bottom: "arg47_1"
+  layer_param{
+    attr_0: "arg47_1"
+    attr_1: 1e-05
+    shape{
+      output_0: [1, 65, 1024]
+      output_1: [1, 65, 1]
+      output_2: [1, 65, 1]
+    }
+  }
+}
+
+layer{
+  type: "GetItemOp"
+  top: "getitem_39"
+  bottom: "native_layer_norm_9"
+  layer_param{
+    attr_0: 0
+    shape: [1, 65, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "view_69"
+  bottom: "getitem_39"
+  layer_param{
+    attr_0: [65, 1024]
+    shape: [65, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "TransposeOp"
+  top: "t_15"
+  bottom: "arg48_1"
+  layer_param{
+    shape: [1024, 2048]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "AddMMOp"
+  top: "addmm_11"
+  bottom: "arg49_1"
+  bottom: "view_69"
+  bottom: "t_15"
+  layer_param{
+    shape: [65, 2048]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "view_70"
+  bottom: "addmm_11"
+  layer_param{
+    attr_0: [1, 65, 2048]
+    shape: [1, 65, 2048]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "GeluOp"
+  top: "gelu_3"
+  bottom: "view_70"
+  layer_param{
+    shape: [1, 65, 2048]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "view_71"
+  bottom: "gelu_3"
+  layer_param{
+    attr_0: [65, 2048]
+    shape: [65, 2048]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "TransposeOp"
+  top: "t_16"
+  bottom: "arg50_1"
+  layer_param{
+    shape: [2048, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "AddMMOp"
+  top: "addmm_12"
+  bottom: "arg51_1"
+  bottom: "view_71"
+  bottom: "t_16"
+  layer_param{
+    shape: [65, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "view_72"
+  bottom: "addmm_12"
+  layer_param{
+    attr_0: [1, 65, 1024]
+    shape: [1, 65, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "AddOp"
+  top: "add_8"
+  bottom: "view_72"
+  bottom: "add_7"
+  layer_param{
+    shape: [1, 65, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "LayerNormOp"
+  top: "native_layer_norm_10"
+  bottom: "add_8"
+  bottom: "arg52_1"
+  bottom: "arg53_1"
+  layer_param{
+    attr_0: "arg53_1"
+    attr_1: 1e-05
+    shape{
+      output_0: [1, 65, 1024]
+      output_1: [1, 65, 1]
+      output_2: [1, 65, 1]
+    }
+  }
+}
+
+layer{
+  type: "GetItemOp"
+  top: "getitem_42"
+  bottom: "native_layer_norm_10"
+  layer_param{
+    attr_0: 0
+    shape: [1, 65, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "TransposeOp"
+  top: "t_17"
+  bottom: "arg54_1"
+  layer_param{
+    shape: [1024, 3072]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "view_73"
+  bottom: "getitem_42"
+  layer_param{
+    attr_0: [65, 1024]
+    shape: [65, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "MatmulOp"
+  top: "mm_4"
+  bottom: "view_73"
+  bottom: "t_17"
+  layer_param{
+    shape: [65, 3072]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "view_74"
+  bottom: "mm_4"
+  layer_param{
+    attr_0: [1, 65, 3072]
+    shape: [1, 65, 3072]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "SplitOp"
+  top: "split_4"
+  bottom: "view_74"
+  layer_param{
+    attr_0: 1024
+    attr_1: -1
+    shape{
+      output_0: [1, 65, 1024]
+      output_1: [1, 65, 1024]
+      output_2: [1, 65, 1024]
+    }
+  }
+}
+
+layer{
+  type: "GetItemOp"
+  top: "getitem_45"
+  bottom: "split_4"
+  layer_param{
+    attr_0: 0
+    shape: [1, 65, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "GetItemOp"
+  top: "getitem_46"
+  bottom: "split_4"
+  layer_param{
+    attr_0: 1
+    shape: [1, 65, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "GetItemOp"
+  top: "getitem_47"
+  bottom: "split_4"
+  layer_param{
+    attr_0: 2
+    shape: [1, 65, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "view_75"
+  bottom: "getitem_45"
+  layer_param{
+    attr_0: [1, 65, 16, 64]
+    shape: [1, 65, 16, 64]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "PermuteOp"
+  top: "permute_17"
+  bottom: "view_75"
+  layer_param{
+    attr_0: [0, 2, 1, 3]
+    shape: [1, 16, 65, 64]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "view_76"
+  bottom: "getitem_46"
+  layer_param{
+    attr_0: [1, 65, 16, 64]
+    shape: [1, 65, 16, 64]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "PermuteOp"
+  top: "permute_18"
+  bottom: "view_76"
+  layer_param{
+    attr_0: [0, 2, 1, 3]
+    shape: [1, 16, 65, 64]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "view_77"
+  bottom: "getitem_47"
+  layer_param{
+    attr_0: [1, 65, 16, 64]
+    shape: [1, 65, 16, 64]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "PermuteOp"
+  top: "permute_19"
+  bottom: "view_77"
+  layer_param{
+    attr_0: [0, 2, 1, 3]
+    shape: [1, 16, 65, 64]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "TransposeOp"
+  top: "transpose_4"
+  bottom: "permute_18"
+  layer_param{
+    attr_0: -1
+    attr_1: -2
+    shape: [1, 16, 64, 65]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ExpandOp"
+  top: "expand_17"
+  bottom: "permute_17"
+  layer_param{
+    attr_0: [1, 16, 65, 64]
+    shape: [1, 16, 65, 64]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "view_78"
+  bottom: "expand_17"
+  layer_param{
+    attr_0: [16, 65, 64]
+    shape: [16, 65, 64]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ExpandOp"
+  top: "expand_18"
+  bottom: "transpose_4"
+  layer_param{
+    attr_0: [1, 16, 64, 65]
+    shape: [1, 16, 64, 65]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "view_79"
+  bottom: "expand_18"
+  layer_param{
+    attr_0: [16, 64, 65]
+    shape: [16, 64, 65]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "BatchMatmulOp"
+  top: "bmm_8"
+  bottom: "view_78"
+  bottom: "view_79"
+  layer_param{
+    shape: [16, 65, 65]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "view_80"
+  bottom: "bmm_8"
+  layer_param{
+    attr_0: [1, 16, 65, 65]
+    shape: [1, 16, 65, 65]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "MulOp"
+  top: "mul_4"
+  bottom: "view_80"
+  layer_param{
+    attr_0: 0.125
+    shape: [1, 16, 65, 65]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "SoftmaxOp"
+  top: "_softmax_4"
+  bottom: "mul_4"
+  layer_param{
+    attr_0: -1
+    attr_1: False
+    shape: [1, 16, 65, 65]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ExpandOp"
+  top: "expand_19"
+  bottom: "_softmax_4"
+  layer_param{
+    attr_0: [1, 16, 65, 65]
+    shape: [1, 16, 65, 65]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "view_81"
+  bottom: "expand_19"
+  layer_param{
+    attr_0: [16, 65, 65]
+    shape: [16, 65, 65]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ExpandOp"
+  top: "expand_20"
+  bottom: "permute_19"
+  layer_param{
+    attr_0: [1, 16, 65, 64]
+    shape: [1, 16, 65, 64]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "view_82"
+  bottom: "expand_20"
+  layer_param{
+    attr_0: [16, 65, 64]
+    shape: [16, 65, 64]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "BatchMatmulOp"
+  top: "bmm_9"
+  bottom: "view_81"
+  bottom: "view_82"
+  layer_param{
+    shape: [16, 65, 64]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "view_83"
+  bottom: "bmm_9"
+  layer_param{
+    attr_0: [1, 16, 65, 64]
+    shape: [1, 16, 65, 64]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "PermuteOp"
+  top: "permute_20"
+  bottom: "view_83"
+  layer_param{
+    attr_0: [0, 2, 1, 3]
+    shape: [1, 65, 16, 64]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "_unsafe_view_5"
+  bottom: "permute_20"
+  layer_param{
+    attr_0: [1, 65, 1024]
+    shape: [1, 65, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "view_84"
+  bottom: "_unsafe_view_5"
+  layer_param{
+    attr_0: [65, 1024]
+    shape: [65, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "TransposeOp"
+  top: "t_18"
+  bottom: "arg55_1"
+  layer_param{
+    shape: [1024, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "AddMMOp"
+  top: "addmm_13"
+  bottom: "arg56_1"
+  bottom: "view_84"
+  bottom: "t_18"
+  layer_param{
+    shape: [65, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "view_85"
+  bottom: "addmm_13"
+  layer_param{
+    attr_0: [1, 65, 1024]
+    shape: [1, 65, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "AddOp"
+  top: "add_9"
+  bottom: "view_85"
+  bottom: "add_8"
+  layer_param{
+    shape: [1, 65, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "LayerNormOp"
+  top: "native_layer_norm_11"
+  bottom: "add_9"
+  bottom: "arg57_1"
+  bottom: "arg58_1"
+  layer_param{
+    attr_0: "arg58_1"
+    attr_1: 1e-05
+    shape{
+      output_0: [1, 65, 1024]
+      output_1: [1, 65, 1]
+      output_2: [1, 65, 1]
+    }
+  }
+}
+
+layer{
+  type: "GetItemOp"
+  top: "getitem_48"
+  bottom: "native_layer_norm_11"
+  layer_param{
+    attr_0: 0
+    shape: [1, 65, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "view_86"
+  bottom: "getitem_48"
+  layer_param{
+    attr_0: [65, 1024]
+    shape: [65, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "TransposeOp"
+  top: "t_19"
+  bottom: "arg59_1"
+  layer_param{
+    shape: [1024, 2048]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "AddMMOp"
+  top: "addmm_14"
+  bottom: "arg60_1"
+  bottom: "view_86"
+  bottom: "t_19"
+  layer_param{
+    shape: [65, 2048]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "view_87"
+  bottom: "addmm_14"
+  layer_param{
+    attr_0: [1, 65, 2048]
+    shape: [1, 65, 2048]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "GeluOp"
+  top: "gelu_4"
+  bottom: "view_87"
+  layer_param{
+    shape: [1, 65, 2048]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "view_88"
+  bottom: "gelu_4"
+  layer_param{
+    attr_0: [65, 2048]
+    shape: [65, 2048]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "TransposeOp"
+  top: "t_20"
+  bottom: "arg61_1"
+  layer_param{
+    shape: [2048, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "AddMMOp"
+  top: "addmm_15"
+  bottom: "arg62_1"
+  bottom: "view_88"
+  bottom: "t_20"
+  layer_param{
+    shape: [65, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "view_89"
+  bottom: "addmm_15"
+  layer_param{
+    attr_0: [1, 65, 1024]
+    shape: [1, 65, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "AddOp"
+  top: "add_10"
+  bottom: "view_89"
+  bottom: "add_9"
+  layer_param{
+    shape: [1, 65, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "LayerNormOp"
+  top: "native_layer_norm_12"
+  bottom: "add_10"
+  bottom: "arg63_1"
+  bottom: "arg64_1"
+  layer_param{
+    attr_0: "arg64_1"
+    attr_1: 1e-05
+    shape{
+      output_0: [1, 65, 1024]
+      output_1: [1, 65, 1]
+      output_2: [1, 65, 1]
+    }
+  }
+}
+
+layer{
+  type: "GetItemOp"
+  top: "getitem_51"
+  bottom: "native_layer_norm_12"
+  layer_param{
+    attr_0: 0
+    shape: [1, 65, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "TransposeOp"
+  top: "t_21"
+  bottom: "arg65_1"
+  layer_param{
+    shape: [1024, 3072]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "view_90"
+  bottom: "getitem_51"
+  layer_param{
+    attr_0: [65, 1024]
+    shape: [65, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "MatmulOp"
+  top: "mm_5"
+  bottom: "view_90"
+  bottom: "t_21"
+  layer_param{
+    shape: [65, 3072]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "view_91"
+  bottom: "mm_5"
+  layer_param{
+    attr_0: [1, 65, 3072]
+    shape: [1, 65, 3072]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "SplitOp"
+  top: "split_5"
+  bottom: "view_91"
+  layer_param{
+    attr_0: 1024
+    attr_1: -1
+    shape{
+      output_0: [1, 65, 1024]
+      output_1: [1, 65, 1024]
+      output_2: [1, 65, 1024]
+    }
+  }
+}
+
+layer{
+  type: "GetItemOp"
+  top: "getitem_54"
+  bottom: "split_5"
+  layer_param{
+    attr_0: 0
+    shape: [1, 65, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "GetItemOp"
+  top: "getitem_55"
+  bottom: "split_5"
+  layer_param{
+    attr_0: 1
+    shape: [1, 65, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "GetItemOp"
+  top: "getitem_56"
+  bottom: "split_5"
+  layer_param{
+    attr_0: 2
+    shape: [1, 65, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "view_92"
+  bottom: "getitem_54"
+  layer_param{
+    attr_0: [1, 65, 16, 64]
+    shape: [1, 65, 16, 64]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "PermuteOp"
+  top: "permute_21"
+  bottom: "view_92"
+  layer_param{
+    attr_0: [0, 2, 1, 3]
+    shape: [1, 16, 65, 64]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "view_93"
+  bottom: "getitem_55"
+  layer_param{
+    attr_0: [1, 65, 16, 64]
+    shape: [1, 65, 16, 64]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "PermuteOp"
+  top: "permute_22"
+  bottom: "view_93"
+  layer_param{
+    attr_0: [0, 2, 1, 3]
+    shape: [1, 16, 65, 64]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "view_94"
+  bottom: "getitem_56"
+  layer_param{
+    attr_0: [1, 65, 16, 64]
+    shape: [1, 65, 16, 64]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "PermuteOp"
+  top: "permute_23"
+  bottom: "view_94"
+  layer_param{
+    attr_0: [0, 2, 1, 3]
+    shape: [1, 16, 65, 64]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "TransposeOp"
+  top: "transpose_5"
+  bottom: "permute_22"
+  layer_param{
+    attr_0: -1
+    attr_1: -2
+    shape: [1, 16, 64, 65]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ExpandOp"
+  top: "expand_21"
+  bottom: "permute_21"
+  layer_param{
+    attr_0: [1, 16, 65, 64]
+    shape: [1, 16, 65, 64]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "view_95"
+  bottom: "expand_21"
+  layer_param{
+    attr_0: [16, 65, 64]
+    shape: [16, 65, 64]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ExpandOp"
+  top: "expand_22"
+  bottom: "transpose_5"
+  layer_param{
+    attr_0: [1, 16, 64, 65]
+    shape: [1, 16, 64, 65]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "view_96"
+  bottom: "expand_22"
+  layer_param{
+    attr_0: [16, 64, 65]
+    shape: [16, 64, 65]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "BatchMatmulOp"
+  top: "bmm_10"
+  bottom: "view_95"
+  bottom: "view_96"
+  layer_param{
+    shape: [16, 65, 65]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "view_97"
+  bottom: "bmm_10"
+  layer_param{
+    attr_0: [1, 16, 65, 65]
+    shape: [1, 16, 65, 65]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "MulOp"
+  top: "mul_5"
+  bottom: "view_97"
+  layer_param{
+    attr_0: 0.125
+    shape: [1, 16, 65, 65]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "SoftmaxOp"
+  top: "_softmax_5"
+  bottom: "mul_5"
+  layer_param{
+    attr_0: -1
+    attr_1: False
+    shape: [1, 16, 65, 65]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ExpandOp"
+  top: "expand_23"
+  bottom: "_softmax_5"
+  layer_param{
+    attr_0: [1, 16, 65, 65]
+    shape: [1, 16, 65, 65]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "view_98"
+  bottom: "expand_23"
+  layer_param{
+    attr_0: [16, 65, 65]
+    shape: [16, 65, 65]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ExpandOp"
+  top: "expand_24"
+  bottom: "permute_23"
+  layer_param{
+    attr_0: [1, 16, 65, 64]
+    shape: [1, 16, 65, 64]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "view_99"
+  bottom: "expand_24"
+  layer_param{
+    attr_0: [16, 65, 64]
+    shape: [16, 65, 64]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "BatchMatmulOp"
+  top: "bmm_11"
+  bottom: "view_98"
+  bottom: "view_99"
+  layer_param{
+    shape: [16, 65, 64]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "view_100"
+  bottom: "bmm_11"
+  layer_param{
+    attr_0: [1, 16, 65, 64]
+    shape: [1, 16, 65, 64]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "PermuteOp"
+  top: "permute_24"
+  bottom: "view_100"
+  layer_param{
+    attr_0: [0, 2, 1, 3]
+    shape: [1, 65, 16, 64]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "_unsafe_view_6"
+  bottom: "permute_24"
+  layer_param{
+    attr_0: [1, 65, 1024]
+    shape: [1, 65, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "view_101"
+  bottom: "_unsafe_view_6"
+  layer_param{
+    attr_0: [65, 1024]
+    shape: [65, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "TransposeOp"
+  top: "t_22"
+  bottom: "arg66_1"
+  layer_param{
+    shape: [1024, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "AddMMOp"
+  top: "addmm_16"
+  bottom: "arg67_1"
+  bottom: "view_101"
+  bottom: "t_22"
+  layer_param{
+    shape: [65, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "view_102"
+  bottom: "addmm_16"
+  layer_param{
+    attr_0: [1, 65, 1024]
+    shape: [1, 65, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "AddOp"
+  top: "add_11"
+  bottom: "view_102"
+  bottom: "add_10"
+  layer_param{
+    shape: [1, 65, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "LayerNormOp"
+  top: "native_layer_norm_13"
+  bottom: "add_11"
+  bottom: "arg68_1"
+  bottom: "arg69_1"
+  layer_param{
+    attr_0: "arg69_1"
+    attr_1: 1e-05
+    shape{
+      output_0: [1, 65, 1024]
+      output_1: [1, 65, 1]
+      output_2: [1, 65, 1]
+    }
+  }
+}
+
+layer{
+  type: "GetItemOp"
+  top: "getitem_57"
+  bottom: "native_layer_norm_13"
+  layer_param{
+    attr_0: 0
+    shape: [1, 65, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "view_103"
+  bottom: "getitem_57"
+  layer_param{
+    attr_0: [65, 1024]
+    shape: [65, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "TransposeOp"
+  top: "t_23"
+  bottom: "arg70_1"
+  layer_param{
+    shape: [1024, 2048]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "AddMMOp"
+  top: "addmm_17"
+  bottom: "arg71_1"
+  bottom: "view_103"
+  bottom: "t_23"
+  layer_param{
+    shape: [65, 2048]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "view_104"
+  bottom: "addmm_17"
+  layer_param{
+    attr_0: [1, 65, 2048]
+    shape: [1, 65, 2048]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "GeluOp"
+  top: "gelu_5"
+  bottom: "view_104"
+  layer_param{
+    shape: [1, 65, 2048]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "view_105"
+  bottom: "gelu_5"
+  layer_param{
+    attr_0: [65, 2048]
+    shape: [65, 2048]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "TransposeOp"
+  top: "t_24"
+  bottom: "arg72_1"
+  layer_param{
+    shape: [2048, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "AddMMOp"
+  top: "addmm_18"
+  bottom: "arg73_1"
+  bottom: "view_105"
+  bottom: "t_24"
+  layer_param{
+    shape: [65, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "ViewOp"
+  top: "view_106"
+  bottom: "addmm_18"
+  layer_param{
+    attr_0: [1, 65, 1024]
+    shape: [1, 65, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "AddOp"
+  top: "add_12"
+  bottom: "view_106"
+  bottom: "add_11"
+  layer_param{
+    shape: [1, 65, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "LayerNormOp"
+  top: "native_layer_norm_14"
+  bottom: "add_12"
+  bottom: "arg74_1"
+  bottom: "arg75_1"
+  layer_param{
+    attr_0: "arg75_1"
+    attr_1: 1e-05
+    shape{
+      output_0: [1, 65, 1024]
+      output_1: [1, 65, 1]
+      output_2: [1, 65, 1]
+    }
+  }
+}
+
+layer{
+  type: "GetItemOp"
+  top: "getitem_60"
+  bottom: "native_layer_norm_14"
+  layer_param{
+    attr_0: 0
+    shape: [1, 65, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "SliceOp"
+  top: "slice_2"
+  bottom: "getitem_60"
+  layer_param{
+    attr_0: 0
+    attr_1: 0
+    attr_2: 9223372036854775807
+    shape: [1, 65, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "SelectOp"
+  top: "select"
+  bottom: "slice_2"
+  layer_param{
+    attr_0: 1
+    attr_1: 0
+    shape: [1, 1024]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "TransposeOp"
+  top: "t_25"
+  bottom: "arg76_1"
+  layer_param{
+    shape: [1024, 1000]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "AddMMOp"
+  top: "addmm_19"
+  bottom: "arg77_1"
+  bottom: "select"
+  bottom: "t_25"
+  layer_param{
+    shape: [1, 1000]
+    dtype: "TensorDType.Float32"
+  }
+}
+
+layer{
+  type: "OutputOp"
+  top: "output"
+  bottom: "addmm_19"
+}

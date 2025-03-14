@@ -17,6 +17,15 @@ class Op:
     nequ = {"py": " != ", "cpp": " != "}
     lshift = {"py": " << ", "cpp": " << "}
     rshift = {"py": " >> ", "cpp": " >> "}
+    
+
+class InpOp:
+
+    log2 = {"py": "math.log2({})", "cpp": "log2({})", "inpop": True}
+
+    class Cast:
+        int = {"py": "int({})", "cpp": "(int){}", "inpop": True}
+
 
 
 class Expr:
@@ -49,23 +58,38 @@ class Expr:
         new_args = [self, new_expr]
         return Expr(new_args, Op.nequ)
 
+    def cast_int(self):
+        return Expr([self], InpOp.Cast.int)
+    
+    def log2(self):
+        return Expr([self], InpOp.log2)
+
     def simplify(self, max_numb=0):
         new_args = [copy.deepcopy(arg).simplify(max_numb) for arg in self.args]
         new_expr = Expr(new_args, self.op)
-        if isinstance(new_args[0], Numb) and isinstance(new_args[1], Numb):
-            return Numb(eval(str(new_expr)))
+        if len(new_args) > 1:
+            if isinstance(new_args[0], Numb) and isinstance(new_args[1], Numb):
+                return Numb(eval(str(new_expr)))
+            else:
+                if self.op in [Op.add, Op.sub, Op.mul, Op.fdiv]:
+                    if isinstance(new_args[0], Numb):
+                        if new_args[0].data == 0 and self.op in [Op.add, Op.sub]:
+                            return new_args[1]
+                        elif new_args[0].data == 1 and self.op in [Op.mul, Op.fdiv]:
+                            return new_args[1]
+                        elif new_args[0].data == 0 and self.op in [Op.mul, Op.fdiv]:
+                            return new_args[1]
+                    elif isinstance(new_args[1], Numb):
+                        if new_args[1].data == 0 and self.op in [Op.add, Op.sub]:
+                            return new_args[0]
+                        elif new_args[1].data == 1 and self.op == Op.mul:
+                            return new_args[0]
+                        elif new_args[1].data == 0 and self.op == Op.mul:
+                            return new_args[0]
+                return new_expr
         else:
-            if self.op in [Op.add, Op.sub, Op.mul, Op.fdiv]:
-                if isinstance(new_args[0], Numb):
-                    if new_args[0].data == 0 and self.op in [Op.add, Op.sub]:
-                        return new_args[1]
-                    elif new_args[0].data == 1 and self.op in [Op.mul, Op.fdiv]:
-                        return new_args[1]
-                elif isinstance(new_args[1], Numb):
-                    if new_args[1].data == 0 and self.op in [Op.add, Op.sub]:
-                        return new_args[0]
-                    elif new_args[1].data == 1 and self.op == Op.mul:
-                        return new_args[0]
+            if isinstance(new_args[0], Numb):
+                return Numb(eval(str(new_expr)))
             return new_expr
 
     def __add__(self, data):
@@ -269,7 +293,10 @@ class Expr:
         '''
 
     def export(self, tag):
-        return f"({self.args[0].export(tag)}{self.op[tag]}{self.args[1].export(tag)})"
+        if self.op.get("inpop") is None:
+            return f"({self.args[0].export(tag)}{self.op[tag]}{self.args[1].export(tag)})"
+        else:
+            return "(" + self.op[tag].format(self.args[0].export(tag)) + ")"
 
     def __str__(self):
         return self.export(tag="py")

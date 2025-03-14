@@ -9,6 +9,7 @@
 实际操作过程以及处理内容如下：
 
 ```shell
+source /tools/Xilinx/Vivado/2023.2/settings64.sh
 make TESTBENCH=<path to testbench>
 ```
 

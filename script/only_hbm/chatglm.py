@@ -15,7 +15,8 @@ import sys
 import dlavm.utils
 sys.setrecursionlimit(3000)  # 将默认的递归深度修改为3000
 
-def chatglm_block(input, pew, silu, index):
+
+def chatglm_block(input, last_token, pew, silu, index):
     prefix = "BLOCK%02d_" % index
     def const_hbm(name, data, shape, dtype=None):
         if dtype is None:
@@ -39,7 +40,7 @@ def chatglm_block(input, pew, silu, index):
     lb   = const_hbm("lbias", "test", [2*4096], dtype=de.fp16)
 
     ln_out = dlavm.nn.rms_norm(input, lnw0)
-    q_data = dlavm.nn.mvm_f16xi4(ln_out, qw, qb, out_head=True)
+    q_data = dlavm.nn.mvm_f16xi4(ln_out, qw, qb, out_heads=[32, 2])
     k_data = dlavm.nn.mvm_f16xi4(ln_out, kw, kb)
     v_data = dlavm.nn.mvm_f16xi4(ln_out, vw, vb)
 
@@ -48,6 +49,9 @@ def chatglm_block(input, pew, silu, index):
 
     q_data = dlavm.glm.pos_emb(q_data, pew)
     k_data = dlavm.glm.pos_emb(k_data, pew)
+
+    k_data = dlavm.nn.kcache2hbm(k_data, cache_len=last_token)
+    v_data = dlavm.nn.vcache2hbm(v_data, cache_len=last_token)
 
     qk_data = dlavm.nn.mvm_f16xf16(q_data, k_data, w_trp=True)
     qk_data = dlavm.nn.softmax(qk_data)
@@ -65,8 +69,10 @@ def chatglm_block(input, pew, silu, index):
     block_out = dlavm.nn.add(l_data, atten_data)
     return block_out
 
-token = 19
-# token = ne.Var("token", 2048)
+# token = 19
+token = ne.Var("token", 2048)
+last_token = ne.Var("last_token", 2048)
+# last_token = 0
 
 pew = adr.const_hbm("pos_emb_weight", "test", [256, 4096], dtype=de.fp16)
 silu = adr.const_hbm("silu_weight", "test", [16*3], dtype=de.fp16)
@@ -78,21 +84,22 @@ outb = adr.const_hbm("obias", "test", [2*65024], dtype=de.fp16)
 input = adr.var_hbm("input", [1, token, 4096])
 
 for i in range(1):
-    input = chatglm_block(input, pew, silu, i)
+    input = chatglm_block(input, last_token, pew, silu, i)
 
 out_ln = dlavm.nn.rms_norm(input, outlnw)
-output = dlavm.nn.mvm_f16xi4(out_ln, outw, outb, arg_max=True)
+output = dlavm.nn.mvm_f16xi4(out_ln, outw, outb, argmax=True)
 output = output[1]
 
 output = transform.infer_type(output, ohbm_accel.OHBM)
 print(output)
 
+
 if __name__ == "__main__":
     from dlavm.driver import config
     config.tb_sim_path = "/home/shenao/dlavm-llm-public/tbsim/workspace_2025_0301"
 
-    init_addr = {"global": 0x0, "weight": "global", "cache": "weight", "runtime": "cache", "insts": "runtime", "hbm": 0x0, "hbm_cache": "hbm", "hbm_rt": "hbm_cache", "onchip": 0x0}
-    mod = backend.build_tb(output, init_addr, "test", targets.hpp, {"wt2hbm":False, "hbm_base": 0x0, "ddr_base": 0x0})
-    # mod = backend.build(output, init_addr, "test", False, targets.hpp, {"wt2hbm":False, "hbm_base": 0x0, "ddr_base": 0x0})
-    with open("chatglm_static_19.h", "w") as f:
+    init_addr = {"hbm": 0x0, "hbm_cache": "hbm", "runtime": "hbm_cache", "onchip": 0x0}
+    # mod = backend.build_tb(output, init_addr, "test", targets.hpp, {"wt2hbm":False, "hbm_base": 0x0, "ddr_base": 0x0})
+    mod = backend.build(output, init_addr, "test", False, targets.hpp, {"wt2hbm":False, "hbm_base": 0x0, "ddr_base": 0x0})
+    with open("chatglm_test_0305.h", "w") as f:
         print(mod.get_source(), file=f)

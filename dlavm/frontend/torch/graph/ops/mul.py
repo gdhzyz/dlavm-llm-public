@@ -48,7 +48,7 @@ class MulToLayerNormPat(CanonicalizeBase):
 
     def rewrite(self, g:Graph, op: MulOp):
         parents = [g.node_table[i] for i in op.parents]
-        new_op = LayerNormOp()
+        new_op = RMSNormOp()
         new_op._name = "fuse_ln_" + op.name
         new_op._parents = [i.name for i in [self.data, self.weight]]
         new_op._arguments = new_op._parents + [self.eps]

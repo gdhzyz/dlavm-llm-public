@@ -45,3 +45,17 @@ def sub(*args, **kwargs):
 
 def activate(*args, **kwargs):
     return Call(Op.Get("nn.activate"), args, Attrs(kwargs))
+
+
+def kcache2hbm(data, **kwargs):
+    kwargs["k_mode"] = True
+    node = Call(Op.Get("nn.kvcache2hbm"), [data], KvcacheAttrs(kwargs))
+    node.prefix = "hbm_cache"
+    return node
+
+
+def vcache2hbm(data, **kwargs):
+    kwargs["k_mode"] = False
+    node = Call(Op.Get("nn.kvcache2hbm"), [data], KvcacheAttrs(kwargs))
+    node.prefix = "hbm_cache"
+    return node

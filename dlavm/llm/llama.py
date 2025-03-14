@@ -11,21 +11,26 @@ def llama_block_hbm(data, pos_weight, silu_weight, token, index, path_prefix="BL
     data_path = path_prefix + "/BLOCK%02d/" % index
     ln_k_bias = adr.hbm.const_ddr(prefix + "ln_k_bias", data_path + "LN_DDR_bin/LN0_wt_in_DDR.bin", [4096*2])
     q_weight = adr.hbm.const_hbm(prefix + "q_weight", data_path + "MVM_BN_write_to_HBM_bin/MVMBN0_q_HBM_DDR_%02d.bin", [4096, 128*32])
+    q_bn = adr.hbm.const_ddr(prefix + "q_bn_bias", data_path + "MVM_BN_DDR_bin/MVMBN0_q_wt_and_bias_in_DDR.bin", [2*128*32])
     k_weight = adr.hbm.const_hbm(prefix + "k_weight", data_path + "MVM_BN_write_to_HBM_bin/MVMBN0_k_HBM_DDR_%02d.bin", [4096, 128*32])
+    k_bn = adr.hbm.const_ddr(prefix + "k_bn_bias", data_path + "MVM_BN_DDR_bin/MVMBN0_k_wt_and_bias_in_DDR.bin", [2*128*32])
     v_weight = adr.hbm.const_hbm(prefix + "v_weight", data_path + "MVM_BN_write_to_HBM_bin/MVMBN0_v_HBM_DDR_%02d.bin", [4096, 128*32])
+    v_bn = adr.hbm.const_ddr(prefix + "v_bn_bias", data_path + "MVM_BN_DDR_bin/MVMBN0_v_wt_and_bias_in_DDR.bin", [2*128*32])
     atten_weight = adr.hbm.const_hbm(prefix + "atten_weight", data_path + "MVM_BN_RES_write_to_HBM_bin/MVMBNRES0_HBM_DDR_%02d.bin", [4096, 4096])
+    atten_bias = adr.hbm.const_ddr(prefix + "atten_bn", data_path + "MVM_BN_RES_DDR_bin/MVMBNRES0_wt_and_bias_in_DDR.bin", [4096*2])
     post_k_bias = adr.hbm.const_ddr(prefix + "post_k_bias", data_path + "LN_DDR_bin/LN1_wt_in_DDR.bin", [4096*2])
     h_to_4h_wt_0 = adr.hbm.const_hbm(prefix + "h_to_4h_wt_0", data_path + "MVM_BN_write_to_HBM_bin/MVMBN1_HBM_DDR_%02d.bin", [4096, 11008])
+    h_to_4h_bn_0 = adr.hbm.const_ddr(prefix + "h_to_4h_bn_0", data_path + "MVM_BN_DDR_bin/MVMBN1_wt_and_bias_in_DDR.bin", [11008*2])
     h_to_4h_wt_1 = adr.hbm.const_hbm(prefix + "h_to_4h_wt_1", data_path + "MVM_BN_RES_write_to_HBM_bin/MVMBNRES1_HBM_DDR_%02d.bin", [4096, 11008])
     h_to_4h_bn_1 = adr.hbm.const_ddr(prefix + "h_to_4h_bn_1", data_path + "MVM_BN_RES_DDR_bin/MVMBNRES1_wt_and_bias_in_DDR.bin", [11008*2])
     dense_4h_to_4h_wt = adr.hbm.const_hbm(prefix + "dense_4h_to_h_wt", data_path + "MVM_BN_RES_write_to_HBM_bin/MVMBNRES2_HBM_DDR_%02d.bin", [11008, 4096])
-    bn_zeros = adr.hbm.const_ddr(prefix + "bn_zeros", data_path + "MVM_BN_RES_DDR_bin/MVMBNRES2_wt_and_bias_in_DDR.bin", [4096*2])
+    dense_4h_to_4h_bn = adr.hbm.const_ddr(prefix + "dense_4h_to_h_bn", data_path + "MVM_BN_RES_DDR_bin/MVMBNRES2_wt_and_bias_in_DDR.bin", [4096*2])
 
     ln_out = adr.hbm.rms_norm(data, ln_k_bias)
 
-    q_data = adr.hbm.mvm(ln_out, q_weight)
-    k_data = adr.hbm.mvm(ln_out, k_weight)
-    v_data = adr.hbm.mvm(ln_out, v_weight)
+    q_data = adr.hbm.mvm_bn(ln_out, q_weight, q_bn)
+    k_data = adr.hbm.mvm_bn(ln_out, k_weight, k_bn)
+    v_data = adr.hbm.mvm_bn(ln_out, v_weight, v_bn)
     q_data = adr.reshape(q_data, [32, token, 128])
     k_data = adr.reshape(k_data, [32, token, 128])
     v_data = adr.reshape(v_data, [32, token, 128])
@@ -44,12 +49,13 @@ def llama_block_hbm(data, pos_weight, silu_weight, token, index, path_prefix="BL
     atten_out = adr.hbm.f2w_mvm(atten_out, v_data)
     atten_out = adr.reshape(atten_out, [1, token, 4096])
 
-    res_out = adr.hbm.mvm_bn_res(atten_out, atten_weight, bn_zeros, data)
+    res_out = adr.hbm.mvm_bn_res(atten_out, atten_weight, atten_bias, data)
+
     post_atten = adr.hbm.rms_norm(res_out, post_k_bias)
-    dense_4h_out0 = adr.hbm.mvm(post_atten, h_to_4h_wt_0)
+    dense_4h_out0 = adr.hbm.mvm_bn(post_atten, h_to_4h_wt_0, h_to_4h_bn_0)
     act_output = adr.hbm.activate(dense_4h_out0, silu_weight)
     dense_4h_out = adr.hbm.mvm_bn_res(post_atten, h_to_4h_wt_1, h_to_4h_bn_1, act_output, res_mul=1)
-    output = adr.hbm.mvm_bn_res(dense_4h_out, dense_4h_to_4h_wt, bn_zeros, res_out)
+    output = adr.hbm.mvm_bn_res(dense_4h_out, dense_4h_to_4h_wt, dense_4h_to_4h_bn, res_out)
     return output
 
 def llama_expr_hbm(device, path_prefix, debug, ir=False):

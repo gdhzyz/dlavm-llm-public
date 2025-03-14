@@ -30,10 +30,13 @@ def PosEmb(args, output, attrs):
         "last_token" : attrs.get("last_token", 0),
         "Token" : dshape[-2] + attrs.get("last_token", 0),
         "Feature_Head" : dshape[0],
+        "MAX_TOKEN" : dtensor.device.MAX_TOKEN,
         # "DAT_IN_BASE_ADDR" : daddr,
         # "HBM_WT_BASE_ADDR" : waddr,
         # "DAT_OUT_BASE_ADDR" : oaddr,
     }
+    if hasattr(dtensor, "heads"):
+        macro_define["Feature_Head"] = dtensor.heads[-1]
     return TestbenchSIM("testbench_EMB_GLM_inout_head_mode", macro_define)
 
 @Op.RegisterAttrs("glm.pos_emb", "testbench", ohbm_accel.OHBM)

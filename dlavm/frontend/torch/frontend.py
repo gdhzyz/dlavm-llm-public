@@ -134,6 +134,7 @@ class DynamoCompiler:
             "gt.Tensor": GreaterThanOp,
             "_unsafe_index.Tensor": UnsafeIndexOp,
             "_native_batch_norm_legit_functional.default": BatchNormOp,
+            "_native_batch_norm_legit_no_training.default": BatchNormOp,
             "avg_pool2d.default": AvgPool2dOp,
             "arange.start_step": ArangeOp,
             "pow.Scalar": PowOp,
@@ -141,6 +142,8 @@ class DynamoCompiler:
             "split_with_sizes.default": SplitWithSizeOp,
             "_unsafe_view.default": ViewOp,
             "rotary_pos_emb.default": RotaryPosEmbOp,
+            "native_layer_norm.default": LayerNormOp,
+            "gelu.default": GeluOp,
         }
 
     @property

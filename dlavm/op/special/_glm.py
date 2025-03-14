@@ -13,8 +13,13 @@ def PosEmbRel(args, attrs):
     device = args[0].device
     dtype = args[0].dtype
     dshape = args[0].shape
+    if dshape[-1] not in [128]:
+        return False, "error head per channels! support 128, found " + str(dshape[-1])
     oshape = [i for i in dshape]
-    return True, Tensor(oshape, dtype, device)
+    tensor = Tensor(oshape, dtype, device)
+    if hasattr(args[0], "heads"):
+        setattr(tensor, "heads", args[0].heads)
+    return True, tensor
 
 Op.Register("glm.pos_emb", PosEmbRel)
 

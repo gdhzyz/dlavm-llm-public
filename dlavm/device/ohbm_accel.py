@@ -8,21 +8,32 @@ from ..utils import tools
 
 class OHBM(Accel):
     name = "ohbm"
-    version = 20240101
+    version = 20250305
+    description = """
+        Only HBM EdgeLLM FPGA Accelerator, 存储设备从DDR-HBM变为Only-HBM
+    """
+
+    MAX_TOKEN                   = 2048
 
     Tb                          = 1
     Tout                        = 32
     HBM_Port                    = 32
     base_Tin                    = 128
     Tin                         = base_Tin
+    s_Tin                       = 32
     MAX_DAT_DW                  = 16
     MAX_DW                      = 16
     HBM_AXI_DATA_WIDTH          = 256
     L_Tout                      = HBM_Port*HBM_AXI_DATA_WIDTH//MAX_DW
     ASYN_FACTOR                 = 2
     log2_CH                     = 19
+    MAX_CH_per_HEAD             = 128
     Pixel_Data_Width            = HBM_AXI_DATA_WIDTH
     HBM_1Row_Bytes              = int((HBM_AXI_DATA_WIDTH)>>3)
+
+    log2_P                      = 8
+    log2_S                      = 8
+    log2_K                      = 8
 
     MAX_BN_CH                   = 1024
     DAT_BRAM_NUM                = HBM_Port
@@ -80,7 +91,7 @@ class OHBM(Accel):
         if not dynamic:
             shape = [i.simplify(1).data if isinstance(i, ne.Expr) else i for i in shape]
         if dtype.dtype == DataEnum.fp16 and dtype.mapped == DataEnum.hbm:
-            if len(shape) == 1: # BN
+            if len(shape) == 1: # BN: TODO, 2* cls.MAX_BN_DW maybe wrong
                 bsize = (((shape[0] // 2) + cls.Tout - 1)// cls.Tout) * cls.Tout * 2 * 2 * cls.MAX_BN_DW // cls.HBM_Port
             elif len(shape) == 3: # Feature
                 bsize = (((shape[0] * shape[-1]) + cls.L_Tout - 1)// cls.L_Tout) * cls.L_Tout * cls.MAX_DAT_DW // 8 * shape[1] // cls.HBM_Port
@@ -101,7 +112,7 @@ class OHBM(Accel):
             WT_scale_group_nums = ((WT_CHin_Padding_with_Tin+WT_CH_Tgroup-1)//WT_CH_Tgroup)
             WT_scale_bits = (WT_CHout_Padding_with_Tout*cls.HBM_AXI_DATA_WIDTH*WT_scale_group_nums)
             WT_SIZE_IN_BYTES = (((WT_CHout_Padding_with_Tout*WT_CHin_Padding_with_Tin*cls.MAX_WT_DW)>>3)+((WT_scale_bits)>>3))
-            return WT_SIZE_IN_BYTES
+            return WT_SIZE_IN_BYTES // cls.HBM_Port
         else:
             raise RuntimeError(f"Unsupport dtype of {dtype.dtype} and mapped of {dtype.mapped} in malloc bytes")
 

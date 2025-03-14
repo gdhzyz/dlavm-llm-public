@@ -47,8 +47,8 @@ def PosEmb(func, args, outputs, attrs):
     feature_in_head_stride = device.HBM_1Row_Bytes * Win * Hin * CHin_div_LTout
     feature_out_line_stride = device.HBM_1Row_Bytes * Wout
     feature_out_head_stride = device.HBM_1Row_Bytes * Wout * Hout * CHout_div_LTout
+    PosEmb_in_line_stride  = (device.HBM_1Row_Bytes*Pos_Num)
     PosEmb_in_head_stride  = (device.HBM_1Row_Bytes*Pos_Num*CHout_div_LTout)
-    PosEmb_in_head_stride  = (device.HBM_1Row_Bytes*Pos_Num)
     if hasattr(data, "strides"):
         feature_in_line_stride = data.strides[-1]
         feature_in_head_stride = data.strides[-3]
@@ -60,8 +60,8 @@ def PosEmb(func, args, outputs, attrs):
     PosEmb_reg_bias=128
     
     Onchip_Dat_BRAM_Bits    =device.TOTAL_DAT_BRAM_BITS
-    Total_Dat_Bits_perWTHead=Height*CHin_Padding_with_LTout*device.MAX_DAT_DW*Feature_Head
-    Total_Dat_Bits_PerToken =CHin_Padding_with_LTout*device.MAX_DAT_DW*Feature_Head
+    Total_Dat_Bits_perWTHead=Height*CHin_Padding_with_LTout*device.MAX_DAT_DW
+    Total_Dat_Bits_PerToken =CHin_Padding_with_LTout*device.MAX_DAT_DW
     Onchip_Token_perWTHead  =Onchip_Dat_BRAM_Bits//Total_Dat_Bits_PerToken
     Total_Wt_Bits_perWTHead =(Height)*Width_in*device.MAX_DAT_DW
     
@@ -90,9 +90,9 @@ def PosEmb(func, args, outputs, attrs):
         Win = ne.If(w < Wout_Split_Times_minus1, out_w_per_slice, out_w_in_last_slice)
         tp_feature_in_base_addr =feature_in_base_addr  +w*out_w_per_slice*device.HBM_1Row_Bytes
         tp_feature_out_base_addr=feature_out_base_addr +w*out_w_per_slice*device.HBM_1Row_Bytes
-        tp_PosEmb_addr          =PosEmb_in_base_addr+(last_token+w*out_w_per_slice)*HBM_1Row_Bytes
+        tp_PosEmb_addr          =PosEmb_in_base_addr+(last_token+w*out_w_per_slice)*device.HBM_1Row_Bytes
       
-        reg_15 = (LTout_div_CHout << 8) + Head_x_CH_div_LTout
+        reg_15 = (Head_x_CH_div_LTout << 8) + LTout_div_CHout
         w_for += CSB_Write(PosEmb_reg_bias+2 , tp_PosEmb_addr            )
         w_for += CSB_Write(PosEmb_reg_bias+3 , tp_feature_in_base_addr   )
         w_for += CSB_Write(PosEmb_reg_bias+4 , feature_in_head_stride    )

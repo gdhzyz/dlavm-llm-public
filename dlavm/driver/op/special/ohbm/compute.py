@@ -2,7 +2,7 @@ from dlavm import ne
 from dlavm.adr import Op, Attrs
 from dlavm.device import ohbm_accel
 from .... import ir
-from ....basic import Tasks
+from ....basic import Tasks, get_vars
 from . import (
     tasks_0303
 )

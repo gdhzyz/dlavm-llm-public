@@ -45,7 +45,7 @@ class LoopSimplify(ir.Functor):
            isinstance(new_stmt.stride, (int, float)):
             py_loop = range(new_stmt.init, new_stmt.extent, new_stmt.stride)
             loop_numb = len(py_loop)
-            if loop_numb <= self.min_loop:
+            if loop_numb <= self.min_loop or self.min_loop == -1:
                 with ir.Block() as block:
                     for i in py_loop:
                         functor = FunctorLoop(var_map={new_stmt.var.name : i})
