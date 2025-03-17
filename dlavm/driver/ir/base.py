@@ -339,7 +339,7 @@ class Call(Stmt):
 
     def __init__(
             self,
-            func: Union[Function, str],
+            func: Union[Function],
             args: Dict[ne.Expr, ne.Expr]=None,
             ret: Optional[str]=None
         ):
@@ -353,6 +353,26 @@ class Call(Stmt):
     def _str_tab(self, tab_num):
         str_args = ", ".join([str(arg) for arg in self.func.args])
         return " "*tab_num + f"{self.func.name}({str_args})"
+
+
+class ExternCall(Stmt):
+
+    def __init__(
+            self,
+            name: Union[str],
+            args: Union[ne.Expr, Expr, int, float, str],
+            ret: Optional[ne.Var]=None
+        ):
+        super().__init__()
+        self.name = name
+        self.ret = ret
+        self.args = args
+
+    def _str_tab(self, tab_num):
+        str_args = ", ".join([str(arg) for arg in self.args])
+        if self.ret is None:
+            return " "*tab_num + f"{self.name}({str_args})"
+        return " "*tab_num + f"{str(self.ret)} = {self.name}({str_args})"
 
 
 class Return(Stmt):

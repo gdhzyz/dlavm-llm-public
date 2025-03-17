@@ -72,6 +72,15 @@ class CodeGenH(CodeGenBase):
             print(stmt)
             return ""
 
+    def VisitExternCall(self, stmt: ir.ExternCall):
+        def_args = ", ".join([self.Visit(i) for i in stmt.args])
+        tabs = self.tab * self.tab_num
+        if stmt.ret is None:
+            source = tabs + f"{stmt.name}({def_args});"
+        else:
+            source = tabs + f"{stmt.ret} = {stmt.name}({def_args});"
+        return source
+
     def VisitReturn(self, stmt: ir.Return):
         data = self.Visit(stmt.data)
         tabs = self.tab * self.tab_num

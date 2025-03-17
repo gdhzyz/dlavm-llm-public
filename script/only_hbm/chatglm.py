@@ -47,8 +47,8 @@ def chatglm_block(input, last_token, pew, silu, index):
     k_data = dlavm.reshape(k_data, new_shape=[2, -1, 128])
     v_data = dlavm.reshape(v_data, new_shape=[2, -1, 128])
 
-    q_data = dlavm.glm.pos_emb(q_data, pew)
-    k_data = dlavm.glm.pos_emb(k_data, pew)
+    q_data = dlavm.nn.rope_glm(q_data, pew, last_token=last_token)
+    k_data = dlavm.nn.rope_glm(k_data, pew, last_token=last_token)
 
     k_data = dlavm.nn.kcache2hbm(k_data, cache_len=last_token)
     v_data = dlavm.nn.vcache2hbm(v_data, cache_len=last_token)
@@ -69,10 +69,11 @@ def chatglm_block(input, last_token, pew, silu, index):
     block_out = dlavm.nn.add(l_data, atten_data)
     return block_out
 
-# token = 19
 token = ne.Var("token", 2048)
 last_token = ne.Var("last_token", 2048)
-# last_token = 0
+token = 19
+last_token = 0
+device = ohbm_accel.OHBM0316
 
 pew = adr.const_hbm("pos_emb_weight", "test", [256, 4096], dtype=de.fp16)
 silu = adr.const_hbm("silu_weight", "test", [16*3], dtype=de.fp16)
@@ -90,7 +91,7 @@ out_ln = dlavm.nn.rms_norm(input, outlnw)
 output = dlavm.nn.mvm_f16xi4(out_ln, outw, outb, argmax=True)
 output = output[1]
 
-output = transform.infer_type(output, ohbm_accel.OHBM)
+output = transform.infer_type(output, device)
 print(output)
 
 
@@ -101,5 +102,5 @@ if __name__ == "__main__":
     init_addr = {"hbm": 0x0, "hbm_cache": "hbm", "runtime": "hbm_cache", "onchip": 0x0}
     # mod = backend.build_tb(output, init_addr, "test", targets.hpp, {"wt2hbm":False, "hbm_base": 0x0, "ddr_base": 0x0})
     mod = backend.build(output, init_addr, "test", False, targets.hpp, {"wt2hbm":False, "hbm_base": 0x0, "ddr_base": 0x0})
-    with open("chatglm_test_0305.h", "w") as f:
+    with open("chatglm_test_19_0316.h", "w") as f:
         print(mod.get_source(), file=f)

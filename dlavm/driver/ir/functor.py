@@ -88,6 +88,8 @@ class Functor:
             result = self.VisitInplace(stmt)
         elif isinstance(stmt, ir.Call):
             result = self.VisitCall(stmt)
+        elif isinstance(stmt, ir.ExternCall):
+            result = self.VisitExternCall(stmt)
         elif isinstance(stmt, ir.Return):
             result = self.VisitReturn(stmt)
         elif isinstance(stmt, ir.BlockSplit):
@@ -117,6 +119,11 @@ class Functor:
     def VisitCall(self, stmt: ir.Call):
         new_stmt = deepcopy(stmt)
         new_stmt.func = self.Visit(stmt.func)
+        return new_stmt
+
+    def VisitExternCall(self, stmt: ir.ExternCall):
+        new_stmt = deepcopy(stmt)
+        new_stmt.args = [self.Visit(b) for b in stmt.args]
         return new_stmt
 
     def VisitReturn(self, stmt: ir.Return):

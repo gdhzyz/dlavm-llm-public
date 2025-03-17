@@ -7,8 +7,8 @@ class Visitor(Functor):
 
     def VisitOp(self, expr: ir.Op):
         new_expr = expr
-        new_expr.arg0 = self.Visit(expr.arg0)
-        new_expr.arg1 = self.Visit(expr.arg1)
+        self.Visit(expr.arg0)
+        self.Visit(expr.arg1)
         return new_expr
 
     def VisitCSBRead(self, expr: ir.CSB_Read):
@@ -37,15 +37,20 @@ class Visitor(Functor):
         self.Visit(new_stmt.func)
         return new_stmt
 
+    def VisitExternCall(self, stmt: ir.ExternCall):
+        new_stmt = stmt
+        [self.Visit(b) for b in stmt.args]
+        return new_stmt
+
     def VisitReturn(self, stmt: ir.Return):
         new_stmt = stmt
-        new_stmt.data = self.Visit(new_stmt.data)
+        self.Visit(new_stmt.data)
         return new_stmt
 
     def VisitWhile(self, stmt: ir.While):
         new_stmt = stmt
-        new_stmt.judge = self.Visit(new_stmt.judge)
-        new_stmt.body = self.RmEmpty([self.Visit(b) for b in stmt.body])
+        self.Visit(new_stmt.judge)
+        [self.Visit(b) for b in stmt.body]
         return new_stmt
 
     def VisitFor(self, stmt: ir.For):
