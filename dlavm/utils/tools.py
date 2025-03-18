@@ -49,3 +49,28 @@ def RegsCheckSame(serial1: dict, serial2: dict, ignore_addr: list) -> bool:
                         print(f"*Regs Check Same Error* : the regs of {items1[i][0]} not same, got {v1} and {v2}")
                         match = False
     return match
+
+
+def RegsCheckSameList(serial1: list, serial2: list, ignore_addr: list) -> bool:
+    if len(serial1) != len(serial2):
+        print(f"*Regs Check Same Error* : length not same, got {len(serial1)} and {len(serial2)}")
+        return False
+    match = True
+    for n in range(len(serial1)):
+        v1 = serial1[n]
+        v2 = serial2[n]
+        if v1[0] != v2[0] or v1[1] != v2[1]:
+            print(f"*Regs Check Same Error* : the regs not same, got {v1} and {v2}")
+            match = False
+        if v1[1] not in ignore_addr:
+            if v1[0] == 0:
+                if isinstance(v1[2], ne.Expr) or isinstance(v2[2], ne.Expr):
+                    print(f"# *Regs Check Same Wranning* : found symbol expression, please check!")
+                    str1 = "[" + ", ".join([str(_i) for _i in v1]) + "]"
+                    str2 = "[" + ", ".join([str(_i) for _i in v2]) + "]"
+                    print(f"# {str1}, {str2}")
+                    continue
+                if v1[2] != v2[2]:
+                    print(f"*Regs Check Same Error* : the regs not same, got {v1} and {v2}")
+                    match = False
+    return match

@@ -227,3 +227,22 @@ def RoPosEmbRel(args, attrs):
 
 Op.Register("nn.rope", RoPosEmbRel)
 
+
+'''
+@brief: Conv2d op
+  @args[0]: input feature data, [Hin, Win, CHin]
+  @args[1]: processed data, [Ky, Kx, CHin, CHout]
+  @output: Tensor, [Head, token, chin]
+'''
+def Conv2dRel(args, attrs):
+    if len(args) not in [2, 3]:
+        return False, "error length arguments! support [2, 3], found " + str(len(args))
+    device = args[0].device
+    dtype = args[0].dtype
+    dshape = args[0].shape
+    oshape = [i for i in dshape]
+    tensor = Tensor(oshape, dtype, device)
+    return True, tensor
+
+Op.Register("nn.conv2d", Conv2dRel)
+

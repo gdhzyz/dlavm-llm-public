@@ -643,6 +643,8 @@ def Softmax(func, args, outputs, attrs):
     feature_in_base_addr = data.get_address()
     feature_out_base_addr = outputs[0].get_address()
     Need_Mask = 1 if attrs.get("mask") else 0
+    if attrs.get("auto_mask"):
+        Need_Mask = ne.If(Height > 1, 1, 0)
     last_token = Width_in - Height
 
     # pre process

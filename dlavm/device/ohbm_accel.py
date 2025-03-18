@@ -12,6 +12,7 @@ class OHBM(Accel):
     description = """
         Only HBM EdgeLLM FPGA Accelerator, 存储设备从DDR-HBM变为Only-HBM
     """
+    tb_sim_path = "/home/shenao/dlavm-llm-public/tbsim/workspace_2025_0312"
 
     MAX_TOKEN                   = 2048
 
@@ -35,6 +36,7 @@ class OHBM(Accel):
     T_quant_block               = 128
     log2_T_quant_block          = 7
 
+    AXI_BURST_LEN               = 64
     log2_P                      = 8
     log2_S                      = 8
     log2_K                      = 8
@@ -85,19 +87,31 @@ class OHBM(Accel):
             return bsize
         elif dtype.dtype == DataEnum.int4 and dtype.mapped == DataEnum.hbm:
             Sparsity_Factor = 1
-            CHout, CHin = shape
-            CHout_div_Tout = tools.Ceil(CHout, cls.Tout)
-            WT_CHin_div_Tin = tools.Ceil(CHin, cls.Tin)
-            WT_CHin_Padding_with_Tin = WT_CHin_div_Tin*cls.Tin
-            WT_CHout_Padding_with_Tout = CHout_div_Tout*cls.Tout
+            if len(shape) == 2:
+                CHout, CHin = shape
+                CHout_div_Tout = tools.Ceil(CHout, cls.Tout)
+                WT_CHin_div_Tin = tools.Ceil(CHin, cls.Tin)
+                WT_CHin_Padding_with_Tin = WT_CHin_div_Tin*cls.Tin
+                WT_CHout_Padding_with_Tout = CHout_div_Tout*cls.Tout
 
-            WT_CH_Tgroup = (cls.T_quant_block*Sparsity_Factor*cls.HBM_AXI_DATA_WIDTH//cls.WT_quant_scale_DW)
-            WT_scale_group_nums = ((WT_CHin_Padding_with_Tin+WT_CH_Tgroup-1)//WT_CH_Tgroup)
-            WT_scale_bits = (WT_CHout_Padding_with_Tout*cls.HBM_AXI_DATA_WIDTH*WT_scale_group_nums)
-            WT_SIZE_IN_BYTES = (((WT_CHout_Padding_with_Tout*WT_CHin_Padding_with_Tin*cls.MAX_WT_DW)>>3)+((WT_scale_bits)>>3))
-            return WT_SIZE_IN_BYTES // cls.HBM_Port
-        else:
-            raise RuntimeError(f"Unsupport dtype of {dtype.dtype} and mapped of {dtype.mapped} in malloc bytes")
+                WT_CH_Tgroup = (cls.T_quant_block*Sparsity_Factor*cls.HBM_AXI_DATA_WIDTH//cls.WT_quant_scale_DW)
+                WT_scale_group_nums = ((WT_CHin_Padding_with_Tin+WT_CH_Tgroup-1)//WT_CH_Tgroup)
+                WT_scale_bits = (WT_CHout_Padding_with_Tout*cls.HBM_AXI_DATA_WIDTH*WT_scale_group_nums)
+                WT_SIZE_IN_BYTES = (((WT_CHout_Padding_with_Tout*WT_CHin_Padding_with_Tin*cls.MAX_WT_DW)>>3)+((WT_scale_bits)>>3))
+                return WT_SIZE_IN_BYTES // cls.HBM_Port
+            elif len(shape) == 4:
+                Ky, Kx, CHin, CHout = shape
+                CHout_div_Tout = tools.Ceil(CHout, cls.Tout)
+                WT_CHin_div_Tin = tools.Ceil(CHin, cls.Tin)
+                WT_CHin_Padding_with_Tin = WT_CHin_div_Tin*cls.Tin
+                WT_CHout_Padding_with_Tout = CHout_div_Tout*cls.Tout
+
+                WT_CH_Tgroup = (cls.T_quant_block*Sparsity_Factor*cls.HBM_AXI_DATA_WIDTH//cls.WT_quant_scale_DW)
+                WT_scale_group_nums = ((WT_CHin_Padding_with_Tin+WT_CH_Tgroup-1)//WT_CH_Tgroup)
+                WT_scale_bits = (WT_CHout_Padding_with_Tout*cls.HBM_AXI_DATA_WIDTH*WT_scale_group_nums)
+                WT_SIZE_IN_BYTES = (((WT_CHout_Padding_with_Tout*WT_CHin_Padding_with_Tin*cls.MAX_WT_DW)>>3)+((WT_scale_bits)>>3))
+                return WT_SIZE_IN_BYTES // cls.HBM_Port * Ky * Kx
+        raise RuntimeError(f"Unsupport dtype of {dtype.dtype} and mapped of {dtype.mapped} in malloc bytes: {shape}")
 
 
 class OHBM0314(OHBM):
@@ -106,6 +120,7 @@ class OHBM0314(OHBM):
     description = """
         update Feature_Head in testbench into Original_Feature_Head and Padding_Feature_Head
     """
+    tb_sim_path = "/home/shenao/dlavm-llm-public/tbsim/workspace_2025_0314"
 
 
 class OHBM0316(OHBM):
@@ -114,5 +129,4 @@ class OHBM0316(OHBM):
     description = """
         update tasks for ACT Op
     """
-
-
+    tb_sim_path = "/home/shenao/dlavm-llm-public/tbsim/workspace_2025_0316"

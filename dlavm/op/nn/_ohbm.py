@@ -7,6 +7,7 @@ from ._nn import (
     ActivateRel,
     Kvcache2hbmRel,
     RoPosEmbRel,
+    Conv2dRel
 )
 
 @Op.RegisterAttrs("nn.mvm_f16xi4", "rel", ohbm_accel.OHBM)
@@ -125,6 +126,16 @@ def Kvcache2HBMOHBMRel(args, attrs):
 @Op.RegisterAttrs("nn.rope", "rel", ohbm_accel.OHBM)
 def RoPEOHBMRel(args, attrs):
     check = RoPosEmbRel(args, attrs)
+    if not check[0]:
+        return check[0], check[1]
+    if args[0].dtype.mapped != DataEnum.hbm or args[0].dtype.dtype != DataEnum.fp16:
+        return False, "dtype of args must be " + DataEnum.hbm + " and " + DataEnum.fp16
+    return True, check[1]
+
+
+@Op.RegisterAttrs("nn.conv2d", "rel", ohbm_accel.OHBM)
+def Conv2dOHBMRel(args, attrs):
+    check = Conv2dRel(args, attrs)
     if not check[0]:
         return check[0], check[1]
     if args[0].dtype.mapped != DataEnum.hbm or args[0].dtype.dtype != DataEnum.fp16:

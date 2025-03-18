@@ -4,7 +4,8 @@ from dlavm.device import ohbm_accel
 from .... import ir
 from ....basic import Tasks, get_vars
 from . import (
-    tasks_0219
+    tasks_0219,
+    tasks_0316,
 )
 
 

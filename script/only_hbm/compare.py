@@ -18,11 +18,11 @@ chin, chout = [4096, 4096]
 token = 19
 last_token = 0
 f_head, w_head = [32, 2]
+device = ohbm_accel.OHBM0316
 
 from dlavm.driver import config
-config.tb_sim_path = "/home/shenao/dlavm-llm-public/tbsim/workspace_2025_0316"
+config.tb_sim_path = device.tb_sim_path
 
-device = ohbm_accel.OHBM0316
 init_addr = {"hbm": 0x0, "runtime": "hbm", "hbm_cache": "hbm"}
 configs = {"wt2hbm":False, "hbm_base": 0x0, "ddr_base": 0x0, "min_loop": -1}
 name, target = "test", targets.hpp
@@ -36,6 +36,7 @@ def run_check(fn):
     print(graph)
     regs1 = mod1.reg_serialization()
     regs2 = mod2.reg_serialization()
+    print(regs1)
     if RegsCheckSame(regs1, regs2, ignores):
         success = f"\033[36;32m Check Success!\033[36;0m "
         finish = f" Check Finish: \033[36;32m{name}\033[36;0m "
@@ -159,7 +160,7 @@ def f2w_mvm_compare():
     return output, mod1, mod2, [10, 11, 13]
 
 
-# @run_check
+@run_check
 def ln_compare():
     input = adr.var_hbm("input", [1, token, chin])
     weight = adr.const_hbm("weight1", "test", [2*chin], dtype=de.fp16)
@@ -224,7 +225,7 @@ def mvm_bn_argmax_compare():
 # @run_check
 def softmax_compare():
     input = adr.var_hbm("input", [f_head, token, token+last_token])
-    output = dlavm.op.nn.softmax(input, mask=True)
+    output = dlavm.op.nn.softmax(input)
 
     output = transform.infer_type(output, device)
     mod1 = backend.build_tb(output, init_addr, name, target, configs)
@@ -244,7 +245,7 @@ def elementwise_compare():
     return output, mod1, mod2, [131, 134, 140]
 
 
-@run_check
+# @run_check
 def activate_compare():
     input = adr.var_hbm("input", [1, token, chin])
     weight = adr.const_hbm("weight1", "test", [chin], dtype=de.fp16)

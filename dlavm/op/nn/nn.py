@@ -6,6 +6,10 @@ from . import (
 from .attrs import *
 
 
+def conv2d(*args, **kwargs):
+    return Call(Op.Get("nn.conv2d"), args, Conv2dAttrs(kwargs))
+
+
 def mvm_f16xi4(*args, **kwargs):
     return Call(Op.Get("nn.mvm_f16xi4"), args, MVMF16xI4Attrs(kwargs))
 
@@ -25,6 +29,10 @@ def rms_norm(*args, **kwargs):
 
 
 def softmax(*args, **kwargs):
+    if kwargs.get("mask", False):
+        kwargs["auto_mask"] = False
+    elif kwargs.get("auto_mask", True):
+        kwargs["auto_mask"] = True
     return Call(Op.Get("nn.softmax"), args, SoftmaxAttrs(kwargs))
 
 

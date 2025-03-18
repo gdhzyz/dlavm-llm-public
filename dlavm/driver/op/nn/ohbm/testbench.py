@@ -86,7 +86,6 @@ def MVMF16xI4(args, output, attrs):
             "Width_in" : dshape[-1],
             "Width_out" : wshape[0],
             "BN_RELU_EN" : 0,
-            "RELU_EN" : 0,
             # "DAT_IN_BASE_ADDR" : daddr,
             # "HBM_WT_BASE_ADDR" : waddr,
             # "DAT_OUT_BASE_ADDR" : oaddr,
@@ -105,7 +104,6 @@ def MVMF16xI4(args, output, attrs):
             "Width_in" : dshape[-1],
             "Width_out" : wshape[0],
             "BN_RELU_EN" : 0,
-            "RELU_EN" : 0,
             # "DAT_IN_BASE_ADDR" : daddr,
             # "HBM_WT_BASE_ADDR" : waddr,
             # "DAT_OUT_BASE_ADDR" : oaddr,
@@ -184,12 +182,15 @@ def Softmax(args, output, attrs):
     dshape = dtensor.shape
     daddr = dtensor.static_address
     oaddr = output[0].static_address
+    mask = 1 if attrs.get("mask") else 0
+    if attrs.get("auto_mask"):
+        mask = 1 if dshape[-2] > 1 else 0
     macro_define = {
         "last_token" : dshape[-1] - dshape[-2],
         "Token" : dshape[-1],
         "Width_in" : dshape[-1],
         "Feature_Head" : dshape[0],
-        "Need_Mask" : 1 if attrs.get("mask") else 0,
+        "Need_Mask" : mask,
         # "DAT_IN_BASE_ADDR" : daddr,
         # "HBM_WT_BASE_ADDR" : waddr,
         # "DAT_OUT_BASE_ADDR" : oaddr,
@@ -202,12 +203,15 @@ def Softmax(args, output, attrs):
     dshape = dtensor.shape
     daddr = dtensor.static_address
     oaddr = output[0].static_address
+    mask = 1 if attrs.get("mask") else 0
+    if attrs.get("auto_mask"):
+        mask = 1 if dshape[-2] > 1 else 0
     macro_define = {
         "last_token" : dshape[-1] - dshape[-2],
         "Token" : dshape[-1],
         "Width_in" : dshape[-1],
         "Original_Feature_Head" : dshape[0],
-        "Need_Mask" : 1 if attrs.get("mask") else 0,
+        "Need_Mask" : mask,
         # "DAT_IN_BASE_ADDR" : daddr,
         # "HBM_WT_BASE_ADDR" : waddr,
         # "DAT_OUT_BASE_ADDR" : oaddr,
@@ -481,6 +485,53 @@ def tb_glm_pos_emb(args, output, attrs):
     device = args[0].device
     with ir.Function([]) as func:
         csbs = Tasks.Get("tb.nn.rope.ohbm", device)(args, output, attrs)
+        for csb in csbs:
+            if csb[0]:
+                func += ir.CSB_Write(csb[1], csb[2])
+            else:
+                func += While(CSB_Read(csb[1]) != 1)
+    return func
+
+
+#####################################################################
+@Tasks.Register("tb.nn.conv2d.ohbm", ohbm_accel.OHBM0314)
+def Conv2d(args, output, attrs):
+    if len(args) == 3:
+        dtensor, wtensor = args[0], args[1]
+        dshape, wshape = dtensor.shape, wtensor.shape
+        daddr = dtensor.static_address
+        waddr = wtensor.static_address
+        oaddr = output[0].static_address
+        macro_define = {
+            "last_token" : 0,
+            "Token" : dshape[-2],
+            "Hin": dshape[0],
+            "RELU_EN" : 1 if attrs.get("relu") else 0,
+            "Width_in" : dshape[-1],
+            "Width_out" : wshape[-1],
+            "BN_RELU_EN" : 0,
+            "Ky": wshape[0],
+            "Kx": wshape[1],
+            "Sy": attrs.get("strides")[0],
+            "Sx": attrs.get("strides")[1],
+            "Py": attrs.get("padding")[0],
+            "Px": attrs.get("padding")[1],
+            # "DAT_IN_BASE_ADDR" : daddr,
+            # "HBM_WT_BASE_ADDR" : waddr,
+            # "DAT_OUT_BASE_ADDR" : oaddr,
+        }
+        return TestbenchSIM("testbench_HBM_MVM_BN_Argmax", macro_define)
+    else:
+        raise RuntimeError("not support modes except conv2d+bn in tb")
+
+
+@Op.RegisterAttrs("nn.conv2d", "testbench", ohbm_accel.OHBM)
+def tb_nn_conv2d(args, output, attrs):
+    if len(get_vars([args[0].shape, attrs])):
+        raise RuntimeError("Unsupport dynamic symbol control in testbench simulation")
+    device = args[0].device
+    with ir.Function([]) as func:
+        csbs = Tasks.Get("tb.nn.conv2d.ohbm", device)(args, output, attrs)
         for csb in csbs:
             if csb[0]:
                 func += ir.CSB_Write(csb[1], csb[2])

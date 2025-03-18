@@ -102,5 +102,5 @@ if __name__ == "__main__":
     init_addr = {"hbm": 0x0, "hbm_cache": "hbm", "runtime": "hbm_cache", "onchip": 0x0}
     # mod = backend.build_tb(output, init_addr, "test", targets.hpp, {"wt2hbm":False, "hbm_base": 0x0, "ddr_base": 0x0})
     mod = backend.build(output, init_addr, "test", False, targets.hpp, {"wt2hbm":False, "hbm_base": 0x0, "ddr_base": 0x0})
-    with open("chatglm_test_19_0316.h", "w") as f:
+    with open("output/chatglm_test_19_0316.h", "w") as f:
         print(mod.get_source(), file=f)

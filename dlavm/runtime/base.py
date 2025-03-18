@@ -197,6 +197,7 @@ class RuntimeBase(ExecutorBase):
 
     def main(self, name, **kwargs):
         args = {}
+        self.regs = []
         func = self.funcs[name]
         for a in func.args:
             args[a] = kwargs[a.name]
@@ -207,7 +208,10 @@ class RuntimeBase(ExecutorBase):
         new_stmt = deepcopy(stmt)
         addr = self.Visit(new_stmt.addr)
         data = self.Visit(new_stmt.data)
-        print(addr, data)
+        self.regs.append([0, addr, data])
 
     def VisitCSBRead(self, expr: ir.CSB_Read):
+        new_expr = deepcopy(expr)
+        addr = self.Visit(new_expr.addr)
+        self.regs.append([1, addr])
         return 1

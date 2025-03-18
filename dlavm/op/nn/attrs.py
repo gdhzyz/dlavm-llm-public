@@ -2,6 +2,16 @@ from ...adr.base import Attrs
 from dlavm.device import ohbm_accel
 
 
+class Conv2dAttrs(Attrs):
+
+    default = {
+        "relu": False,
+        "padding" : [0, 0],
+        "strides" : [1, 1],
+        # attention
+    }
+
+
 class MVMF16xI4Attrs(Attrs):
 
     default = {
@@ -29,7 +39,8 @@ class NormAttrs(Attrs):
 class SoftmaxAttrs(Attrs):
 
     default = {
-        "mask": False
+        "mask": False,
+        "auto_mask": False,
     }
 
 
