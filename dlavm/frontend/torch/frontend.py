@@ -144,6 +144,7 @@ class DynamoCompiler:
             "rotary_pos_emb.default": RotaryPosEmbOp,
             "native_layer_norm.default": LayerNormOp,
             "gelu.default": GeluOp,
+            "_scaled_dot_product_efficient_attention.default":ScaledDotProductFlashAttentionForCpuOp,
         }
 
     @property
@@ -171,6 +172,8 @@ class DynamoCompiler:
             return TensorDType.Float64
         if dtype == "torch.bool":
             return TensorDType.Bool
+        if dtype == "torch.bfloat16":
+            return TensorDType.BFloat16
         raise NotImplementedError(f"Unsupported dtype: {dtype}")
 
     def _create_node(

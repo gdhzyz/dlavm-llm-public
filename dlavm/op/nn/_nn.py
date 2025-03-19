@@ -235,12 +235,21 @@ Op.Register("nn.rope", RoPosEmbRel)
   @output: Tensor, [Head, token, chin]
 '''
 def Conv2dRel(args, attrs):
-    if len(args) not in [2, 3]:
-        return False, "error length arguments! support [2, 3], found " + str(len(args))
+    if len(args) not in [3]:
+        return False, "error length arguments! support [3], found " + str(len(args))
     device = args[0].device
     dtype = args[0].dtype
     dshape = args[0].shape
-    oshape = [i for i in dshape]
+    wshape = args[1].shape
+    Hin, Win, CHin = dshape
+    Ky, Kx, wCHin, CHout = wshape
+    if CHin != wCHin:
+        return False, f"CHin in weight({wCHin}) should same with CHin in data({CHin})"
+    Py, Px = attrs.get("padding")
+    Sy, Sx = attrs.get("strides")
+    Wout = ((Win+2*Px-Kx)//Sx+1)
+    Hout = ((Hin+2*Py-Ky)//Sy+1)
+    oshape = [Hout, Wout, CHout]
     tensor = Tensor(oshape, dtype, device)
     return True, tensor
 

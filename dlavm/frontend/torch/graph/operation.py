@@ -615,6 +615,12 @@ class LayerNormOp(Op):
         self._op_type = OpType.ReduceType
 
 
+class RMSNormOp(Op):
+    def __init__(self) -> None:
+        super().__init__()
+        self._op_type = OpType.ReduceType
+
+
 class RotaryPosEmbOp(Op):
     def __init__(self) -> None:
         super().__init__()

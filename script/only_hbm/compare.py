@@ -36,7 +36,6 @@ def run_check(fn):
     print(graph)
     regs1 = mod1.reg_serialization()
     regs2 = mod2.reg_serialization()
-    print(regs1)
     if RegsCheckSame(regs1, regs2, ignores):
         success = f"\033[36;32m Check Success!\033[36;0m "
         finish = f" Check Finish: \033[36;32m{name}\033[36;0m "
@@ -114,6 +113,23 @@ def glm_atten_compare():
     return output, []
 
 
+@run_check
+def conv2d_compare():
+    hin, win, chin, chout = 224, 224, 512, 512
+    k = 3
+    p = 0
+    s = 2
+    input = adr.var_hbm("input", [hin, win, chin])
+    weight = adr.const_hbm("weight1", "test", [k, k, chin, chout])
+    bn = adr.const_hbm("weight2", "test", [2*chout], dtype=de.fp16)
+    output = dlavm.op.nn.conv2d(input, weight, bn, padding=[p, p], strides=[s, s])
+
+    output = transform.infer_type(output, device)
+    mod1 = backend.build_tb(output, init_addr, name, target, configs)
+    mod2 = backend.build(output, init_addr, name, False, target, configs)
+    return output, mod1, mod2, [10, 11, 13, 25]
+
+
 # @run_check
 def kcache_compare():
     input_k = adr.var_hbm("input_k", [w_head, token, 128])
@@ -160,7 +176,7 @@ def f2w_mvm_compare():
     return output, mod1, mod2, [10, 11, 13]
 
 
-@run_check
+# @run_check
 def ln_compare():
     input = adr.var_hbm("input", [1, token, chin])
     weight = adr.const_hbm("weight1", "test", [2*chin], dtype=de.fp16)

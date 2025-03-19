@@ -25,6 +25,14 @@ def MVMF16xF16(args, outputs, attrs):
     return func
 
 
+@Op.RegisterAttrs("nn.conv2d", "compute", ohbm_accel.OHBM)
+def Conv2d(args, outputs, attrs):
+    device = args[0].device
+    with ir.Function(get_vars([args[0].shape, attrs])) as func:
+        Tasks.Get("ohbm.nn.conv2d", device)(func, args, outputs, attrs)
+    return func
+
+
 @Op.RegisterAttrs("nn.norm", "compute", ohbm_accel.OHBM)
 def Norm(args, outputs, attrs):
     device = args[0].device

@@ -520,7 +520,7 @@ def Conv2d(args, output, attrs):
             # "HBM_WT_BASE_ADDR" : waddr,
             # "DAT_OUT_BASE_ADDR" : oaddr,
         }
-        return TestbenchSIM("testbench_HBM_MVM_BN_Argmax", macro_define)
+        return TestbenchSIM("testbench_HBM_CNN_BN", macro_define)
     else:
         raise RuntimeError("not support modes except conv2d+bn in tb")
 

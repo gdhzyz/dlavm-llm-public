@@ -107,6 +107,30 @@ def AtomMVMSingleTime(block, CHin, Hin, Win, CHout_offset, CHout, Hout, Wout,
          0, 0, MVMMode.reg_19_y, MVMMode.reg_20_x, 0, 0, 0, mode)
 
 
+@Tasks.Register("atom.ohbm.nn.conv2d", ohbm_accel.OHBM)
+def AtomMVMSingleTime(block, CHin, Hin, Win, CHout_offset, CHout, Hout, Wout,
+                      relu_en, wt_reuse, dat_reuse, Py_now, Px, Ky, Kx, Sy, Sx,
+                      feature_in_addr, feature_in_surface_stride, feature_in_line_stride,
+                      wt_base_addr, wt_bits_in_one_CHout, BN_base_addr,
+                      feature_out_addr, feature_out_surface_stride, feature_out_line_stride, 
+                      mode, device):
+    task = Tasks.Get("atom.ohbm.nn.mvm", device)
+    CHout_Split_Times_minus1 = 0
+    wt_ch_group_reg = 0
+    t_quant_block_reg = 0
+    Last_Group_CHin = 0
+    reg_17 = 1
+    reg_19_y = Py_now + (Sy << (device.log2_P)) + (Ky << (device.log2_P + device.log2_S))
+    reg_20_x = Px + (Sx << (device.log2_P)) + (Kx << (device.log2_P + device.log2_S))
+    task(block, CHin, Hin, Win, CHout_offset, CHout, Hout, Wout,
+         CHout_Split_Times_minus1, relu_en, wt_reuse, dat_reuse,
+         wt_ch_group_reg, t_quant_block_reg, Last_Group_CHin,
+         feature_in_addr, feature_in_surface_stride, feature_in_line_stride,
+         wt_base_addr, wt_bits_in_one_CHout, BN_base_addr,
+         feature_out_addr, feature_out_surface_stride, feature_out_line_stride, 
+         reg_17, 0, reg_19_y, reg_20_x, 0, 0, 0, mode)
+
+
 @Tasks.Register("atom.ohbm.nn.mvm_f16xf16", ohbm_accel.OHBM)
 def AtomMVMSingleTime(block, CHin, Hin, Win, CHout_offset, CHout, Hout, Wout,
                       wt_reuse, dat_reuse, reg_17, reg_18, reg_26, reg_27, reg_28,
@@ -306,6 +330,186 @@ def MVM(func, args, outputs, attrs):
                      feature_out_surface_stride, feature_out_line_stride, mode, device)
             w_for += ch_for
         _else += w_for
+    func += t_if
+
+
+#########################################################################################
+#                                nn.conv2d compute task                                 #
+#########################################################################################
+@Tasks.Register("ohbm.nn.conv2d", ohbm_accel.OHBM)
+def Conv2d(func, args, outputs, attrs):
+    device = args[0].device
+
+    mode = MVMMode.bn
+    data, weight, bn = args
+
+    # macro define testbench
+    WT_DW = device.MAX_WT_DW
+    Sparsity_Factor = 1
+    Head, Height, Width_in = data.shape
+    Ky, Kx, _, Width_out = weight.shape
+    Hout, Wout, _ = outputs[0].shape
+    if hasattr(data, "heads"):
+        Head, Width_in = 1, Width_in*data.heads[-1]
+    feature_in_addr = data.get_address()
+    wt_base_addr = weight.get_address()
+    BN_base_addr = 0
+    feature_out_addr = outputs[0].get_address()
+    relu_en = attrs.get("relu", 0)
+    if mode in [MVMMode.bn, MVMMode.bn_argmax]:
+        BN_base_addr = bn.get_address()
+    # pre process
+    Tb = 1
+    Hin, Win = Head, Height
+    CHin = Ceil_Padding(Width_in, device.Tout)
+    Hout, Wout = Hout, Wout
+    CHout = Ceil_Padding(Width_out, device.Tout)
+    Sy, Sx = attrs.get("strides")
+    Py, Px = attrs.get("padding")
+    Ky, Kx = Ky, Kx
+    T_quant_block = device.T_quant_block
+    CHin_div_LTout = Ceil(CHin, device.L_Tout)
+    CHin_Padding = CHin_div_LTout * device.L_Tout
+    CHout_div_Tout = Ceil(CHout, device.Tout)
+    CHout_div_LTout = Ceil(CHout, device.L_Tout)
+    WT_CHin_div_Tin = Ceil(CHin, device.Tin)
+    WT_CHin_Padding_with_Tin = WT_CHin_div_Tin*device.Tin
+    WT_CHout_Padding_with_Tout = CHout_div_Tout*device.Tout
+
+    WT_CHin_Padding_with_Tin = (WT_CHin_div_Tin*device.Tin)
+    WT_CHout_Padding_with_Tout = (CHout_div_Tout*device.Tout)
+    WT_CHin_div_Tblock       = Ceil(WT_CHin_Padding_with_Tin, T_quant_block)
+    Tblock_div_Tin           = (T_quant_block//device.Tin)
+    
+    CHin_WT_Bytes            = (WT_CHin_Padding_with_Tin*WT_DW//8)
+    WT_CHin_div_Tin          = Ceil(CHin, device.Tin)
+    WT_SIZE_IN_BYTES         = ((Kx*Ky*WT_CHout_Padding_with_Tout*WT_CHin_Padding_with_Tin*WT_DW)>>3)
+    WT_BYTES_PER_CHOUT       = (WT_SIZE_IN_BYTES//WT_CHout_Padding_with_Tout)
+    WT_NUM_DIV_TIN           = (WT_CHout_Padding_with_Tout*WT_CHin_div_Tin)
+
+    # stride load or compute
+    feature_in_line_stride = device.HBM_1Row_Bytes * Win
+    feature_in_surface_stride = device.HBM_1Row_Bytes * Win * Hin
+    feature_in_head_stride = device.HBM_1Row_Bytes * Win * Hin * CHin_div_LTout
+    feature_out_line_stride = device.HBM_1Row_Bytes * Wout
+    feature_out_surface_stride = device.HBM_1Row_Bytes * Wout * Hout
+    feature_out_head_stride = device.HBM_1Row_Bytes * Wout * Hout * CHout_div_LTout
+    if hasattr(data, "strides"):
+        feature_in_line_stride = data.strides[-1]
+        feature_in_surface_stride = data.strides[-2]
+        feature_in_head_stride = data.strides[-3]
+    if hasattr(outputs[0], "strides"):
+        feature_out_line_stride = outputs[0].strides[-1]
+        feature_out_surface_stride = outputs[0].strides[-2]
+        feature_out_head_stride = outputs[0].strides[-3]
+
+    # loop define
+    dat_bits_per_row=Win*CHin_Padding*device.MAX_DAT_DW
+    min_dat_depth   =Ky*dat_bits_per_row//(device.HBM_AXI_DATA_WIDTH*device.HBM_Port)
+    wt_bits_per_Tout=WT_BYTES_PER_CHOUT*device.Tout*8
+    min_wt_depth    =wt_bits_per_Tout//(device.HBM_AXI_DATA_WIDTH*device.HBM_Port*device.ASYN_FACTOR)
+
+    if min_wt_depth>device.ID1_BRAM_DEPTH:
+        print("ohbm.nn.mvm driver task error:")
+        print("=======================================================================")
+        print("================ FPGA WT BRAM DEPTH not enough!    ====================")
+        print("=======================================================================")
+        exit(-1)
+
+    """
+    TODO: min_dat_depth > device.ID0_BRAM_DEPTH: return error
+    """
+
+    # ir: create local variable
+    mininum_bw=0
+    overlap=Ky-Sy
+    CHout_in_each_split=(device.TOTAL_WT_BRAM_BITS//wt_bits_per_Tout)*device.Tout
+    
+    tp_CHout_in_each_split=(1<<int(math.log2(CHout_in_each_split)))
+    CHout_in_each_split = ne.If(tp_CHout_in_each_split>CHout_in_each_split, tp_CHout_in_each_split//2, tp_CHout_in_each_split)
+    CHout_Split_Times = ne.If(CHout_in_each_split < CHout, (CHout+CHout_in_each_split-1)//CHout_in_each_split, 1)
+    last_CHout_in_each_split = ne.If(CHout%CHout_in_each_split, CHout%CHout_in_each_split, CHout_in_each_split)
+
+    Hout_first  = func.assign("Hout_first", Hout, "int")
+    Hin_first   = func.assign("Hin_first", Hin, "int")
+    Hout_middle = func.assign("Hout_middle", Hout, "int")
+    Hin_middle  = func.assign("Hin_middle", Hin, "int")
+    t_if = ir.If(Hin>device.TOTAL_DAT_BRAM_BITS//dat_bits_per_row)
+    with t_if.then_block as _then:
+        Hout_first  = _then.assign_var(Hout_first , ((device.TOTAL_DAT_BRAM_BITS//dat_bits_per_row)+Py-Ky)//Sy+1  )
+        Hin_first   = _then.assign_var(Hin_first  , (Hout_first-1)*Sy+Ky-Py                                       )
+        Hout_middle = _then.assign_var(Hout_middle, ((device.TOTAL_DAT_BRAM_BITS//dat_bits_per_row)-Ky)//Sy+1     )
+        Hin_middle  = _then.assign_var(Hin_middle , (Hout_middle-1)*Sy+Ky                                         )
+    func += t_if
+
+    Hout_first = ne.If(Hout_first>=Hout, Hout, Hout_first)
+    Hin_first = ne.If(Hout_first>=Hout, Hin, Hin_first)
+
+    Hout_Split_Times = ne.If((Hout-Hout_first)%Hout_middle, (Hout-Hout_first)//Hout_middle+2, (Hout-Hout_first)//Hout_middle+1)
+    Hout_last = ne.If((Hout-Hout_first)%Hout_middle, (Hout-Hout_first)%Hout_middle, Hout_middle)
+
+    Hin_last=Hin-Hin_first+overlap-(Hout_Split_Times-2)*(Hin_middle-overlap)
+
+    total_clks_if_reuse_wt=Tb*(dat_bits_per_row*Hin+dat_bits_per_row*overlap*(Hout_Split_Times-1))*(CHout_Split_Times)*device.MAX_DAT_DW//(device.HBM_AXI_DATA_WIDTH*device.HBM_Port) \
+                          +WT_SIZE_IN_BYTES//(device.HBM_AXI_DATA_WIDTH*device.HBM_Port)+20
+    total_clks_if_reuse_dat=Tb*(dat_bits_per_row*Hin+dat_bits_per_row*overlap*(Hout_Split_Times-1))*device.MAX_DAT_DW//(device.HBM_AXI_DATA_WIDTH*device.HBM_Port) \
+                          +WT_SIZE_IN_BYTES*(Hout_Split_Times)//(device.HBM_AXI_DATA_WIDTH*device.HBM_Port)+20
+    total_clks_if_reuse_wt =func.assign("total_clks_if_reuse_wt", total_clks_if_reuse_wt, "int")
+    total_clks_if_reuse_dat=func.assign("total_clks_if_reuse_dat", total_clks_if_reuse_dat, "int")
+    Hout_Split_Times = func.assign("Hout_Split_Times", Hout_Split_Times, "int")
+    CHout_Split_Times = func.assign("CHout_Split_Times", CHout_Split_Times, "int")
+
+    task = Tasks.Get("atom.ohbm.nn.conv2d", device)
+
+    t_if = ir.If(total_clks_if_reuse_wt < total_clks_if_reuse_dat)
+    with t_if.then_block as _then:
+        with ir.For("ch", 0, CHout_Split_Times, 1) as ch_for:
+            ch = ch_for.var
+            with ir.For("h", 0, Hout_Split_Times, 1) as h_for:
+                h = h_for.var
+                CH_in_now = CHin
+                dma_dat_reuse_now = 0
+                CH_out_offset = ch*CHout_in_each_split
+                CH_out_now = ne.If(ch < CHout_Split_Times-1, CHout_in_each_split, last_CHout_in_each_split)
+                dma_wt_reuse_now = ne.If(h, 1, 0)
+                H_in_now = ne.If(h, ne.If(h.eq(Hout_Split_Times-1), Hin_last, Hin_middle), Hin_first)
+                H_out_now = ne.If(h, ne.If(h.eq(Hout_Split_Times-1), Hout_last, Hout_middle), Hout_first)
+                H_in_offset = ne.If(h, (Hin_first-overlap)+(h-1)*(Hin_middle-overlap), 0)
+                H_out_offset = ne.If(h, (Hout_first)+(h-1)*(Hout_middle), 0)
+                Py_now = ne.If(h, 0, Py)
+                task(h_for, CH_in_now, H_in_now, Win, CH_out_offset, CH_out_now, H_out_now, Wout,
+                     relu_en, dma_wt_reuse_now, dma_dat_reuse_now, Py_now, Px, Ky, Kx, Sy, Sx,
+                     feature_in_addr+feature_in_line_stride*H_in_offset, feature_in_surface_stride, feature_in_line_stride,
+                     wt_base_addr+WT_BYTES_PER_CHOUT//device.HBM_Port*CHout_in_each_split*ch, WT_BYTES_PER_CHOUT*8,
+                     BN_base_addr + device.HBM_1Row_Bytes*(ch*CHout_in_each_split//(device.L_Tout//2)),
+                     feature_out_addr+feature_out_line_stride*H_out_offset+feature_out_surface_stride*(ch*CHout_in_each_split//device.L_Tout),
+                     feature_out_surface_stride, feature_out_line_stride, mode, device)
+            ch_for += h_for
+        _then += ch_for
+    with t_if.else_block as _else:
+        with ir.For("h", 0, Hout_Split_Times, 1) as h_for:
+            h = h_for.var
+            with ir.For("ch", 0, CHout_Split_Times, 1) as ch_for:
+                ch = ch_for.var
+                CH_in_now = CHin
+                dma_wt_reuse_now = 0
+                CH_out_offset = ch*CHout_in_each_split
+                CH_out_now = ne.If(ch < CHout_Split_Times-1, CHout_in_each_split, last_CHout_in_each_split)
+                dma_dat_reuse_now = ne.If(ch, 1, 0)
+                H_in_now = ne.If(h, ne.If(h.eq(Hout_Split_Times-1), Hin_last, Hin_middle), Hin_first)
+                H_out_now = ne.If(h, ne.If(h.eq(Hout_Split_Times-1), Hout_last, Hout_middle), Hout_first)
+                H_in_offset = ne.If(h, (Hin_first-overlap)+(h-1)*(Hin_middle-overlap), 0)
+                H_out_offset = ne.If(h, (Hout_first)+(h-1)*(Hout_middle), 0)
+                Py_now = ne.If(h, 0, Py)
+                task(ch_for, CH_in_now, H_in_now, Win, CH_out_offset, CH_out_now, H_out_now, Wout,
+                     relu_en, dma_wt_reuse_now, dma_dat_reuse_now, Py_now, Px, Ky, Kx, Sy, Sx,
+                     feature_in_addr+feature_in_line_stride*H_in_offset, feature_in_surface_stride, feature_in_line_stride,
+                     wt_base_addr+WT_BYTES_PER_CHOUT//device.HBM_Port*CHout_in_each_split*ch, WT_BYTES_PER_CHOUT*8,
+                     BN_base_addr + device.HBM_1Row_Bytes*(ch*CHout_in_each_split//(device.L_Tout//2)),
+                     feature_out_addr+feature_out_line_stride*H_out_offset+feature_out_surface_stride*(ch*CHout_in_each_split//device.L_Tout),
+                     feature_out_surface_stride, feature_out_line_stride, mode, device)
+            h_for += ch_for
+        _else += h_for
     func += t_if
 
 
@@ -858,88 +1062,6 @@ def Activate(func, args, outputs, attrs):
         w_for += CSB_Write(activation_reg_bias+10, Hin                       )
         w_for += CSB_Write(activation_reg_bias+11, Win                       )
         w_for += CSB_Write(activation_reg_bias+12, 0                         )
-        w_for += CSB_Write(activation_reg_bias+13, 0                         )
-        w_for += CSB_Write(activation_reg_bias+14, 0                         )
-        w_for += CSB_Write(activation_reg_bias+15, 0                         )
-        w_for += CSB_Write(activation_reg_bias+16, 0                         )
-        w_for += CSB_Write(activation_reg_bias+17, 0b010000                  )
-   
-        w_for += While(CSB_Read(activation_reg_bias+1)!=1) 
-    func += w_for
-
-@Tasks.Register("ohbm.nn.activate", ohbm_accel.OHBM0316)
-def Activate(func, args, outputs, attrs):
-    device = args[0].device
-    data, weight = args
-
-    # macro define testbench
-    WT_DW = device.MAX_WT_DW
-    Sparsity_Factor = 1
-    Head, Height, Width_in = data.shape[-3:]
-    Width_out = Width_in
-    feature_in_base_addr = data.get_address()
-    wt_base_addr = weight.get_address()
-    feature_out_base_addr = outputs[0].get_address()
-    Layer_Norm = 0 if attrs.get("rms") else 1
-
-    # pre process
-    Tb = 1
-    Hin, Win = 1, Height
-    CHin = Ceil_Padding(Width_in, device.Tout)
-    Hout, Wout = 1, Height
-    CHout = Ceil_Padding(Width_out, device.Tout)
-    CHin_div_LTout = Ceil(CHin, device.L_Tout)
-    CHin_Padding = CHin_div_LTout * device.L_Tout
-    CHout_div_Tout = Ceil(CHout, device.Tout)
-    CHin_Padding_with_LTout = CHin_Padding
-
-    # stride load or compute
-    feature_in_line_stride = device.HBM_1Row_Bytes * Win
-    feature_in_surface_stride = device.HBM_1Row_Bytes * Win * Hin
-    feature_out_line_stride = device.HBM_1Row_Bytes * Wout
-    feature_out_surface_stride = device.HBM_1Row_Bytes * Wout * Hout
-    if hasattr(data, "strides"):
-        feature_in_line_stride = data.strides[-1]
-        feature_in_surface_stride = data.strides[-2]
-    if hasattr(outputs[0], "strides"):
-        feature_out_line_stride = outputs[0].strides[-1]
-        feature_out_surface_stride = outputs[0].strides[-2]
-
-    # task function
-    pixel_in=Height
-    activation_reg_bias=128
-    
-    Onchip_Dat_BRAM_Bits    =device.TOTAL_DAT_BRAM_BITS
-    Total_Dat_Bits_perWTHead=Height*CHin_Padding_with_LTout*device.MAX_DAT_DW
-    Total_Dat_Bits_PerToken =CHin_Padding_with_LTout*device.MAX_DAT_DW
-    Onchip_Token_perWTHead  =Onchip_Dat_BRAM_Bits//Total_Dat_Bits_PerToken
-    
-    Wout_Split_Times_minus1 = func.assign("Wout_Split_Times_minus1", 0, "int")
-    out_w_per_slice         = func.assign("out_w_per_slice", Wout, "int")
-    out_w_in_last_slice     = func.assign("out_w_in_last_slice", Wout, "int")
-    t_if = ir.If(Total_Dat_Bits_perWTHead>Onchip_Dat_BRAM_Bits)
-    with t_if.then_block as _then:
-        Wout_Split_Times_minus1=_then.assign_var(Wout_Split_Times_minus1, (Wout+Onchip_Token_perWTHead-1)//Onchip_Token_perWTHead-1)
-        out_w_per_slice        =_then.assign_var(out_w_per_slice, Onchip_Token_perWTHead)
-        out_w_in_last_slice    =_then.assign_var(out_w_in_last_slice, Wout-(Wout_Split_Times_minus1)*out_w_per_slice)
-    func += t_if
-    with ir.For("w", 0, Wout_Split_Times_minus1+1, 1) as w_for:
-        w = w_for.var
-        Win = ne.If(w < Wout_Split_Times_minus1, out_w_per_slice, out_w_in_last_slice)
-        tp_feature_in_base_addr =feature_in_base_addr  +w*out_w_per_slice*device.HBM_1Row_Bytes
-        tp_feature_out_base_addr=feature_out_base_addr +w*out_w_per_slice*device.HBM_1Row_Bytes
-       
-        w_for += CSB_Write(activation_reg_bias+2 , wt_base_addr              )
-        w_for += CSB_Write(activation_reg_bias+3 , tp_feature_in_base_addr   )
-        w_for += CSB_Write(activation_reg_bias+4 , feature_in_surface_stride )
-        w_for += CSB_Write(activation_reg_bias+5 , feature_in_line_stride    )
-        w_for += CSB_Write(activation_reg_bias+6 , tp_feature_out_base_addr  )
-        w_for += CSB_Write(activation_reg_bias+7 , feature_out_surface_stride)
-        w_for += CSB_Write(activation_reg_bias+8 , feature_out_line_stride   )
-        w_for += CSB_Write(activation_reg_bias+9 , CHin                      )
-        w_for += CSB_Write(activation_reg_bias+10, Hin                       )
-        w_for += CSB_Write(activation_reg_bias+11, Win                       )
-        w_for += CSB_Write(activation_reg_bias+12, ne.If(w, 2, 1)            )
         w_for += CSB_Write(activation_reg_bias+13, 0                         )
         w_for += CSB_Write(activation_reg_bias+14, 0                         )
         w_for += CSB_Write(activation_reg_bias+15, 0                         )

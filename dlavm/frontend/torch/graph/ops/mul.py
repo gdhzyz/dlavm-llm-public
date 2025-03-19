@@ -1,5 +1,5 @@
 from ..graph import Graph
-from ..operation import LayerNormOp, MulOp, PlaceholderOp, RsqrtOp, AddOp, MeanOp, PowOp
+from ..operation import LayerNormOp, RMSNormOp, MulOp, PlaceholderOp, RsqrtOp, AddOp, MeanOp, PowOp
 from .canonicalize import CanonicalizeBase, CanonicalizeManager
 from .utils import check_list_types
 

@@ -85,3 +85,13 @@ def mvm_compare(token, last_token):
     return output, [10, 11, 13, 25]
 
 
+@run_expr_check([token, last_token], [int_token, int_last_token], {str_token:int_token, str_last_token:int_last_token})
+def f2w_mvm_compare(token, last_token):
+    input_a = adr.var_hbm("input_a", [f_head, token, token+last_token])
+    input_v = adr.var_hbm("input_v", [w_head, token+last_token, 128])
+    output = dlavm.op.nn.mvm_f16xf16(input_a, input_v)
+
+    return output, [10, 11, 13]
+
+
+
