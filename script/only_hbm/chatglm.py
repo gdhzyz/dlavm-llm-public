@@ -87,6 +87,7 @@ input = adr.var_hbm("input", [1, token, 4096])
 for i in range(1):
     input = chatglm_block(input, last_token, pew, silu, i)
 
+input = dlavm.gather(input)
 out_ln = dlavm.nn.rms_norm(input, outlnw)
 output = dlavm.nn.mvm_f16xi4(out_ln, outw, outb, argmax=True)
 output = output[1]
