@@ -676,7 +676,7 @@ def MVMF16xF16(func, args, outputs, attrs):
     reg_28 = 2
     if attrs.get("w_trp"):
         reg_17 = 2
-        reg_18 = FP32_to_FP20(1/math.sqrt(Width_in)) # TODO, why f2w also has this computing
+        reg_18 = FP32_to_FP20(1/math.sqrt(Width_in))
         reg_28 = 1
     else:
         reg_26 = WT_LINE_STRIDE

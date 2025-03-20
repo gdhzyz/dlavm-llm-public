@@ -22,7 +22,8 @@ f_head, w_head = [32, 2]
 device = ohbm_accel.OHBM0316
 
 from dlavm.driver import config
-config.tb_sim_path = "/home/shenao/dlavm-llm-public/tbsim/workspace_2025_0316"
+config.tb_sim_path = device.tb_sim_path
+config.sim_tool = "modelsim"
 
 str_token = "token"
 str_last_token = "last_token"
@@ -77,12 +78,19 @@ def ln_compare(token, last_token):
 
 
 @run_expr_check([token, last_token], [int_token, int_last_token], {str_token:int_token, str_last_token:int_last_token})
-def mvm_compare(token, last_token):
+def rms_compare(token, last_token):
     input = adr.var_hbm("input", [1, token, chin])
-    weight = adr.const_hbm("weight", "test", [chout, chin])
-    output = dlavm.op.nn.mvm_f16xi4(input, weight)
+    weight = adr.const_hbm("weight1", "test", [2*chin], dtype=de.fp16)
+    output = dlavm.op.nn.rms_norm(input, weight)
+    return output, [130, 131, 134]
 
-    return output, [10, 11, 13, 25]
+
+@run_expr_check([token, last_token], [int_token, int_last_token], {str_token:int_token, str_last_token:int_last_token})
+def trp_mvm_compare(token, last_token):
+    input_q = adr.var_hbm("input_q", [f_head, token, 128])
+    input_k = adr.var_hbm("input_k", [w_head, token+last_token, 128])
+    output = dlavm.op.nn.mvm_f16xf16(input_q, input_k, w_trp=True)
+    return output, [10, 11, 13]
 
 
 @run_expr_check([token, last_token], [int_token, int_last_token], {str_token:int_token, str_last_token:int_last_token})
@@ -90,8 +98,75 @@ def f2w_mvm_compare(token, last_token):
     input_a = adr.var_hbm("input_a", [f_head, token, token+last_token])
     input_v = adr.var_hbm("input_v", [w_head, token+last_token, 128])
     output = dlavm.op.nn.mvm_f16xf16(input_a, input_v)
-
     return output, [10, 11, 13]
 
 
+@run_expr_check([token, last_token], [int_token, int_last_token], {str_token:int_token, str_last_token:int_last_token})
+def kcache_compare(token, last_token):
+    input_k = adr.var_hbm("input_k", [w_head, token, 128])
+    output = dlavm.op.nn.kcache2hbm(input_k, cache_len=last_token)
+    return output, [131, 134]
 
+
+@run_expr_check([token, last_token], [int_token, int_last_token], {str_token:int_token, str_last_token:int_last_token})
+def vcache_compare(token, last_token):
+    input_v = adr.var_hbm("input_v", [w_head, token, 128])
+    output = dlavm.op.nn.vcache2hbm(input_v, cache_len=last_token)
+    return output, [131, 134]
+
+
+@run_expr_check([token, last_token], [int_token, int_last_token], {str_token:int_token, str_last_token:int_last_token})
+def mvm_compare(token, last_token):
+    input = adr.var_hbm("input", [1, token, chin])
+    weight = adr.const_hbm("weight", "test", [chout, chin])
+    output = dlavm.op.nn.mvm_f16xi4(input, weight)
+    return output, [10, 11, 13, 25]
+
+
+@run_expr_check([token, last_token], [int_token, int_last_token], {str_token:int_token, str_last_token:int_last_token})
+def mvm_bn_compare(token, last_token):
+    input = adr.var_hbm("input", [1, token, chin])
+    weight = adr.const_hbm("weight", "test", [chout, chin])
+    bn = adr.const_hbm("bn", "test", [2*chout], dtype=de.fp16)
+    output = dlavm.op.nn.mvm_f16xi4(input, weight, bn)
+    return output, [10, 11, 13, 25]
+
+
+@run_expr_check([token, last_token], [int_token, int_last_token], {str_token:int_token, str_last_token:int_last_token})
+def mvm_bn_argmax_compare(token, last_token):
+    input = adr.var_hbm("input", [1, token, chin])
+    weight = adr.const_hbm("weight", "test", [chout, chin])
+    bn = adr.const_hbm("bn", "test", [2*chout], dtype=de.fp16)
+    output = dlavm.op.nn.mvm_f16xi4(input, weight, bn, argmax=True)
+    return output, [10, 11, 13, 25]
+
+
+@run_expr_check([token, last_token], [int_token, int_last_token], {str_token:int_token, str_last_token:int_last_token})
+def softmax_compare(token, last_token):
+    input = adr.var_hbm("input", [f_head, token, token+last_token])
+    output = dlavm.op.nn.softmax(input)
+    return output, [131, 134]
+
+
+@run_expr_check([token, last_token], [int_token, int_last_token], {str_token:int_token, str_last_token:int_last_token})
+def elementwise_compare(token, last_token):
+    input1 = adr.var_hbm("input1", [1, token, chin])
+    input2 = adr.var_hbm("input2", [1, token, chin])
+    output = dlavm.op.nn.add(input1, input2)
+    return output, [131, 134, 140]
+
+
+@run_expr_check([token, last_token], [int_token, int_last_token], {str_token:int_token, str_last_token:int_last_token})
+def activate_compare(token, last_token):
+    input = adr.var_hbm("input", [1, token, chin])
+    weight = adr.const_hbm("weight1", "test", [chin], dtype=de.fp16)
+    output = dlavm.op.nn.activate(input, weight)
+    return output, [130, 131, 134]
+
+
+@run_expr_check([token, last_token], [int_token, int_last_token], {str_token:int_token, str_last_token:int_last_token})
+def emb_glm_compare(token, last_token):
+    input = adr.var_hbm("input", [f_head, token, 128])
+    weight = adr.const_hbm("weight1", "test", [100, 128], dtype=de.fp16)
+    output = dlavm.op.nn.rope_glm(input, weight, last_token=last_token)
+    return output, [130, 131, 134]

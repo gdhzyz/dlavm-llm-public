@@ -20,7 +20,7 @@ def MVM(args, outputs, attrs):
 @Op.RegisterAttrs("nn.mvm_f16xf16", "compute", ohbm_accel.OHBM)
 def MVMF16xF16(args, outputs, attrs):
     device = args[0].device
-    with ir.Function(get_vars([args[0].shape, attrs])) as func:
+    with ir.Function(get_vars([args[0].shape, args[1].shape, attrs])) as func:
         Tasks.Get("ohbm.nn.mvm_f16xf16", device)(func, args, outputs, attrs)
     return func
 

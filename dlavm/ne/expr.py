@@ -29,7 +29,6 @@ class InpOp:
         int = {"py": "int({})", "cpp": "(int){}", "inpop": True}
 
 
-
 class Expr:
 
     def __init__(self, args, op):

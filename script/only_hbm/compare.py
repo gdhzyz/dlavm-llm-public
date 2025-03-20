@@ -22,6 +22,7 @@ device = ohbm_accel.OHBM0316
 
 from dlavm.driver import config
 config.tb_sim_path = device.tb_sim_path
+config.sim_tool = "modelsim"
 
 init_addr = {"hbm": 0x0, "runtime": "hbm", "hbm_cache": "hbm"}
 configs = {"wt2hbm":False, "hbm_base": 0x0, "ddr_base": 0x0, "min_loop": -1}
@@ -69,7 +70,7 @@ def run_expr_check(fn):
     print(f"{finish:=^135}\n")
 
 
-# @run_expr_check
+@run_expr_check
 def mvm_out_heads_atten_compare():
     qw   = adr.const_hbm("qweight", "test", [4096, 4096])
     qb   = adr.const_hbm("qbias", "test", [2*4096], dtype=de.fp16)
@@ -79,7 +80,7 @@ def mvm_out_heads_atten_compare():
     return output, []
 
 
-# @run_expr_check
+@run_expr_check
 def glm_atten_compare():
     pew = adr.const_hbm("pos_emb_weight", "test", [256, 4096], dtype=de.fp16)
     qw   = adr.const_hbm("qweight", "test", [4096, 4096])
@@ -130,7 +131,7 @@ def conv2d_compare():
     return output, mod1, mod2, [10, 11, 13, 25]
 
 
-# @run_check
+@run_check
 def kcache_compare():
     input_k = adr.var_hbm("input_k", [w_head, token, 128])
     output = dlavm.op.nn.kcache2hbm(input_k, cache_len=last_token)
@@ -141,7 +142,7 @@ def kcache_compare():
     return output, mod1, mod2, [131, 134]
 
 
-# @run_check
+@run_check
 def vcache_compare():
     input_v = adr.var_hbm("input_v", [w_head, token, 128])
     output = dlavm.op.nn.vcache2hbm(input_v, cache_len=last_token)
@@ -152,7 +153,7 @@ def vcache_compare():
     return output, mod1, mod2, [131, 134]
 
 
-# @run_check
+@run_check
 def trp_mvm_compare():
     input_q = adr.var_hbm("input_q", [f_head, token, 128])
     input_k = adr.var_hbm("input_k", [w_head, token+last_token, 128])
@@ -164,7 +165,7 @@ def trp_mvm_compare():
     return output, mod1, mod2, [10, 11, 13]
 
 
-# @run_check
+@run_check
 def f2w_mvm_compare():
     input_a = adr.var_hbm("input_a", [f_head, token, token+last_token])
     input_v = adr.var_hbm("input_v", [w_head, token+last_token, 128])
@@ -176,7 +177,7 @@ def f2w_mvm_compare():
     return output, mod1, mod2, [10, 11, 13]
 
 
-# @run_check
+@run_check
 def ln_compare():
     input = adr.var_hbm("input", [1, token, chin])
     weight = adr.const_hbm("weight1", "test", [2*chin], dtype=de.fp16)
@@ -188,7 +189,7 @@ def ln_compare():
     return output, mod1, mod2, [130, 131, 134]
 
 
-# @run_check
+@run_check
 def rms_compare():
     input = adr.var_hbm("input", [1, token, chin])
     weight = adr.const_hbm("weight1", "test", [2*chin], dtype=de.fp16)
@@ -200,7 +201,7 @@ def rms_compare():
     return output, mod1, mod2, [130, 131, 134]
 
 
-# @run_check
+@run_check
 def mvm_compare():
     input = adr.var_hbm("input", [1, token, chin])
     weight = adr.const_hbm("weight", "test", [chout, chin])
@@ -212,7 +213,7 @@ def mvm_compare():
     return output, mod1, mod2, [10, 11, 13, 25]
 
 
-# @run_check
+@run_check
 def mvm_bn_compare():
     input = adr.var_hbm("input", [1, token, chin])
     weight = adr.const_hbm("weight", "test", [chout, chin])
@@ -225,7 +226,7 @@ def mvm_bn_compare():
     return output, mod1, mod2, [10, 11, 13, 25]
 
 
-# @run_check
+@run_check
 def mvm_bn_argmax_compare():
     input = adr.var_hbm("input", [1, token, chin])
     weight = adr.const_hbm("weight", "test", [chout, chin])
@@ -238,7 +239,7 @@ def mvm_bn_argmax_compare():
     return output, mod1, mod2, [10, 11, 13, 25]
 
 
-# @run_check
+@run_check
 def softmax_compare():
     input = adr.var_hbm("input", [f_head, token, token+last_token])
     output = dlavm.op.nn.softmax(input)
@@ -249,7 +250,7 @@ def softmax_compare():
     return output, mod1, mod2, [131, 134]
 
 
-# @run_check
+@run_check
 def elementwise_compare():
     input1 = adr.var_hbm("input1", [1, token, chin])
     input2 = adr.var_hbm("input2", [1, token, chin])
@@ -261,7 +262,7 @@ def elementwise_compare():
     return output, mod1, mod2, [131, 134, 140]
 
 
-# @run_check
+@run_check
 def activate_compare():
     input = adr.var_hbm("input", [1, token, chin])
     weight = adr.const_hbm("weight1", "test", [chin], dtype=de.fp16)
@@ -273,7 +274,7 @@ def activate_compare():
     return output, mod1, mod2, [130, 131, 134]
 
 
-# @run_check
+@run_check
 def emb_glm_compare():
     input = adr.var_hbm("input", [f_head, token, 128])
     weight = adr.const_hbm("weight1", "test", [100, 128], dtype=de.fp16)

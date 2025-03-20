@@ -71,8 +71,8 @@ def chatglm_block(input, last_token, pew, silu, index):
 
 token = ne.Var("token", 2048)
 last_token = ne.Var("last_token", 2048)
-token = 19
-last_token = 0
+# token = 19
+# last_token = 0
 device = ohbm_accel.OHBM0316
 
 pew = adr.const_hbm("pos_emb_weight", "test", [256, 4096], dtype=de.fp16)
@@ -104,3 +104,5 @@ if __name__ == "__main__":
     mod = backend.build(output, init_addr, "test", False, targets.hpp, {"wt2hbm":False, "hbm_base": 0x0, "ddr_base": 0x0})
     with open("output/chatglm_test_19_0316.h", "w") as f:
         print(mod.get_source(), file=f)
+    with open("output/chatglm_test_19_0316.prototxt", "w") as f:
+        print(mod.get_prototxt(), file=f)

@@ -48,6 +48,7 @@ class ExecutorBase(ir.Functor):
             print(new_expr)
             vars = new_expr.get_vars()
             print(vars)
+            print(self.tp_vars)
             raise RuntimeError("no found [] when compute ne, please check!")
 
     def VisitData(self, data):
@@ -152,24 +153,24 @@ class ExecutorBase(ir.Functor):
 
     def VisitMemWriteFile(self, stmt: ir.MemWriteFile):
         new_stmt = deepcopy(stmt)
-        pass
+        raise RuntimeError("no realize MemWriteFile node!")
 
     def VisitMemWrite(self, stmt: ir.MemWrite):
         new_stmt = deepcopy(stmt)
-        pass
+        raise RuntimeError("no realize MemWrite node!")
 
     def VisitMemInit(self, stmt: ir.MemInit):
         new_stmt = deepcopy(stmt)
-        pass
+        raise RuntimeError("no realize MemInit node!")
 
     def VisitStrFormat(self, stmt: ir.StrFormat):
         new_stmt = deepcopy(stmt)
-        pass
+        raise RuntimeError("no realize StrFormat node!")
 
     def VisitInplace(self, stmt: ir.Inplace):
         new_stmt = deepcopy(stmt)
         op = new_stmt.op["py"]
-        if in_func and new_stmt.var in self.tp_vars.keys():
+        if self.in_func and new_stmt.var in self.tp_vars.keys():
             self.tp_vars[new_stmt.var.name] = eval(f"{self.tp_vars[new_stmt.var.name]} {op} {self.Visit(new_stmt.data)}")
         else:
             self.rt_vars[new_stmt.var.name] = eval(f"{self.rt_vars[new_stmt.var.name]} {op} {self.Visit(new_stmt.data)}")
