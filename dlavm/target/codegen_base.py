@@ -46,6 +46,10 @@ class CodeGenBase(ir.Functor):
         self.tab_num -= 1
         return body
 
+    def VisitMacroDefine(self, stmt: ir.MacroDefine):
+        body = "\n".join(self._clean([self.Visit(b) for b in stmt.body]))
+        return body
+
     def VisitWhile(self, stmt: ir.While):
         if stmt.body:
             self.tab_num += 1
@@ -53,7 +57,6 @@ class CodeGenBase(ir.Functor):
             self.tab_num -= 1
             return body
         return ""
-
 
 
 class CodeGenEngine:

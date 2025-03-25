@@ -57,6 +57,7 @@ def run_expr_check(dyn_arg, sta_arg, main_arg):
         sta_rt.main(name, **main_arg)
         regs1 = dyn_rt.regs
         regs2 = sta_rt.regs
+        print(regs1)
         if RegsCheckSameList(regs1, regs2, ignores):
             success = f"\033[36;32m Check Success!\033[36;0m "
             finish = f" Check Finish: \033[36;32m{name}\033[36;0m "
@@ -124,7 +125,7 @@ def mvm_compare(token, last_token):
 
 
 @run_expr_check([token, last_token], [int_token, int_last_token], {str_token:int_token, str_last_token:int_last_token})
-def mvm_bn_compare(token, last_token):
+def mvm_bn_compare(token, last_token, chin=13696, chout=4096):
     input = adr.var_hbm("input", [1, token, chin])
     weight = adr.const_hbm("weight", "test", [chout, chin])
     bn = adr.const_hbm("bn", "test", [2*chout], dtype=de.fp16)

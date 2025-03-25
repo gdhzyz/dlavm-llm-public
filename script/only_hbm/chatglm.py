@@ -73,7 +73,7 @@ token = ne.Var("token", 2048)
 last_token = ne.Var("last_token", 2048)
 # token = 19
 # last_token = 0
-device = ohbm_accel.OHBM0316
+device = ohbm_accel.OHBM0323
 
 pew = adr.const_hbm("pos_emb_weight", "test", [256, 4096], dtype=de.fp16)
 silu = adr.const_hbm("silu_weight", "test", [16*3], dtype=de.fp16)
@@ -98,11 +98,12 @@ print(output)
 
 if __name__ == "__main__":
     from dlavm.driver import config
-    config.tb_sim_path = "/home/shenao/dlavm-llm-public/tbsim/workspace_2025_0301"
+    config.tb_sim_path = device.tb_sim_path
+    config.sim_tool = "modelsim"
 
     init_addr = {"hbm": 0x0, "hbm_cache": "hbm", "runtime": "hbm_cache", "onchip": 0x0}
     # mod = backend.build_tb(output, init_addr, "test", targets.hpp, {"wt2hbm":False, "hbm_base": 0x0, "ddr_base": 0x0})
-    mod = backend.build(output, init_addr, "test", False, targets.hpp, {"wt2hbm":False, "hbm_base": 0x0, "ddr_base": 0x0})
+    mod = backend.build(output, init_addr, "test", False, targets.hpp, {"wt2hbm":False, "hbm_base": 0x0, "ddr_base": 0x0, "addr_dtype": "uint64_t"})
     with open("output/chatglm_test_19_0316.h", "w") as f:
         print(mod.get_source(), file=f)
     with open("output/chatglm_test_19_0316.prototxt", "w") as f:

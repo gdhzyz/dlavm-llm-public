@@ -124,19 +124,20 @@ def Softmax(func, args, outputs, attrs):
     CHin_div_LTout = Ceil(CHin, device.L_Tout)
     CHin_Padding = CHin_div_LTout * device.L_Tout
     CHout_div_Tout = Ceil(CHout, device.Tout)
+    CHout_div_LTout = Ceil(CHout, device.L_Tout)
     CHin_Padding_with_LTout = CHin_Padding
 
     # stride load or compute
     feature_in_line_stride = device.HBM_1Row_Bytes * Win
-    feature_in_surface_stride = device.HBM_1Row_Bytes * Win * Hin
+    feature_in_head_stride = device.HBM_1Row_Bytes * Win * Hin * CHin_div_LTout
     feature_out_line_stride = device.HBM_1Row_Bytes * Wout
-    feature_out_surface_stride = device.HBM_1Row_Bytes * Wout * Hout
+    feature_out_head_stride = device.HBM_1Row_Bytes * Wout * Hout * CHout_div_LTout
     if hasattr(data, "strides"):
         feature_in_line_stride = data.strides[-1]
-        feature_in_surface_stride = data.strides[-2]
+        feature_in_head_stride = data.strides[-3]
     if hasattr(outputs[0], "strides"):
         feature_out_line_stride = outputs[0].strides[-1]
-        feature_out_surface_stride = outputs[0].strides[-2]
+        feature_out_head_stride = outputs[0].strides[-3]
 
     # task function
     Softmax_reg_bias=128
@@ -163,10 +164,10 @@ def Softmax(func, args, outputs, attrs):
        
         w_for += CSB_Write(Softmax_reg_bias+2 , Need_Mask                 )
         w_for += CSB_Write(Softmax_reg_bias+3 , tp_feature_in_base_addr   )
-        w_for += CSB_Write(Softmax_reg_bias+4 , feature_in_surface_stride )
+        w_for += CSB_Write(Softmax_reg_bias+4 , feature_in_head_stride    )
         w_for += CSB_Write(Softmax_reg_bias+5 , feature_in_line_stride    )
         w_for += CSB_Write(Softmax_reg_bias+6 , tp_feature_out_base_addr  )
-        w_for += CSB_Write(Softmax_reg_bias+7 , feature_out_surface_stride)
+        w_for += CSB_Write(Softmax_reg_bias+7 , feature_out_head_stride   )
         w_for += CSB_Write(Softmax_reg_bias+8 , feature_out_line_stride   )
         w_for += CSB_Write(Softmax_reg_bias+9 , Width_in                  ) # Token
         w_for += CSB_Write(Softmax_reg_bias+10, Feature_Head              )

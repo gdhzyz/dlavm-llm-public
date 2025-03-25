@@ -292,6 +292,22 @@ class For(Block):
         return "\n".join(strs)
 
 
+class MacroDefine(Block):
+
+    def __init__(
+            self,
+            name: Union[str]
+        ) -> None:
+        super().__init__()
+        self.name = name
+
+    def _str_tab(self, tab_num):
+        strs = [f"#ifdef {self.name}"]
+        strs += [i._str_tab(tab_num) for i in self.body]
+        strs += ["#endif"]
+        return "\n".join(strs)
+
+
 class While(Block):
 
     def __init__(
@@ -360,7 +376,7 @@ class ExternCall(Stmt):
     def __init__(
             self,
             name: Union[str],
-            args: Union[ne.Expr, Expr, int, float, str],
+            args: List[Union[ne.Expr, Expr, int, float, str]],
             ret: Optional[ne.Var]=None
         ):
         super().__init__()

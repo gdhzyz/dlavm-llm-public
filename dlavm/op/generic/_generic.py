@@ -91,3 +91,21 @@ def ConcatRel(args, attrs):
 
 Op.Register("concat", ConcatRel)
 
+
+'''
+@brief: Gather op
+  @args: input feature datas
+  @attrs: axis and index
+  @output: Tensor
+'''
+def GatherRel(args, attrs):
+    axis, index = attrs["axis"], attrs["index"]
+    device = args[0].device
+    dtype = args[0].dtype
+    if axis == -1:
+        return False, "the axis should not be -1"
+    oshape = [i for i in args[0].shape]
+    oshape[axis] = len(index)
+    return True, Tensor(oshape, dtype, device)
+
+Op.Register("gather", GatherRel)

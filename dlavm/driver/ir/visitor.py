@@ -27,6 +27,11 @@ class Visitor(Functor):
         [self.Visit(b) for b in new_stmt.body]
         return new_stmt
 
+    def VisitMacroDefine(self, stmt: ir.MacroDefine):
+        new_stmt = stmt
+        [self.Visit(b) for b in new_stmt.body]
+        return new_stmt
+
     def VisitBlock(self, stmt: ir.Block):
         new_stmt = stmt
         [self.Visit(b) for b in new_stmt.body]

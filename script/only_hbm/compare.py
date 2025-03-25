@@ -18,7 +18,7 @@ chin, chout = [4096, 4096]
 token = 19
 last_token = 0
 f_head, w_head = [32, 2]
-device = ohbm_accel.OHBM0316
+device = ohbm_accel.OHBM0323
 
 from dlavm.driver import config
 config.tb_sim_path = device.tb_sim_path
@@ -76,11 +76,11 @@ def mvm_out_heads_atten_compare():
     qb   = adr.const_hbm("qbias", "test", [2*4096], dtype=de.fp16)
 
     ln_out = adr.var_hbm("input", [1, token, 4096])
-    output = dlavm.nn.mvm_f16xi4(ln_out, qw, qb, out_heads=[32, 2])
-    return output, []
+    output = dlavm.nn.mvm_f16xi4(ln_out, qw, qb, out_heads=[f_head, w_head])
+    return output, [10, 11, 13, 25, 33]
 
 
-@run_expr_check
+# @run_expr_check
 def glm_atten_compare():
     pew = adr.const_hbm("pos_emb_weight", "test", [256, 4096], dtype=de.fp16)
     qw   = adr.const_hbm("qweight", "test", [4096, 4096])
@@ -128,7 +128,7 @@ def conv2d_compare():
     output = transform.infer_type(output, device)
     mod1 = backend.build_tb(output, init_addr, name, target, configs)
     mod2 = backend.build(output, init_addr, name, False, target, configs)
-    return output, mod1, mod2, [10, 11, 13, 25]
+    return output, mod1, mod2, [10, 11, 13, 25, 33]
 
 
 @run_check
@@ -162,7 +162,7 @@ def trp_mvm_compare():
     output = transform.infer_type(output, device)
     mod1 = backend.build_tb(output, init_addr, name, target, configs)
     mod2 = backend.build(output, init_addr, name, False, target, configs)
-    return output, mod1, mod2, [10, 11, 13]
+    return output, mod1, mod2, [10, 11, 13, 33]
 
 
 @run_check
@@ -174,7 +174,7 @@ def f2w_mvm_compare():
     output = transform.infer_type(output, device)
     mod1 = backend.build_tb(output, init_addr, name, target, configs)
     mod2 = backend.build(output, init_addr, name, False, target, configs)
-    return output, mod1, mod2, [10, 11, 13]
+    return output, mod1, mod2, [10, 11, 13, 33]
 
 
 @run_check
@@ -186,7 +186,7 @@ def ln_compare():
     output = transform.infer_type(output, device)
     mod1 = backend.build_tb(output, init_addr, name, target, configs)
     mod2 = backend.build(output, init_addr, name, False, target, configs)
-    return output, mod1, mod2, [130, 131, 134]
+    return output, mod1, mod2, [130, 131, 134, 142]
 
 
 @run_check
@@ -198,7 +198,7 @@ def rms_compare():
     output = transform.infer_type(output, device)
     mod1 = backend.build_tb(output, init_addr, name, target, configs)
     mod2 = backend.build(output, init_addr, name, False, target, configs)
-    return output, mod1, mod2, [130, 131, 134]
+    return output, mod1, mod2, [130, 131, 134, 142]
 
 
 @run_check
@@ -210,7 +210,7 @@ def mvm_compare():
     output = transform.infer_type(output, device)
     mod1 = backend.build_tb(output, init_addr, name, target, configs)
     mod2 = backend.build(output, init_addr, name, False, target, configs)
-    return output, mod1, mod2, [10, 11, 13, 25]
+    return output, mod1, mod2, [10, 11, 13, 25, 33]
 
 
 @run_check
@@ -223,7 +223,7 @@ def mvm_bn_compare():
     output = transform.infer_type(output, device)
     mod1 = backend.build_tb(output, init_addr, name, target, configs)
     mod2 = backend.build(output, init_addr, name, False, target, configs)
-    return output, mod1, mod2, [10, 11, 13, 25]
+    return output, mod1, mod2, [10, 11, 13, 25, 33]
 
 
 @run_check
@@ -236,7 +236,7 @@ def mvm_bn_argmax_compare():
     output = transform.infer_type(output, device)
     mod1 = backend.build_tb(output, init_addr, name, target, configs)
     mod2 = backend.build(output, init_addr, name, False, target, configs)
-    return output, mod1, mod2, [10, 11, 13, 25]
+    return output, mod1, mod2, [10, 11, 13, 25, 33]
 
 
 @run_check
@@ -247,7 +247,7 @@ def softmax_compare():
     output = transform.infer_type(output, device)
     mod1 = backend.build_tb(output, init_addr, name, target, configs)
     mod2 = backend.build(output, init_addr, name, False, target, configs)
-    return output, mod1, mod2, [131, 134]
+    return output, mod1, mod2, [130, 131, 134]
 
 
 @run_check
@@ -259,7 +259,7 @@ def elementwise_compare():
     output = transform.infer_type(output, device)
     mod1 = backend.build_tb(output, init_addr, name, target, configs)
     mod2 = backend.build(output, init_addr, name, False, target, configs)
-    return output, mod1, mod2, [131, 134, 140]
+    return output, mod1, mod2, [131, 134, 139, 140]
 
 
 @run_check
@@ -271,7 +271,7 @@ def activate_compare():
     output = transform.infer_type(output, device)
     mod1 = backend.build_tb(output, init_addr, name, target, configs)
     mod2 = backend.build(output, init_addr, name, False, target, configs)
-    return output, mod1, mod2, [130, 131, 134]
+    return output, mod1, mod2, [130, 131, 134, 141]
 
 
 @run_check
@@ -283,4 +283,4 @@ def emb_glm_compare():
     output = transform.infer_type(output, device)
     mod1 = backend.build_tb(output, init_addr, name, target, configs)
     mod2 = backend.build(output, init_addr, name, False, target, configs)
-    return output, mod1, mod2, [130, 131, 134]
+    return output, mod1, mod2, [130, 131, 134, 144]

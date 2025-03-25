@@ -64,6 +64,8 @@ class Functor:
             result = self.VisitFunction(stmt)
         elif isinstance(stmt, ir.For):
             result = self.VisitFor(stmt)
+        elif isinstance(stmt, ir.MacroDefine):
+            result = self.VisitMacroDefine(stmt)
         elif isinstance(stmt, ir.While):
             result = self.VisitWhile(stmt)
         elif isinstance(stmt, ir.If):
@@ -102,6 +104,11 @@ class Functor:
         return result
 
     def VisitFunction(self, stmt: ir.Function):
+        new_stmt = deepcopy(stmt)
+        new_stmt.body = self.RmEmpty([self.Visit(b) for b in stmt.body])
+        return new_stmt
+
+    def VisitMacroDefine(self, stmt: ir.MacroDefine):
         new_stmt = deepcopy(stmt)
         new_stmt.body = self.RmEmpty([self.Visit(b) for b in stmt.body])
         return new_stmt

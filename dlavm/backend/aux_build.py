@@ -219,7 +219,7 @@ class AuxBuild(RegsBuild, GraphBuild):
 
         self.aux_task_finish()
         self.storage.set_address(init_addr)
-        lib.body = [self.storage.export(), self.inputs, self.outputs, self.load_params, self.model_upt, self.model_run]
+        lib.body = [self.storage.export(self.addr_dtype), self.inputs, self.outputs, self.load_params, self.model_upt, self.model_run]
         return lib, graphs, self.storage, None, self.insts
 
     def visit_var(self, expr):

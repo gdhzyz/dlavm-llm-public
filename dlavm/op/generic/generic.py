@@ -54,3 +54,11 @@ def concat(*args):
     '''
     attrs = Attrs({"axis":-1})
     return VM(Op.Get("split"), args, attrs)
+
+
+def gather(data):
+    '''
+    @brief: easy version, which just support get last token
+    '''
+    attrs = Attrs({"axis":-2, "index":[-1]})
+    return VM(Op.Get("gather"), [data], attrs)

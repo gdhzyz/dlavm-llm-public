@@ -130,3 +130,13 @@ class OHBM0316(OHBM):
         update tasks for ACT Op
     """
     tb_sim_path = "/home/shenao/dlavm-llm-public/tbsim/workspace_2025_0316"
+
+
+class OHBM0323(OHBM):
+
+    version = 20250323
+    description = """
+        add high32 addr register for operations.
+        *IMPORT VERSION* : update all task driver
+    """
+    tb_sim_path = "/home/shenao/dlavm-llm-public/tbsim/workspace_2025_0323"

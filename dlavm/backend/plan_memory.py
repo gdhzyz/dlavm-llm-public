@@ -145,14 +145,14 @@ class Storage:
                     source += f"# storage size: {storage.byte_size} B\n"
         return source[:-1]
 
-    def export(self):
+    def export(self, dtype="uint32_t"):
         with ir.Block() as source:
             for prefix in self.sort_keys:
                 memo = self.memo_[prefix]
                 source += ir.Annotation(f"{prefix} storage define")
                 for id, storage in memo.items():
                     addr_hex = "0x%08x" % (storage.address)
-                    source += ir.Assign(str(id), addr_hex, "uint32_t")
+                    source += ir.Assign(str(id), addr_hex, dtype)
         return source
 
     def __str__(self):

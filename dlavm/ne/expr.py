@@ -19,6 +19,7 @@ class Op:
     nequ = {"py": " != ", "cpp": " != "}
     lshift = {"py": " << ", "cpp": " << "}
     rshift = {"py": " >> ", "cpp": " >> "}
+    bit_and = {"py": " & ", "cpp": " & "}
     
 
 class InpOp:
@@ -79,14 +80,14 @@ class Expr:
                         elif new_args[0].data == 1 and self.op in [Op.mul, Op.fdiv]:
                             return new_args[1]
                         elif new_args[0].data == 0 and self.op in [Op.mul, Op.fdiv]:
-                            return new_args[1]
+                            return new_args[0]
                     elif isinstance(new_args[1], Numb):
                         if new_args[1].data == 0 and self.op in [Op.add, Op.sub]:
                             return new_args[0]
                         elif new_args[1].data == 1 and self.op == Op.mul:
                             return new_args[0]
                         elif new_args[1].data == 0 and self.op == Op.mul:
-                            return new_args[0]
+                            return new_args[1]
                 return new_expr
         else:
             if isinstance(new_args[0], Numb):
@@ -292,6 +293,15 @@ class Expr:
                 return True
         return False
         '''
+
+    def __and__(self, data):
+        new_expr = data
+        if isinstance(data, str):
+            new_expr = Var(data)
+        elif isinstance(data, (int, float)):
+            new_expr = Numb(data)
+        #return self.simplify(max_numb=0) <= new_expr
+        return Expr([self, new_expr], Op.bit_and)
 
     def export(self, tag):
         if self.op.get("inpop") is None:

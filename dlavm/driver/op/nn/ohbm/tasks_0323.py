@@ -7,22 +7,6 @@ from .... import ir
 from ....ir import CSB_Write, CSB_Read, While
 from ....basic import Tasks, Ceil, Ceil_Padding
 
-@Tasks.Register("atom.hbm.pcie2mem", ohbm_accel.OHBM)
-def PCIe2MEM(addr, fname, total_bytes, addr_base, device, is_hbm):
-    with ir.Function([ne.Var("prefix", -1, "char*")]) as func:
-        path = func.args[0]
-        addr = ne.Var(addr, -1)
-        if is_hbm:
-            with ir.For("port", 0, device.HBM_Port, 1, "uint64_t") as port:
-                real_addr = addr + addr_base + port.var*(1 << device.log2_Bank_Step)
-                real_path = port[ir.StrFormat("real_path", "%s/"+fname, path, port.var)]
-                port += ir.MemWriteFile(ir.Cast(real_addr, "uint64_t"), real_path.var, total_bytes)
-            func += port
-        else:
-            real_path = func[ir.StrFormat("real_path", "%s/"+fname, path)]
-            func += ir.MemWriteFile(addr, real_path.var, total_bytes)
-    return func
-
 
 class MVMMode:
 
@@ -38,7 +22,7 @@ class MVMMode:
     reg_20_x = Px + (Sx << (device.log2_P)) + (Kx << (device.log2_P + device.log2_S))
 
 
-@Tasks.Register("atom.ohbm.nn.mvm", ohbm_accel.OHBM)
+@Tasks.Register("atom.ohbm.nn.mvm", ohbm_accel.OHBM0323)
 def AtomMVMSingleTime(block, CHin, Hin, Win, CHout_offset, CHout, Hout, Wout,
                       CHout_Split_Times_minus1, relu_en, reg_16,
                       wt_ch_group_reg, t_quant_block_reg, Last_Group_CHin,
@@ -47,45 +31,64 @@ def AtomMVMSingleTime(block, CHin, Hin, Win, CHout_offset, CHout, Hout, Wout,
                       feature_out_addr, feature_out_surface_stride, feature_out_line_stride, 
                       reg_17, reg_18, reg_19_y, reg_20_x, reg_26, reg_27, reg_28, mode):
     onchip_mode = 0
-    block += CSB_Write (2 , CHin                      )
-    block += CSB_Write (3 , Win                       )
-    block += CSB_Write (4 , Hin                       )
-    block += CSB_Write (5 , Wout                      )
-    block += CSB_Write (6 , Hout                      )
-    block += CSB_Write (7 , CHout                     )
-    block += CSB_Write (8 , CHout_offset              )
-    block += CSB_Write (9 , CHout_Split_Times_minus1  )
-    block += CSB_Write (10, feature_in_addr           )
-    block += CSB_Write (11, wt_base_addr              )
-    block += CSB_Write (12, wt_bits_in_one_CHout      )
-    block += CSB_Write (13, feature_out_addr          )
-    block += CSB_Write (14, relu_en                   )
-    block += CSB_Write (15, onchip_mode               )
-    block += CSB_Write (16, reg_16                    )
-    block += CSB_Write (17, reg_17                    )
-    block += CSB_Write (18, reg_18                    )
+    en_log2addr = 0xff00000000
+    feature_in_addr = block.assign("feature_in_addr", feature_in_addr, "uint64_t")
+    wt_base_addr = block.assign("wt_base_addr", wt_base_addr, "uint64_t")
+    feature_out_addr = block.assign("feature_out_addr", feature_out_addr, "uint64_t")
+    in_addr_low32bits = ir.Cast(feature_in_addr, "uint32_t")
+    wt_addr_low32bits = ir.Cast(wt_base_addr, "uint32_t")
+    out_addr_low32bits = ir.Cast(feature_out_addr, "uint32_t")
+    if BN_base_addr:
+        BN_base_addr = block.assign("BN_base_addr", BN_base_addr, "uint64_t")
+        addr_high32bits = ((BN_base_addr & en_log2addr) >> 8)
+        BN_addr_low32bits = ir.Cast(BN_base_addr, "uint32_t")
+    else:
+        addr_high32bits = 0
+        BN_addr_low32bits = 0
+    addr_high32bits += ((feature_in_addr & en_log2addr) >> 32) + \
+                       ((feature_out_addr & en_log2addr) >> 24) + \
+                       ((wt_base_addr & en_log2addr) >> 16)
 
-    block += CSB_Write (19, reg_19_y                  )
-    block += CSB_Write (20, reg_20_x                  )
-    block += CSB_Write (21, 0                         )
-    block += CSB_Write (22, wt_ch_group_reg           )
-    block += CSB_Write (23, t_quant_block_reg         )
-    block += CSB_Write (24, Last_Group_CHin           )
+    block += CSB_Write (2 , CHin                                    )
+    block += CSB_Write (3 , Win                                     )
+    block += CSB_Write (4 , Hin                                     )
+    block += CSB_Write (5 , Wout                                    )
+    block += CSB_Write (6 , Hout                                    )
+    block += CSB_Write (7 , CHout                                   )
+    block += CSB_Write (8 , CHout_offset                            )
+    block += CSB_Write (9 , CHout_Split_Times_minus1                )
+    block += CSB_Write (10, in_addr_low32bits                       )
+    block += CSB_Write (11, wt_addr_low32bits                       )
+    block += CSB_Write (12, wt_bits_in_one_CHout                    )
+    block += CSB_Write (13, out_addr_low32bits                      )
+    block += CSB_Write (14, relu_en                                 )
+    block += CSB_Write (15, onchip_mode                             )
+    block += CSB_Write (16, reg_16                                  )
+    block += CSB_Write (17, reg_17                                  )
+    block += CSB_Write (18, reg_18                                  )
 
-    block += CSB_Write (25, BN_base_addr              )
-    block += CSB_Write (26, reg_26                    )
-    block += CSB_Write (27, reg_27                    )
-    block += CSB_Write (28, reg_28                    )
-    block += CSB_Write (29, feature_in_surface_stride )
-    block += CSB_Write (30, feature_in_line_stride    )
-    block += CSB_Write (31, feature_out_surface_stride)
-    block += CSB_Write (32, feature_out_line_stride   )
+    block += CSB_Write (19, reg_19_y                                )
+    block += CSB_Write (20, reg_20_x                                )
+    block += CSB_Write (21, 0                                       )
+    block += CSB_Write (22, wt_ch_group_reg                         )
+    block += CSB_Write (23, t_quant_block_reg                       )
+    block += CSB_Write (24, Last_Group_CHin                         )
 
-    block += CSB_Write (33, mode                      )
+    block += CSB_Write (25, BN_addr_low32bits                       )
+    block += CSB_Write (26, reg_26                                  )
+    block += CSB_Write (27, reg_27                                  )
+    block += CSB_Write (28, reg_28                                  )
+    block += CSB_Write (29, feature_in_surface_stride               )
+    block += CSB_Write (30, feature_in_line_stride                  )
+    block += CSB_Write (31, feature_out_surface_stride              )
+    block += CSB_Write (32, feature_out_line_stride                 )
+    block += CSB_Write (33, ir.Cast(addr_high32bits, "uint32_t")    )
+
+    block += CSB_Write (34, mode                      )
     block += While(CSB_Read(1)!=1) 
 
 
-@Tasks.Register("atom.ohbm.nn.mvm_f16xi4", ohbm_accel.OHBM)
+@Tasks.Register("atom.ohbm.nn.mvm_f16xi4", ohbm_accel.OHBM0323)
 def AtomMVMSingleTime(block, CHin, Hin, Win, CHout_offset, CHout, Hout, Wout,
                       CHout_Split_Times_minus1, relu_en, wt_reuse, dat_reuse,
                       wt_ch_group_reg, t_quant_block_reg, Last_Group_CHin,
@@ -94,21 +97,23 @@ def AtomMVMSingleTime(block, CHin, Hin, Win, CHout_offset, CHout, Hout, Wout,
                       feature_out_addr, feature_out_surface_stride, feature_out_line_stride, 
                       mode, device):
     task = Tasks.Get("atom.ohbm.nn.mvm", device)
+    BN_mode = 1
     if mode not in [MVMMode.bn, MVMMode.bn_argmax]:
         BN_base_addr = 0
+        BN_mode = 0
     if mode not in [MVMMode.bn_argmax]:
         CHout_Split_Times_minus1 = 0
-    reg_16 = dat_reuse*2 + wt_reuse
+    reg_16 = dat_reuse*2 + wt_reuse + BN_mode*4
     task(block, CHin, Hin, Win, CHout_offset, CHout, Hout, Wout,
          CHout_Split_Times_minus1, relu_en, reg_16,
          wt_ch_group_reg, t_quant_block_reg, Last_Group_CHin,
          feature_in_addr, feature_in_surface_stride, feature_in_line_stride,
          wt_base_addr, wt_bits_in_one_CHout, BN_base_addr,
          feature_out_addr, feature_out_surface_stride, feature_out_line_stride, 
-         0, 0, MVMMode.reg_19_y, MVMMode.reg_20_x, 0, 0, 0, mode)
+         1, 0, MVMMode.reg_19_y, MVMMode.reg_20_x, 0, 0, 0, mode)
 
 
-@Tasks.Register("atom.ohbm.nn.conv2d", ohbm_accel.OHBM)
+@Tasks.Register("atom.ohbm.nn.conv2d", ohbm_accel.OHBM0323)
 def AtomMVMSingleTime(block, CHin, Hin, Win, CHout_offset, CHout, Hout, Wout,
                       relu_en, wt_reuse, dat_reuse, Py_now, Px, Ky, Kx, Sy, Sx,
                       feature_in_addr, feature_in_surface_stride, feature_in_line_stride,
@@ -120,8 +125,9 @@ def AtomMVMSingleTime(block, CHin, Hin, Win, CHout_offset, CHout, Hout, Wout,
     wt_ch_group_reg = 0
     t_quant_block_reg = 0
     Last_Group_CHin = 0
-    reg_16 = dat_reuse*2 + wt_reuse
-    reg_17 = 1
+    BN_mode = 1
+    reg_16 = dat_reuse*2 + wt_reuse + BN_mode*4
+    reg_17 = 2
     reg_19_y = Py_now + (Sy << (device.log2_P)) + (Ky << (device.log2_P + device.log2_S))
     reg_20_x = Px + (Sx << (device.log2_P)) + (Kx << (device.log2_P + device.log2_S))
     task(block, CHin, Hin, Win, CHout_offset, CHout, Hout, Wout,
@@ -133,7 +139,7 @@ def AtomMVMSingleTime(block, CHin, Hin, Win, CHout_offset, CHout, Hout, Wout,
          reg_17, 0, reg_19_y, reg_20_x, 0, 0, 0, mode)
 
 
-@Tasks.Register("atom.ohbm.nn.mvm_f16xf16", ohbm_accel.OHBM)
+@Tasks.Register("atom.ohbm.nn.mvm_f16xf16", ohbm_accel.OHBM0323)
 def AtomMVMSingleTime(block, CHin, Hin, Win, CHout_offset, CHout, Hout, Wout,
                       wt_reuse, dat_reuse, reg_17, reg_18, reg_26, reg_27, reg_28,
                       feature_in_addr, feature_in_head_stride, feature_in_line_stride,
@@ -519,7 +525,7 @@ def Conv2d(func, args, outputs, attrs):
 #########################################################################################
 #                                nn.mvm_f16xf16 compute task                            #
 #########################################################################################
-@Tasks.Register("ohbm.nn.mvm_f16xf16", ohbm_accel.OHBM)
+@Tasks.Register("ohbm.nn.mvm_f16xf16", ohbm_accel.OHBM0323)
 def MVMF16xF16(func, args, outputs, attrs):
     device = args[0].device
 
@@ -533,8 +539,10 @@ def MVMF16xF16(func, args, outputs, attrs):
     Sparsity_Factor = 1
     Feature_Head, Height, Width_in = data.shape[-3:]
     Weight_Head = weight.shape[0]
+    Padding_Feature_Head = None
     if hasattr(data, "heads"):
         Feature_Head = data.heads[0]
+        Padding_Feature_Head = data.heads[2]
     if w_trp:
         Width_out = weight.shape[-2]
         MAX_CH_per_HEAD = Width_in
@@ -560,6 +568,9 @@ def MVMF16xF16(func, args, outputs, attrs):
     Head_x_CHin_div_LTout = (Head_x_CHin+device.L_Tout-1)//device.L_Tout
     LTout_div_CHin        = device.L_Tout//MAX_CH_per_HEAD # MAX_CH_per_HEAD
     Head_x_CH_div_LTout   = (Feature_Head//Weight_Head+LTout_div_CHin-1)//LTout_div_CHin
+    if Padding_Feature_Head is None:
+        Feature_Head_in_Padding = (Head_x_CHin_div_LTout*device.L_Tout//CHin)
+        Padding_Feature_Head    = (Feature_Head_in_Padding*Weight_Head)
 
     WT_CHin                 = device.MAX_TOKEN
     WT_CHout                = MAX_CH_per_HEAD
@@ -673,20 +684,21 @@ def MVMF16xF16(func, args, outputs, attrs):
 
     task = Tasks.Get("atom.ohbm.nn.mvm_f16xf16", device)
 
-    reg_17 = 3
+    reg_17 = 4
     reg_18 = FP32_to_FP20(1.0)
-    reg_26 = 0
+    reg_26 = WT_LINE_STRIDE
     reg_27 = (Head_x_CH_div_LTout << 8) + LTout_div_CHin
     reg_28 = 2
-    if attrs.get("w_trp"):
-        reg_17 = 2
-        reg_18 = FP32_to_FP20(1/math.sqrt(Width_in))
-        reg_28 = 1
-    else:
-        reg_26 = WT_LINE_STRIDE
-
     H_in_now = Feature_Head // Weight_Head
     H_out_now = H_in_now
+    if attrs.get("w_trp"):
+        reg_17 = 3
+        reg_18 = FP32_to_FP20(1/math.sqrt(Width_in))
+        reg_26 = 0
+        reg_28 = 1
+        H_in_now = Padding_Feature_Head // Weight_Head
+        H_out_now = Feature_Head // Weight_Head
+
     t_if = ir.If(total_clks_if_reuse_wt < total_clks_if_reuse_dat)
     with t_if.then_block as _then:
         with ir.For("h", 0, Weight_Head, 1) as h_for:
@@ -750,7 +762,7 @@ def MVMF16xF16(func, args, outputs, attrs):
 #########################################################################################
 #                                nn.norm compute task                                   #
 #########################################################################################
-@Tasks.Register("ohbm.nn.norm", ohbm_accel.OHBM)
+@Tasks.Register("ohbm.nn.norm", ohbm_accel.OHBM0323)
 def Norm(func, args, outputs, attrs):
     device = args[0].device
     data, weight = args
@@ -794,15 +806,14 @@ def Norm(func, args, outputs, attrs):
     ch_out=Width_in
     Ln_reg_bias=128
     
-    Onchip_Dat_BRAM_Bits    =device.TOTAL_DAT_BRAM_BITS
-    Total_Dat_Bits_perWTHead=Height*CHin_Padding_with_LTout*device.MAX_DAT_DW
     Total_Dat_Bits_PerToken =CHin_Padding_with_LTout*device.MAX_DAT_DW
-    Onchip_Token_perWTHead  =Onchip_Dat_BRAM_Bits//Total_Dat_Bits_PerToken
+    Onchip_Token_perWTHead  =device.TOTAL_DAT_BRAM_BITS//Total_Dat_Bits_PerToken
+    Required_Dat_BRAM_Bits  =device.AXI_BURST_LEN*device.MAX_DAT_DW*CHin_Padding_with_LTout
     
     Wout_Split_Times_minus1 = func.assign("Wout_Split_Times_minus1", 0, "int")
     out_w_per_slice         = func.assign("out_w_per_slice", Wout, "int")
     out_w_in_last_slice     = func.assign("out_w_in_last_slice", Wout, "int")
-    t_if = ir.If(Total_Dat_Bits_perWTHead>Onchip_Dat_BRAM_Bits)
+    t_if = ir.If(Required_Dat_BRAM_Bits>device.TOTAL_DAT_BRAM_BITS)
     with t_if.then_block as _then:
         Wout_Split_Times_minus1=_then.assign_var(Wout_Split_Times_minus1, (Wout+Onchip_Token_perWTHead-1)//Onchip_Token_perWTHead-1)
         out_w_per_slice        =_then.assign_var(out_w_per_slice, Onchip_Token_perWTHead)
@@ -813,21 +824,32 @@ def Norm(func, args, outputs, attrs):
         Win = ne.If(w < Wout_Split_Times_minus1, out_w_per_slice, out_w_in_last_slice)
         tp_feature_in_base_addr =feature_in_base_addr  +w*out_w_per_slice*device.HBM_1Row_Bytes
         tp_feature_out_base_addr=feature_out_base_addr +w*out_w_per_slice*device.HBM_1Row_Bytes
-       
-        w_for += CSB_Write(Ln_reg_bias+2 , wt_base_addr              )
-        w_for += CSB_Write(Ln_reg_bias+3 , tp_feature_in_base_addr   )
+
+        en_log2addr = 0xff00000000
+        feature_in_addr = w_for.assign("feature_in_addr", tp_feature_in_base_addr, "uint64_t")
+        wt_base_addr = w_for.assign("wt_base_addr", wt_base_addr, "uint64_t")
+        feature_out_addr = w_for.assign("feature_out_addr", tp_feature_out_base_addr, "uint64_t")
+        in_addr_low32bits = ir.Cast(feature_in_addr, "uint32_t")
+        wt_addr_low32bits = ir.Cast(wt_base_addr, "uint32_t")
+        out_addr_low32bits = ir.Cast(feature_out_addr, "uint32_t")
+        addr_high32bits = ((feature_in_addr & en_log2addr) >> 32) + \
+                          ((feature_out_addr & en_log2addr) >> 24) + \
+                          ((wt_base_addr & en_log2addr) >> 16)
+
+        w_for += CSB_Write(Ln_reg_bias+2 , wt_addr_low32bits         )
+        w_for += CSB_Write(Ln_reg_bias+3 , in_addr_low32bits         )
         w_for += CSB_Write(Ln_reg_bias+4 , feature_in_surface_stride )
         w_for += CSB_Write(Ln_reg_bias+5 , feature_in_line_stride    )
-        w_for += CSB_Write(Ln_reg_bias+6 , tp_feature_out_base_addr  )
+        w_for += CSB_Write(Ln_reg_bias+6 , out_addr_low32bits        )
         w_for += CSB_Write(Ln_reg_bias+7 , feature_out_surface_stride)
         w_for += CSB_Write(Ln_reg_bias+8 , feature_out_line_stride   )
         w_for += CSB_Write(Ln_reg_bias+9 , CHin                      )
         w_for += CSB_Write(Ln_reg_bias+10, Hin                       )
         w_for += CSB_Write(Ln_reg_bias+11, Win                       )
-        w_for += CSB_Write(Ln_reg_bias+12, pixel_in                  )
+        w_for += CSB_Write(Ln_reg_bias+12, Layer_Norm                )
         w_for += CSB_Write(Ln_reg_bias+13, FP20_recip_CH_r           )
-        w_for += CSB_Write(Ln_reg_bias+14, 0                         )
-        w_for += CSB_Write(Ln_reg_bias+15, Layer_Norm                )
+        w_for += CSB_Write(Ln_reg_bias+14, addr_high32bits           )
+        w_for += CSB_Write(Ln_reg_bias+15, 0                         )
         w_for += CSB_Write(Ln_reg_bias+16, 0                         )
         w_for += CSB_Write(Ln_reg_bias+17, 0b100000                  )
    
@@ -838,7 +860,7 @@ def Norm(func, args, outputs, attrs):
 #########################################################################################
 #                                nn.softmax compute task                                #
 #########################################################################################
-@Tasks.Register("ohbm.nn.softmax", ohbm_accel.OHBM)
+@Tasks.Register("ohbm.nn.softmax", ohbm_accel.OHBM0323)
 def Softmax(func, args, outputs, attrs):
     device = args[0].device
     data = args[0]
@@ -881,16 +903,15 @@ def Softmax(func, args, outputs, attrs):
 
     # task function
     Softmax_reg_bias=128
-    
-    Onchip_Dat_BRAM_Bits    =device.TOTAL_DAT_BRAM_BITS
-    Total_Dat_Bits_perWTHead=Height*CHin_Padding_with_LTout*device.MAX_DAT_DW*Feature_Head
-    Total_Dat_Bits_PerToken =CHin_Padding_with_LTout*device.MAX_DAT_DW*Feature_Head
-    Onchip_Token_perWTHead  =Onchip_Dat_BRAM_Bits//Total_Dat_Bits_PerToken
+
+    Total_Dat_Bits_PerToken =CHin_Padding_with_LTout*device.MAX_DAT_DW
+    Onchip_Token_perWTHead  =device.TOTAL_DAT_BRAM_BITS//Total_Dat_Bits_PerToken
+    Required_Dat_BRAM_Bits  =device.AXI_BURST_LEN*device.MAX_DAT_DW*CHin_Padding_with_LTout
     
     Wout_Split_Times_minus1 = func.assign("Wout_Split_Times_minus1", 0, "int")
     out_w_per_slice         = func.assign("out_w_per_slice", Wout, "int")
     out_w_in_last_slice     = func.assign("out_w_in_last_slice", Wout, "int")
-    t_if = ir.If(Total_Dat_Bits_perWTHead>Onchip_Dat_BRAM_Bits)
+    t_if = ir.If(Required_Dat_BRAM_Bits>device.TOTAL_DAT_BRAM_BITS)
     with t_if.then_block as _then:
         Wout_Split_Times_minus1=_then.assign_var(Wout_Split_Times_minus1, (Wout+Onchip_Token_perWTHead-1)//Onchip_Token_perWTHead-1)
         out_w_per_slice        =_then.assign_var(out_w_per_slice, Onchip_Token_perWTHead)
@@ -902,20 +923,28 @@ def Softmax(func, args, outputs, attrs):
         tp_feature_in_base_addr =feature_in_base_addr  +w*out_w_per_slice*device.HBM_1Row_Bytes
         tp_feature_out_base_addr=feature_out_base_addr +w*out_w_per_slice*device.HBM_1Row_Bytes
         Win_offset=w*out_w_per_slice+last_token
-       
-        w_for += CSB_Write(Softmax_reg_bias+2 , Need_Mask                 )
-        w_for += CSB_Write(Softmax_reg_bias+3 , tp_feature_in_base_addr   )
+ 
+        en_log2addr = 0xff00000000
+        feature_in_addr = w_for.assign("feature_in_addr", tp_feature_in_base_addr, "uint64_t")
+        feature_out_addr = w_for.assign("feature_out_addr", tp_feature_out_base_addr, "uint64_t")
+        in_addr_low32bits = ir.Cast(feature_in_addr, "uint32_t")
+        out_addr_low32bits = ir.Cast(feature_out_addr, "uint32_t")
+        addr_high32bits = ((feature_in_addr & en_log2addr) >> 32) + \
+                          ((feature_out_addr & en_log2addr) >> 24) 
+      
+        w_for += CSB_Write(Softmax_reg_bias+2 , addr_high32bits           )
+        w_for += CSB_Write(Softmax_reg_bias+3 , in_addr_low32bits         )
         w_for += CSB_Write(Softmax_reg_bias+4 , feature_in_head_stride    )
         w_for += CSB_Write(Softmax_reg_bias+5 , feature_in_line_stride    )
-        w_for += CSB_Write(Softmax_reg_bias+6 , tp_feature_out_base_addr  )
+        w_for += CSB_Write(Softmax_reg_bias+6 , out_addr_low32bits        )
         w_for += CSB_Write(Softmax_reg_bias+7 , feature_out_head_stride   )
         w_for += CSB_Write(Softmax_reg_bias+8 , feature_out_line_stride   )
         w_for += CSB_Write(Softmax_reg_bias+9 , Width_in                  ) # Token
         w_for += CSB_Write(Softmax_reg_bias+10, Feature_Head              )
         w_for += CSB_Write(Softmax_reg_bias+11, Width_in                  ) # Token
         w_for += CSB_Write(Softmax_reg_bias+12, Win                       )
-        w_for += CSB_Write(Softmax_reg_bias+13, 0                         )
-        w_for += CSB_Write(Softmax_reg_bias+14, Win_offset                )
+        w_for += CSB_Write(Softmax_reg_bias+13, Win_offset                )
+        w_for += CSB_Write(Softmax_reg_bias+14, Need_Mask                 )
         w_for += CSB_Write(Softmax_reg_bias+15, 0                         )
         w_for += CSB_Write(Softmax_reg_bias+16, 0                         )
         w_for += CSB_Write(Softmax_reg_bias+17, 0b1000                    )
@@ -927,7 +956,7 @@ def Softmax(func, args, outputs, attrs):
 #########################################################################################
 #                                nn.elementwise compute task                            #
 #########################################################################################
-@Tasks.Register("ohbm.nn.elementwise", ohbm_accel.OHBM)
+@Tasks.Register("ohbm.nn.elementwise", ohbm_accel.OHBM0323)
 def Elementwise(func, args, outputs, attrs):
     device = args[0].device
     data, weight = args
@@ -973,28 +1002,61 @@ def Elementwise(func, args, outputs, attrs):
     # task function
     Elementwise_reg_bias = 128
        
-    func += CSB_Write(Elementwise_reg_bias+2 , Mode                      )
-    func += CSB_Write(Elementwise_reg_bias+3 , feature_in_base_addr      )
-    func += CSB_Write(Elementwise_reg_bias+4 , feature_in_surface_stride )
-    func += CSB_Write(Elementwise_reg_bias+5 , feature_in_line_stride    )
-    func += CSB_Write(Elementwise_reg_bias+6 , feature_out_base_addr     )
-    func += CSB_Write(Elementwise_reg_bias+7 , feature_out_surface_stride)
-    func += CSB_Write(Elementwise_reg_bias+8 , feature_out_line_stride   )
-    func += CSB_Write(Elementwise_reg_bias+9 , CHin                      )
-    func += CSB_Write(Elementwise_reg_bias+10, Win                       )
-    func += CSB_Write(Elementwise_reg_bias+11, Hin                       )
-    func += CSB_Write(Elementwise_reg_bias+12, feature_wt_base_addr      )
-    func += CSB_Write(Elementwise_reg_bias+13, feature_wt_surface_stride )
-    func += CSB_Write(Elementwise_reg_bias+14, feature_wt_line_stride    )
-    func += CSB_Write(Elementwise_reg_bias+17, 0b000010                  )
+    Total_Dat_Bits_PerToken =CHin_Padding_with_LTout*device.MAX_DAT_DW
+    Onchip_Token_perWTHead  =device.TOTAL_DAT_BRAM_BITS//Total_Dat_Bits_PerToken
+    Required_Dat_BRAM_Bits  =device.AXI_BURST_LEN*device.MAX_DAT_DW*CHin_Padding_with_LTout
+    
+    Wout_Split_Times_minus1 = func.assign("Wout_Split_Times_minus1", 0, "int")
+    out_w_per_slice         = func.assign("out_w_per_slice", Wout, "int")
+    out_w_in_last_slice     = func.assign("out_w_in_last_slice", Wout, "int")
+    t_if = ir.If(Required_Dat_BRAM_Bits>device.TOTAL_DAT_BRAM_BITS)
+    with t_if.then_block as _then:
+        Wout_Split_Times_minus1=_then.assign_var(Wout_Split_Times_minus1, (Wout+Onchip_Token_perWTHead-1)//Onchip_Token_perWTHead-1)
+        out_w_per_slice        =_then.assign_var(out_w_per_slice, Onchip_Token_perWTHead)
+        out_w_in_last_slice    =_then.assign_var(out_w_in_last_slice, Wout-(Wout_Split_Times_minus1)*out_w_per_slice)
+    func += t_if
+    with ir.For("w", 0, Wout_Split_Times_minus1+1, 1) as w_for:
+        w = w_for.var
+        Win = ne.If(w < Wout_Split_Times_minus1, out_w_per_slice, out_w_in_last_slice)
+        tp_feature_in_base_addr =feature_in_base_addr  +w*out_w_per_slice*device.HBM_1Row_Bytes
+        tp_feature_wt_base_addr =feature_wt_base_addr  +w*out_w_per_slice*device.HBM_1Row_Bytes
+        tp_feature_out_base_addr=feature_out_base_addr +w*out_w_per_slice*device.HBM_1Row_Bytes
 
-    func += While(CSB_Read(Elementwise_reg_bias+1)!=1) 
+        en_log2addr = 0xff00000000
+        feature_in_addr = w_for.assign("feature_in_addr", tp_feature_in_base_addr, "uint64_t")
+        wt_base_addr = w_for.assign("wt_base_addr", tp_feature_wt_base_addr, "uint64_t")
+        feature_out_addr = w_for.assign("feature_out_addr", tp_feature_out_base_addr, "uint64_t")
+        in_addr_low32bits = ir.Cast(feature_in_addr, "uint32_t")
+        wt_addr_low32bits = ir.Cast(wt_base_addr, "uint32_t")
+        out_addr_low32bits = ir.Cast(feature_out_addr, "uint32_t")
+        addr_high32bits = ((feature_in_addr & en_log2addr) >> 32) + \
+                          ((feature_out_addr & en_log2addr) >> 24) + \
+                          ((wt_base_addr & en_log2addr) >> 16)
+
+        w_for += CSB_Write(Elementwise_reg_bias+2 , Mode                      )
+        w_for += CSB_Write(Elementwise_reg_bias+3 , in_addr_low32bits         )
+        w_for += CSB_Write(Elementwise_reg_bias+4 , feature_in_surface_stride )
+        w_for += CSB_Write(Elementwise_reg_bias+5 , feature_in_line_stride    )
+        w_for += CSB_Write(Elementwise_reg_bias+6 , out_addr_low32bits        )
+        w_for += CSB_Write(Elementwise_reg_bias+7 , feature_out_surface_stride)
+        w_for += CSB_Write(Elementwise_reg_bias+8 , feature_out_line_stride   )
+        w_for += CSB_Write(Elementwise_reg_bias+9 , CHin                      )
+        w_for += CSB_Write(Elementwise_reg_bias+10, Win                       )
+        w_for += CSB_Write(Elementwise_reg_bias+11, addr_high32bits           )
+        w_for += CSB_Write(Elementwise_reg_bias+12, wt_addr_low32bits         )
+        w_for += CSB_Write(Elementwise_reg_bias+13, feature_wt_surface_stride )
+        w_for += CSB_Write(Elementwise_reg_bias+14, feature_wt_line_stride    )
+        w_for += CSB_Write(Elementwise_reg_bias+17, 0b000010                  )
+
+        w_for += While(CSB_Read(Elementwise_reg_bias+1)!=1) 
+
+    func += w_for
 
 
 #########################################################################################
 #                                nn.activate compute task                               #
 #########################################################################################
-@Tasks.Register("ohbm.nn.activate", ohbm_accel.OHBM)
+@Tasks.Register("ohbm.nn.activate", ohbm_accel.OHBM0323)
 def Activate(func, args, outputs, attrs):
     device = args[0].device
     data, weight = args
@@ -1036,15 +1098,14 @@ def Activate(func, args, outputs, attrs):
     pixel_in=Height
     activation_reg_bias=128
     
-    Onchip_Dat_BRAM_Bits    =device.TOTAL_DAT_BRAM_BITS
-    Total_Dat_Bits_perWTHead=Height*CHin_Padding_with_LTout*device.MAX_DAT_DW
     Total_Dat_Bits_PerToken =CHin_Padding_with_LTout*device.MAX_DAT_DW
-    Onchip_Token_perWTHead  =Onchip_Dat_BRAM_Bits//Total_Dat_Bits_PerToken
-    
+    Onchip_Token_perWTHead  =device.TOTAL_DAT_BRAM_BITS//Total_Dat_Bits_PerToken
+    Required_Dat_BRAM_Bits  =device.AXI_BURST_LEN*device.MAX_DAT_DW*CHin_Padding_with_LTout
+ 
     Wout_Split_Times_minus1 = func.assign("Wout_Split_Times_minus1", 0, "int")
     out_w_per_slice         = func.assign("out_w_per_slice", Wout, "int")
     out_w_in_last_slice     = func.assign("out_w_in_last_slice", Wout, "int")
-    t_if = ir.If(Total_Dat_Bits_perWTHead>Onchip_Dat_BRAM_Bits)
+    t_if = ir.If(Required_Dat_BRAM_Bits>device.TOTAL_DAT_BRAM_BITS)
     with t_if.then_block as _then:
         Wout_Split_Times_minus1=_then.assign_var(Wout_Split_Times_minus1, (Wout+Onchip_Token_perWTHead-1)//Onchip_Token_perWTHead-1)
         out_w_per_slice        =_then.assign_var(out_w_per_slice, Onchip_Token_perWTHead)
@@ -1055,19 +1116,30 @@ def Activate(func, args, outputs, attrs):
         Win = ne.If(w < Wout_Split_Times_minus1, out_w_per_slice, out_w_in_last_slice)
         tp_feature_in_base_addr =feature_in_base_addr  +w*out_w_per_slice*device.HBM_1Row_Bytes
         tp_feature_out_base_addr=feature_out_base_addr +w*out_w_per_slice*device.HBM_1Row_Bytes
+
+        en_log2addr = 0xff00000000
+        feature_in_addr = w_for.assign("feature_in_addr", tp_feature_in_base_addr, "uint64_t")
+        wt_base_addr = w_for.assign("wt_base_addr", wt_base_addr, "uint64_t")
+        feature_out_addr = w_for.assign("feature_out_addr", tp_feature_out_base_addr, "uint64_t")
+        in_addr_low32bits = ir.Cast(feature_in_addr, "uint32_t")
+        wt_addr_low32bits = ir.Cast(wt_base_addr, "uint32_t")
+        out_addr_low32bits = ir.Cast(feature_out_addr, "uint32_t")
+        addr_high32bits = ((feature_in_addr & en_log2addr) >> 32) + \
+                          ((feature_out_addr & en_log2addr) >> 24) + \
+                          ((wt_base_addr & en_log2addr) >> 16)
        
-        w_for += CSB_Write(activation_reg_bias+2 , wt_base_addr              )
-        w_for += CSB_Write(activation_reg_bias+3 , tp_feature_in_base_addr   )
+        w_for += CSB_Write(activation_reg_bias+2 , wt_addr_low32bits         )
+        w_for += CSB_Write(activation_reg_bias+3 , in_addr_low32bits         )
         w_for += CSB_Write(activation_reg_bias+4 , feature_in_surface_stride )
         w_for += CSB_Write(activation_reg_bias+5 , feature_in_line_stride    )
-        w_for += CSB_Write(activation_reg_bias+6 , tp_feature_out_base_addr  )
+        w_for += CSB_Write(activation_reg_bias+6 , out_addr_low32bits        )
         w_for += CSB_Write(activation_reg_bias+7 , feature_out_surface_stride)
         w_for += CSB_Write(activation_reg_bias+8 , feature_out_line_stride   )
         w_for += CSB_Write(activation_reg_bias+9 , CHin                      )
         w_for += CSB_Write(activation_reg_bias+10, Hin                       )
         w_for += CSB_Write(activation_reg_bias+11, Win                       )
-        w_for += CSB_Write(activation_reg_bias+12, 0                         )
-        w_for += CSB_Write(activation_reg_bias+13, 0                         )
+        w_for += CSB_Write(activation_reg_bias+12, ne.If(w, 2, 1)            )
+        w_for += CSB_Write(activation_reg_bias+13, addr_high32bits           )
         w_for += CSB_Write(activation_reg_bias+14, 0                         )
         w_for += CSB_Write(activation_reg_bias+15, 0                         )
         w_for += CSB_Write(activation_reg_bias+16, 0                         )
@@ -1080,7 +1152,7 @@ def Activate(func, args, outputs, attrs):
 #########################################################################################
 #                               nn.kvcache2hbm compute task                             #
 #########################################################################################
-@Tasks.Register("ohbm.nn.kvcache2hbm", ohbm_accel.OHBM)
+@Tasks.Register("ohbm.nn.kvcache2hbm", ohbm_accel.OHBM0323) # TODO: high addr bits version not update
 def Kvcache2hbm(func, args, outputs, attrs):
     device = args[0].device
     data = args[0]
@@ -1151,7 +1223,7 @@ def Kvcache2hbm(func, args, outputs, attrs):
 #########################################################################################
 #                                nn.rope compute task                                   #
 #########################################################################################
-@Tasks.Register("ohbm.nn.rope", ohbm_accel.OHBM)
+@Tasks.Register("ohbm.nn.rope", ohbm_accel.OHBM0323)
 def PosEmb(func, args, outputs, attrs):
     device = args[0].device
     data, weight = args
@@ -1200,28 +1272,15 @@ def PosEmb(func, args, outputs, attrs):
 
     # task function
     PosEmb_reg_bias=128
-    
-    Onchip_Dat_BRAM_Bits    =device.TOTAL_DAT_BRAM_BITS
-    Total_Dat_Bits_perWTHead=Height*CHin_Padding_with_LTout*device.MAX_DAT_DW
-    Total_Dat_Bits_PerToken =CHin_Padding_with_LTout*device.MAX_DAT_DW
-    Onchip_Token_perWTHead  =Onchip_Dat_BRAM_Bits//Total_Dat_Bits_PerToken
-    Total_Wt_Bits_perWTHead =(Height)*Width_in*device.MAX_DAT_DW
-    
-    """
-    TODO: limit the Height var if it is dynamic symbol
-    if(Total_Wt_Bits_perWTHead>(`TOTAL_WT_BRAM_BITS/`LTout_div_CHout))
-    begin
-        $display("=======================================================================");
-        $display("================ FPGA WT BRAM DEPTH not enough!    ====================");
-        $display("=======================================================================");
-        $finish;
-    end
-    """
+
+    Total_Dat_Bits_PerToken =Head_x_CH_div_LTout*device.L_Tout*device.MAX_DAT_DW
+    Onchip_Token_perWTHead  =device.TOTAL_DAT_BRAM_BITS//Total_Dat_Bits_PerToken
+    Required_Dat_BRAM_Bits  =device.AXI_BURST_LEN*device.MAX_DAT_DW*Head_x_CH_div_LTout*device.L_Tout
     
     Wout_Split_Times_minus1 = func.assign("Wout_Split_Times_minus1", 0, "int")
     out_w_per_slice         = func.assign("out_w_per_slice", Wout, "int")
     out_w_in_last_slice     = func.assign("out_w_in_last_slice", Wout, "int")
-    t_if = ir.If(Total_Dat_Bits_perWTHead>Onchip_Dat_BRAM_Bits)
+    t_if = ir.If(Required_Dat_BRAM_Bits>device.TOTAL_DAT_BRAM_BITS)
     with t_if.then_block as _then:
         Wout_Split_Times_minus1=_then.assign_var(Wout_Split_Times_minus1, (Wout+Onchip_Token_perWTHead-1)//Onchip_Token_perWTHead-1)
         out_w_per_slice        =_then.assign_var(out_w_per_slice, Onchip_Token_perWTHead)
@@ -1233,13 +1292,24 @@ def PosEmb(func, args, outputs, attrs):
         tp_feature_in_base_addr =feature_in_base_addr  +w*out_w_per_slice*device.HBM_1Row_Bytes
         tp_feature_out_base_addr=feature_out_base_addr +w*out_w_per_slice*device.HBM_1Row_Bytes
         tp_PosEmb_addr          =PosEmb_in_base_addr+(last_token+w*out_w_per_slice)*device.HBM_1Row_Bytes
+
+        en_log2addr = 0xff00000000
+        feature_in_addr = w_for.assign("feature_in_addr", tp_feature_in_base_addr, "uint64_t")
+        wt_base_addr = w_for.assign("wt_base_addr", tp_PosEmb_addr, "uint64_t")
+        feature_out_addr = w_for.assign("feature_out_addr", tp_feature_out_base_addr, "uint64_t")
+        in_addr_low32bits = ir.Cast(feature_in_addr, "uint32_t")
+        wt_addr_low32bits = ir.Cast(wt_base_addr, "uint32_t")
+        out_addr_low32bits = ir.Cast(feature_out_addr, "uint32_t")
+        addr_high32bits = ((feature_in_addr & en_log2addr) >> 32) + \
+                          ((feature_out_addr & en_log2addr) >> 24) + \
+                          ((wt_base_addr & en_log2addr) >> 16)
       
         reg_15 = (Head_x_CH_div_LTout << 8) + LTout_div_CHout
-        w_for += CSB_Write(PosEmb_reg_bias+2 , tp_PosEmb_addr            )
-        w_for += CSB_Write(PosEmb_reg_bias+3 , tp_feature_in_base_addr   )
+        w_for += CSB_Write(PosEmb_reg_bias+2 , wt_addr_low32bits         )
+        w_for += CSB_Write(PosEmb_reg_bias+3 , in_addr_low32bits         )
         w_for += CSB_Write(PosEmb_reg_bias+4 , feature_in_head_stride    )
         w_for += CSB_Write(PosEmb_reg_bias+5 , feature_in_line_stride    )
-        w_for += CSB_Write(PosEmb_reg_bias+6 , tp_feature_out_base_addr  )
+        w_for += CSB_Write(PosEmb_reg_bias+6 , out_addr_low32bits        )
         w_for += CSB_Write(PosEmb_reg_bias+7 , feature_out_head_stride   )
         w_for += CSB_Write(PosEmb_reg_bias+8 , feature_out_line_stride   )
         w_for += CSB_Write(PosEmb_reg_bias+9 , CHin                      )
@@ -1249,8 +1319,10 @@ def PosEmb(func, args, outputs, attrs):
         w_for += CSB_Write(PosEmb_reg_bias+13, PosEmb_in_head_stride     )
         w_for += CSB_Write(PosEmb_reg_bias+14, PosEmb_in_line_stride     )
         w_for += CSB_Write(PosEmb_reg_bias+15, reg_15                    )
-        w_for += CSB_Write(PosEmb_reg_bias+16, 0                         )
+        w_for += CSB_Write(PosEmb_reg_bias+16, addr_high32bits           )
         w_for += CSB_Write(PosEmb_reg_bias+17, 0b000100                  )
    
         w_for += While(CSB_Read(PosEmb_reg_bias+1)!=1) 
     func += w_for
+
+

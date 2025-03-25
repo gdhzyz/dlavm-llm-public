@@ -25,6 +25,8 @@ class CodeGenH(CodeGenBase):
         return f"// {text}"
 
     def VisitData(self, data):
+        if isinstance(data, str):
+            return "\"" + data + "\""
         return str(data)
 
     def VisitOp(self, expr: ir.Op):
@@ -53,6 +55,12 @@ class CodeGenH(CodeGenBase):
         if len(self.lib):
             lib_src = [self.Visit(l) for l in self.lib]
             source = "\n".join(lib_src) + "\n\n" + source
+        return source
+
+    def VisitMacroDefine(self, stmt: ir.MacroDefine):
+        source = f"#ifdef {stmt.name}\n"
+        source += super().VisitMacroDefine(stmt)
+        source += "\n#endif"
         return source
 
     def VisitCall(self, stmt: ir.Call):

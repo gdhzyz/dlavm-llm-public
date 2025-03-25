@@ -18,7 +18,9 @@ def get_vars(targets):
             vars += func(n.get_vars(True))
     return vars
 
-#####################################################################
+#########################################################################################
+#                            nn.mvm_f16xi4 testbench task                               #
+#########################################################################################
 @Tasks.Register("tb.nn.mvm_f16xi4.ohbm", ohbm_accel.OHBM)
 def MVMF16xI4(args, output, attrs):
     if len(args) == 2:
@@ -126,6 +128,61 @@ def MVMF16xI4(args, output, attrs):
         raise RuntimeError("not support mvm with bn or res in tb")
 
 
+@Tasks.Register("tb.nn.mvm_f16xi4.ohbm", ohbm_accel.OHBM0323)
+def MVMF16xI4(args, output, attrs):
+    if len(args) == 2:
+        dtensor, wtensor = args[0], args[1]
+        dshape, wshape = dtensor.shape, wtensor.shape
+        daddr = dtensor.static_address
+        waddr = wtensor.static_address
+        oaddr = output[0].static_address
+        macro_define = {
+            "Last_Token" : attrs.get("last_token", 0),
+            "This_Token" : dshape[-2] + attrs.get("last_token", 0),
+            "RELU_EN" : 1 if attrs.get("relu") else 0,
+            "Token_CHin" : dshape[-1],
+            "Token_CHout" : wshape[0],
+            "BN_RELU_EN" : 0,
+            # "DAT_IN_BASE_ADDR" : daddr,
+            # "HBM_WT_BASE_ADDR" : waddr,
+            # "DAT_OUT_BASE_ADDR" : oaddr,
+        }
+        return TestbenchSIM("testbench_HBM_MVM", macro_define)
+    elif len(args) == 3:
+        dtensor, wtensor = args[0], args[1]
+        dshape, wshape = dtensor.shape, wtensor.shape
+        daddr = dtensor.static_address
+        waddr = wtensor.static_address
+        oaddr = output[0].static_address
+        macro_define = {
+            "Last_Token" : attrs.get("last_token", 0),
+            "This_Token" : dshape[-2] + attrs.get("last_token", 0),
+            "RELU_EN" : 1 if attrs.get("relu") else 0,
+            "Token_CHin" : dshape[-1],
+            "Token_CHout" : wshape[0],
+            "BN_RELU_EN" : 0,
+            # "DAT_IN_BASE_ADDR" : daddr,
+            # "HBM_WT_BASE_ADDR" : waddr,
+            # "DAT_OUT_BASE_ADDR" : oaddr,
+        }
+        if attrs.get("argmax"):
+            return TestbenchSIM("testbench_HBM_MVM_BN_Argmax", macro_define)
+        else:
+            if attrs.get("out_heads") is not None:
+                del macro_define["Token_CHout"]
+                macro_define["Original_Feature_Head"] = attrs.get("out_heads")[0]
+                macro_define["Weight_Head"] = attrs.get("out_heads")[1]
+                return TestbenchSIM("testbench_HBM_MVM_BN_output_head_mode", macro_define)
+            if hasattr(dtensor, "heads"):
+                del macro_define["Token_CHin"]
+                macro_define["Original_Feature_Head"] = dtensor.heads[0]
+                macro_define["Weight_Head"] = dtensor.heads[1]
+                return TestbenchSIM("testbench_HBM_MVM_BN_input_head_mode", macro_define)
+            return TestbenchSIM("testbench_HBM_MVM_BN", macro_define)
+    else:
+        raise RuntimeError("not support mvm with bn or res in tb")
+
+
 @Op.RegisterAttrs("nn.mvm_f16xi4", "testbench", ohbm_accel.OHBM)
 def tb_nn_mvm_f16xi4(args, output, attrs):
     if len(get_vars([args[0].shape, attrs])):
@@ -141,7 +198,9 @@ def tb_nn_mvm_f16xi4(args, output, attrs):
     return func
 
 
-#####################################################################
+#########################################################################################
+#                                 nn.norm testbench task                                #
+#########################################################################################
 @Tasks.Register("tb.nn.norm.ohbm", ohbm_accel.OHBM)
 def Norm(args, output, attrs):
     dtensor, wtensor = args[0], args[1]
@@ -153,6 +212,24 @@ def Norm(args, output, attrs):
         "last_token" : attrs.get("last_token", 0),
         "Token" : dshape[-2] + attrs.get("last_token", 0),
         "Width_in" : dshape[-1],
+        "RMS_Norm" : 1 if attrs.get("rms") else 0,
+        # "DAT_IN_BASE_ADDR" : daddr,
+        # "HBM_WT_BASE_ADDR" : waddr,
+        # "DAT_OUT_BASE_ADDR" : oaddr,
+    }
+    return TestbenchSIM("testbench_LN", macro_define)
+
+@Tasks.Register("tb.nn.norm.ohbm", ohbm_accel.OHBM0323)
+def Norm(args, output, attrs):
+    dtensor, wtensor = args[0], args[1]
+    dshape, wshape = dtensor.shape, wtensor.shape
+    daddr = dtensor.static_address
+    waddr = wtensor.static_address
+    oaddr = output[0].static_address
+    macro_define = {
+        "Last_Token" : attrs.get("last_token", 0),
+        "This_Token" : dshape[-2] + attrs.get("last_token", 0),
+        "Token_CHin" : dshape[-1],
         "RMS_Norm" : 1 if attrs.get("rms") else 0,
         # "DAT_IN_BASE_ADDR" : daddr,
         # "HBM_WT_BASE_ADDR" : waddr,
@@ -175,7 +252,9 @@ def tb_nn_norm(args, output, attrs):
     return func
 
 
-#####################################################################
+#########################################################################################
+#                               nn.softmax testbench task                               #
+#########################################################################################
 @Tasks.Register("tb.nn.softmax.ohbm", ohbm_accel.OHBM)
 def Softmax(args, output, attrs):
     dtensor = args[0]
@@ -218,6 +297,27 @@ def Softmax(args, output, attrs):
     }
     return TestbenchSIM("testbench_SOFTMAX", macro_define)
 
+@Tasks.Register("tb.nn.softmax.ohbm", ohbm_accel.OHBM0323)
+def Softmax(args, output, attrs):
+    dtensor = args[0]
+    dshape = dtensor.shape
+    daddr = dtensor.static_address
+    oaddr = output[0].static_address
+    mask = 1 if attrs.get("mask") else 0
+    if attrs.get("auto_mask"):
+        mask = 1 if dshape[-2] > 1 else 0
+    macro_define = {
+        "Last_Token" : dshape[-1] - dshape[-2],
+        "This_Token" : dshape[-1],
+        "Token_CHin" : dshape[-1],
+        "Original_Feature_Head" : dshape[0],
+        "Need_Mask" : mask,
+        # "DAT_IN_BASE_ADDR" : daddr,
+        # "HBM_WT_BASE_ADDR" : waddr,
+        # "DAT_OUT_BASE_ADDR" : oaddr,
+    }
+    return TestbenchSIM("testbench_SOFTMAX", macro_define)
+
 @Op.RegisterAttrs("nn.softmax", "testbench", ohbm_accel.OHBM)
 def tb_nn_softmax(args, output, attrs):
     if len(get_vars([args[0].shape, attrs])):
@@ -233,7 +333,9 @@ def tb_nn_softmax(args, output, attrs):
     return func
 
 
-#####################################################################
+#########################################################################################
+#                            nn.elementwise testbench task                              #
+#########################################################################################
 @Tasks.Register("tb.nn.elementwise.ohbm", ohbm_accel.OHBM)
 def Elementwise(args, output, attrs):
     dtensor, wtensor = args[0], args[1]
@@ -245,6 +347,25 @@ def Elementwise(args, output, attrs):
         "last_token" : attrs.get("last_token", 0),
         "Token" : dshape[-2] + attrs.get("last_token", 0),
         "Width_in" : dshape[-1],
+        "Feature_Head" : dshape[0],
+        "ElementWise_Mode" : attrs.get("mode"),
+        # "DAT_IN_BASE_ADDR" : daddr,
+        # "HBM_WT_BASE_ADDR" : waddr,
+        # "DAT_OUT_BASE_ADDR" : oaddr,
+    }
+    return TestbenchSIM("testbench_ElementWise", macro_define)
+
+@Tasks.Register("tb.nn.elementwise.ohbm", ohbm_accel.OHBM0323)
+def Elementwise(args, output, attrs):
+    dtensor, wtensor = args[0], args[1]
+    dshape, wshape = dtensor.shape, wtensor.shape
+    daddr = dtensor.static_address
+    waddr = wtensor.static_address
+    oaddr = output[0].static_address
+    macro_define = {
+        "Last_Token" : attrs.get("last_token", 0),
+        "This_Token" : dshape[-2] + attrs.get("last_token", 0),
+        "Token_CHin" : dshape[-1],
         "Feature_Head" : dshape[0],
         "ElementWise_Mode" : attrs.get("mode"),
         # "DAT_IN_BASE_ADDR" : daddr,
@@ -268,7 +389,9 @@ def tb_nn_elementwise(args, output, attrs):
     return func
 
 
-#####################################################################
+#########################################################################################
+#                              nn.activate testbench task                               #
+#########################################################################################
 @Tasks.Register("tb.nn.activate.ohbm", ohbm_accel.OHBM)
 def Activate(args, output, attrs):
     dtensor, wtensor = args[0], args[1]
@@ -280,6 +403,23 @@ def Activate(args, output, attrs):
         "last_token" : attrs.get("last_token", 0),
         "Token" : dshape[-2] + attrs.get("last_token", 0),
         "Width_in" : dshape[-1],
+        # "DAT_IN_BASE_ADDR" : daddr,
+        # "HBM_WT_BASE_ADDR" : waddr,
+        # "DAT_OUT_BASE_ADDR" : oaddr,
+    }
+    return TestbenchSIM("testbench_ACT", macro_define)
+
+@Tasks.Register("tb.nn.activate.ohbm", ohbm_accel.OHBM0323)
+def Activate(args, output, attrs):
+    dtensor, wtensor = args[0], args[1]
+    dshape, wshape = dtensor.shape, wtensor.shape
+    daddr = dtensor.static_address
+    waddr = wtensor.static_address
+    oaddr = output[0].static_address
+    macro_define = {
+        "Last_Token" : attrs.get("last_token", 0),
+        "This_Token" : dshape[-2] + attrs.get("last_token", 0),
+        "Token_CHin" : dshape[-1],
         # "DAT_IN_BASE_ADDR" : daddr,
         # "HBM_WT_BASE_ADDR" : waddr,
         # "DAT_OUT_BASE_ADDR" : oaddr,
@@ -301,7 +441,9 @@ def tb_nn_activate(args, output, attrs):
     return func
 
 
-#####################################################################
+#########################################################################################
+#                            nn.mvm_f16xf16 testbench task                              #
+#########################################################################################
 @Tasks.Register("tb.nn.mvm_f16xf16.ohbm", ohbm_accel.OHBM)
 def MVMF16xF16(args, output, attrs):
     dtensor, wtensor = args[0], args[1]
@@ -378,6 +520,33 @@ def MVMF16xF16(args, output, attrs):
         }
         return TestbenchSIM("testbench_HBM_MVM_afterF2W_output_head_mode", macro_define)
 
+@Tasks.Register("tb.nn.mvm_f16xf16.ohbm", ohbm_accel.OHBM0323)
+def MVMF16xF16(args, output, attrs):
+    dtensor, wtensor = args[0], args[1]
+    dshape, wshape = dtensor.shape, wtensor.shape
+    daddr = dtensor.static_address
+    waddr = wtensor.static_address
+    oaddr = output[0].static_address
+    macro_define = {
+        "Last_Token" : wshape[-2] - dshape[-2],
+        "This_Token" : wshape[-2],
+        "Token_CHin" : dshape[-1],
+        "Original_Feature_Head" : dshape[0],
+        "Weight_Head" : wshape[0],
+        "MAX_TOKEN" : dtensor.device.MAX_TOKEN,
+        # "DAT_IN_BASE_ADDR" : daddr,
+        # "HBM_WT_BASE_ADDR" : waddr,
+        # "DAT_OUT_BASE_ADDR" : oaddr,
+    }
+    if attrs.get("w_trp"):
+        macro_define["Token_CHout"] = wshape[-2]
+        if hasattr(dtensor, "heads"):
+            macro_define["Feature_Head"] = dtensor.heads[0]
+        return TestbenchSIM("testbench_HBM_MVM_afterTRP_input_head_mode", macro_define)
+    else:
+        macro_define["Token_CHout"] = wshape[-1]
+        return TestbenchSIM("testbench_HBM_MVM_afterF2W_output_head_mode", macro_define)
+
 @Op.RegisterAttrs("nn.mvm_f16xf16", "testbench", ohbm_accel.OHBM)
 def tb_nn_mm_f16xf16(args, output, attrs):
     if len(get_vars([args[0].shape, attrs])):
@@ -393,7 +562,9 @@ def tb_nn_mm_f16xf16(args, output, attrs):
     return func
 
 
-#####################################################################
+#########################################################################################
+#                            nn.kvcache2hbm testbench task                              #
+#########################################################################################
 @Tasks.Register("tb.nn.kvcache2hbm.ohbm", ohbm_accel.OHBM)
 def Kvcache2HBM(args, output, attrs):
     dtensor = args[0]
@@ -414,6 +585,28 @@ def Kvcache2HBM(args, output, attrs):
     }
     return TestbenchSIM("testbench_KVcache2HBM", macro_define)
 
+
+@Tasks.Register("tb.nn.kvcache2hbm.ohbm", ohbm_accel.OHBM0323)
+def Kvcache2HBM(args, output, attrs):
+    dtensor = args[0]
+    dshape = dtensor.shape
+    oshape = output[0].shape
+    daddr = dtensor.static_address
+    oaddr = output[0].static_address
+    macro_define = {
+        "Last_Token" : attrs.get("cache_len"),
+        "This_Token" : oshape[-2],
+        "Token_CHin" : dshape[-1],
+        "Weight_Head" : dshape[0],
+        "K_TRP_mode" : 1 if attrs.get("k_mode") else 0,
+        "MAX_TOKEN" : attrs.get("cache_size"),
+        # "DAT_IN_BASE_ADDR" : daddr,
+        # "HBM_WT_BASE_ADDR" : waddr,
+        # "DAT_OUT_BASE_ADDR" : oaddr,
+    }
+    return TestbenchSIM("testbench_KVcache2HBM", macro_define)
+
+
 @Op.RegisterAttrs("nn.kvcache2hbm", "testbench", ohbm_accel.OHBM)
 def tb_nn_kvcache2hbm(args, output, attrs):
     if len(get_vars([args[0].shape, attrs])):
@@ -429,7 +622,9 @@ def tb_nn_kvcache2hbm(args, output, attrs):
     return func
 
 
-#####################################################################
+#########################################################################################
+#                                nn.rope testbench task                                 #
+#########################################################################################
 @Tasks.Register("tb.nn.rope.ohbm", ohbm_accel.OHBM)
 def PosEmb(args, output, attrs):
     dtensor, wtensor = args[0], args[1]
@@ -476,7 +671,29 @@ def PosEmb(args, output, attrs):
         return TestbenchSIM("testbench_EMB_Qwen_inout_head_mode", macro_define)
     else:
         raise RuntimeError("no found realize for this mode: " + attrs.get("mode"))
+
+@Tasks.Register("tb.nn.rope.ohbm", ohbm_accel.OHBM0323)
+def PosEmb(args, output, attrs):
+    dtensor, wtensor = args[0], args[1]
+    dshape, wshape = dtensor.shape, wtensor.shape
+    daddr = dtensor.static_address
+    waddr = wtensor.static_address
+    oaddr = output[0].static_address
+    macro_define = {
+        "Last_Token" : attrs.get("last_token"),
+        "This_Token" : dshape[-2] + attrs.get("last_token", 0),
+        "Padding_Feature_Head" : dshape[0],
+        "MAX_TOKEN" : dtensor.device.MAX_TOKEN,
+        # "DAT_IN_BASE_ADDR" : daddr,
+        # "HBM_WT_BASE_ADDR" : waddr,
+        # "DAT_OUT_BASE_ADDR" : oaddr,
+    }
+    if attrs.get("mode") == RoPEMode.glm:
+        return TestbenchSIM("testbench_EMB_GLM_inout_head_mode", macro_define)
+    elif attrs.get("mode") == RoPEMode.qwen:
         return TestbenchSIM("testbench_EMB_Qwen_inout_head_mode", macro_define)
+    else:
+        raise RuntimeError("no found realize for this mode: " + attrs.get("mode"))
 
 @Op.RegisterAttrs("nn.rope", "testbench", ohbm_accel.OHBM)
 def tb_glm_pos_emb(args, output, attrs):
@@ -493,7 +710,9 @@ def tb_glm_pos_emb(args, output, attrs):
     return func
 
 
-#####################################################################
+#########################################################################################
+#                                nn.conv2d testbench task                               #
+#########################################################################################
 @Tasks.Register("tb.nn.conv2d.ohbm", ohbm_accel.OHBM0314)
 def Conv2d(args, output, attrs):
     if len(args) == 3:
@@ -509,6 +728,37 @@ def Conv2d(args, output, attrs):
             "RELU_EN" : 1 if attrs.get("relu") else 0,
             "Width_in" : dshape[-1],
             "Width_out" : wshape[-1],
+            "BN_RELU_EN" : 0,
+            "Ky": wshape[0],
+            "Kx": wshape[1],
+            "Sy": attrs.get("strides")[0],
+            "Sx": attrs.get("strides")[1],
+            "Py": attrs.get("padding")[0],
+            "Px": attrs.get("padding")[1],
+            # "DAT_IN_BASE_ADDR" : daddr,
+            # "HBM_WT_BASE_ADDR" : waddr,
+            # "DAT_OUT_BASE_ADDR" : oaddr,
+        }
+        return TestbenchSIM("testbench_HBM_CNN_BN", macro_define)
+    else:
+        raise RuntimeError("not support modes except conv2d+bn in tb")
+
+
+@Tasks.Register("tb.nn.conv2d.ohbm", ohbm_accel.OHBM0323)
+def Conv2d(args, output, attrs):
+    if len(args) == 3:
+        dtensor, wtensor = args[0], args[1]
+        dshape, wshape = dtensor.shape, wtensor.shape
+        daddr = dtensor.static_address
+        waddr = wtensor.static_address
+        oaddr = output[0].static_address
+        macro_define = {
+            "Last_Token" : 0,
+            "This_Token" : dshape[-2],
+            "Hin": dshape[0],
+            "RELU_EN" : 1 if attrs.get("relu") else 0,
+            "Token_CHin" : dshape[-1],
+            "Token_CHout" : wshape[-1],
             "BN_RELU_EN" : 0,
             "Ky": wshape[0],
             "Kx": wshape[1],
