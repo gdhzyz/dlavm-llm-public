@@ -101,13 +101,14 @@ class RegsBuild(GraphBuild):
         expr = super().visit_call(expr)
         args = [arg.checked_type for arg in expr.args]
         if isinstance(expr.checked_type, Tuple):
-            func = expr.op.get_attr("compute", args[0].device)(args, expr.checked_type.tensors, expr.attrs)
+            func = expr.op.get_attr("compute", expr.get_device())(args, expr.checked_type.tensors, expr.attrs)
         elif isinstance(expr.checked_type, Tensor):
-            func = expr.op.get_attr("compute", args[0].device)(args, [expr.checked_type], expr.attrs)
+            func = expr.op.get_attr("compute", expr.get_device())(args, [expr.checked_type], expr.attrs)
         else:
             raise RuntimeError("GraphModule: infer_type first!")
-        func.name = expr.ir_name
-        func_ir = self.opt_pass(func)
-        self.model_run += ir.Call(func_ir)
-        self.model_run.update_args(func_ir.args)
+        if func != ir.Empty:
+            func.name = expr.ir_name
+            func_ir = self.opt_pass(func)
+            self.model_run += ir.Call(func_ir)
+            self.model_run.update_args(func_ir.args)
         return expr

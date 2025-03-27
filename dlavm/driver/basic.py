@@ -44,6 +44,15 @@ def Ceil_Padding(data0, data1):
     return ((data0 + data1 - 1) // data1) * data1
 
 
+def ten2list(tensor):
+    l = []
+    l.append(tensor.shape)
+    l.append(tensor.offset)
+    if hasattr(tensor, "strides"):
+        l.append(tensor.strides)
+    return l
+
+
 def get_vars(targets):
     vars = []
     func = lambda n : [i for i in n if i not in vars]

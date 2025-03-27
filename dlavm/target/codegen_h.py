@@ -25,7 +25,7 @@ class CodeGenH(CodeGenBase):
         return f"// {text}"
 
     def VisitData(self, data):
-        if isinstance(data, str):
+        if isinstance(data, str) and "0x" not in data:
             return "\"" + data + "\""
         return str(data)
 

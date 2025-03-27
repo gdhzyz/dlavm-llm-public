@@ -15,11 +15,11 @@ from dlavm.runtime import RuntimeBase
 from dlavm.utils.tools import RegsCheckSameList
 
 
-int_token = 19
-int_last_token = 0
+int_token = 213
+int_last_token = 37
 chin, chout = [4096, 4096]
 f_head, w_head = [32, 2]
-device = ohbm_accel.OHBM0316
+device = ohbm_accel.OHBM0326
 
 from dlavm.driver import config
 config.tb_sim_path = device.tb_sim_path
@@ -57,7 +57,7 @@ def run_expr_check(dyn_arg, sta_arg, main_arg):
         sta_rt.main(name, **main_arg)
         regs1 = dyn_rt.regs
         regs2 = sta_rt.regs
-        print(regs1)
+        # print(regs1)
         if RegsCheckSameList(regs1, regs2, ignores):
             success = f"\033[36;32m Check Success!\033[36;0m "
             finish = f" Check Finish: \033[36;32m{name}\033[36;0m "
@@ -170,4 +170,12 @@ def emb_glm_compare(token, last_token):
     input = adr.var_hbm("input", [f_head, token, 128])
     weight = adr.const_hbm("weight1", "test", [100, 128], dtype=de.fp16)
     output = dlavm.op.nn.rope_glm(input, weight, last_token=last_token)
+    return output, [130, 131, 134]
+
+
+@run_expr_check([token, last_token], [int_token, int_last_token], {str_token:int_token, str_last_token:int_last_token})
+def emb_qwen_compare(token, last_token):
+    input = adr.var_hbm("input", [f_head, token, 128])
+    weight = adr.const_hbm("weight1", "test", [100, 128], dtype=de.fp16)
+    output = dlavm.op.nn.rope_qwen(input, weight, last_token=last_token)
     return output, [130, 131, 134]

@@ -14,11 +14,11 @@ from dlavm.adr import DataEnum as de
 from dlavm.utils.tools import RegsCheckSame
 
 
-chin, chout = [4096, 4096]
-token = 19
-last_token = 0
-f_head, w_head = [32, 2]
-device = ohbm_accel.OHBM0323
+token = 213
+last_token = 37
+chin, chout = [3584, 3584]
+f_head, w_head = [28, 4]
+device = ohbm_accel.OHBM0326
 
 from dlavm.driver import config
 config.tb_sim_path = device.tb_sim_path

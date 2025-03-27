@@ -56,12 +56,13 @@ class InferType(Functor):
         new_attrs = self.set_attrs(expr.attrs)
         new_args = [self.visit(arg) for arg in expr.args]
         new_type = [arg.get_checked_type() for arg in new_args]
+        new_outs = self.visit(expr.outs) if expr.outs is not None else None
         # func = expr.op.attrs["rel"]
         # if self.device is not None:
         func = expr.op.get_attr("rel", self.device)
         state, checked_type = func(new_type, new_attrs)
         if state:
-            new_expr = Call(expr.op, new_args, new_attrs, expr.prefix, checked_type)
+            new_expr = Call(expr.op, new_args, new_attrs, expr.prefix, checked_type, outs=new_outs)
             return new_expr
         else:
             raise RuntimeError("Check Error! " + expr.op.name + ", " + checked_type)

@@ -68,10 +68,15 @@ class GraphBuild(Functor):
         if hasattr(self, "linked"):
             for index, ll in enumerate(self.linked):
                 if arg in ll:
+                    is_free = False
                     for a in ll:
                         if self.info_memo[a][1] != 1:
-                            self.info_memo[a][1] -= 1
-                            return
+                            is_free = True
+                            if arg == a:
+                                self.info_memo[a][1] -= 1
+                                return
+                    if is_free:
+                        return
                     self.storage.free(arg.checked_type.storage_id)
                     if hasattr(arg.checked_type, "onchip"):
                         self.storage.free(arg.checked_type.onchip)
@@ -138,7 +143,12 @@ class GraphBuild(Functor):
                 log = f"{expr.op.name} [{tp_args}] -> [{tp_outs}]"
                 LOG_WITH_PREFIX("graph", log)
         elif isinstance(expr.checked_type, Tensor):
-            storage_id = self._malloc(expr.checked_type, expr.prefix)
+            if expr.outs is not None:
+                expr.outs = self.visit(expr.outs)
+                self._link_storage(expr.outs, expr)
+                storage_id = expr.outs.checked_type.storage_id
+            else:
+                storage_id = self._malloc(expr.checked_type, expr.prefix)
             expr.checked_type.storage_id = storage_id
             extern_debug = ""
             if onchip:
@@ -165,10 +175,13 @@ class GraphBuild(Functor):
         })
         return expr
 
+    # TODO: if tupleitem node should be check free, because the info_memo has these visit info
     def visit_tupleitem(self, expr):
         arg = self.visit(expr.expr)
         expr.expr = arg
         expr.checked_type = arg.checked_type.tensors[expr.index]
+        if self.info_memo[expr.expr][1] != 1:
+            self.info_memo[expr.expr][1] -= 1
         if isinstance(expr.expr, VM):
             self._link_storage(expr.expr, expr)
         setattr(expr, "ir_name", expr.expr.ir_name + f"_{expr.index}")

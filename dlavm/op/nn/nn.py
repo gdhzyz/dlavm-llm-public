@@ -1,4 +1,4 @@
-from ...adr.base import Call, Op
+from ...adr.base import Call, Op, DataType, DataEnum
 from . import (
     _nn,
     _ohbm
@@ -79,3 +79,11 @@ def rope_qwen(*args, **kwargs):
     return Call(Op.Get("nn.rope"), args, RoPEAttrs(kwargs))
 
 
+def empty_f16_hbm(shape, device):
+    dtype = DataType(DataEnum.fp16, DataEnum.hbm)
+    kwargs = {
+        "shape": shape,
+        "dtype": dtype,
+        "device": device,
+    }
+    return Call(Op.Get("nn.empty"), [], EmptyAttrs(kwargs))

@@ -11,9 +11,7 @@ from dlavm import backend
 from dlavm.target import targets
 from dlavm.device import ohbm_accel, hbm_accel
 from dlavm.adr import DataEnum as de
-import sys
-import dlavm.utils
-sys.setrecursionlimit(3000)  # 将默认的递归深度修改为3000
+from dlavm.utils.tools import RegsCheckSame
 
 
 def qwen2_block(input, last_token, pew, silu, index):
@@ -24,8 +22,7 @@ def qwen2_block(input, last_token, pew, silu, index):
         return adr.const_hbm(prefix + name, prefix + data, shape, dtype)
     lnw0 = const_hbm("lnweight0", "test", [2*3584], dtype=de.fp16)
     lnw1 = const_hbm("lnweight1", "test", [2*3584], dtype=de.fp16)
-    qw   = const_hbm("qweight", "test", [4096, 3584])
-    qb   = const_hbm("qbias", "test", [2*4096], dtype=de.fp16)
+
     kw   = const_hbm("kweight", "test", [128*4, 3584])
     kb   = const_hbm("kbias", "test", [2*128*4], dtype=de.fp16)
     vw   = const_hbm("vweight", "test", [128*4, 3584])
@@ -72,38 +69,54 @@ def qwen2_block(input, last_token, pew, silu, index):
 # token = 19
 token = ne.Var("token", 2048)
 last_token = ne.Var("last_token", 2048)
+device = ohbm_accel.OHBM0326
 
-pew = adr.const_hbm("pos_emb_weight", "test", [256, 3584], dtype=de.fp16)
-silu = adr.const_hbm("silu_weight", "test", [16*3], dtype=de.fp16)
 
-outlnw = adr.const_hbm("out_lnweight", "test", [2*3584], dtype=de.fp16)
-outw = adr.const_hbm("oweight", "test", [152064, 3584])
-outb = adr.const_hbm("obias", "test", [2*152064], dtype=de.fp16)
+qw1   = adr.const_hbm("qweight", "test", [7*128, 3584])
+qb1   = adr.const_hbm("qbias", "test", [2*7*128], dtype=de.fp16)
+qw2   = adr.const_hbm("qweight", "test", [7*128, 3584])
+qb2   = adr.const_hbm("qbias", "test", [2*7*128], dtype=de.fp16)
+qw3   = adr.const_hbm("qweight", "test", [7*128, 3584])
+qb3   = adr.const_hbm("qbias", "test", [2*7*128], dtype=de.fp16)
+qw4   = adr.const_hbm("qweight", "test", [7*128, 3584])
+qb4   = adr.const_hbm("qbias", "test", [2*7*128], dtype=de.fp16)
+ln1   = adr.const_hbm("qbias", "test", [2*32*128], dtype=de.fp16)
+ln2   = adr.const_hbm("qbias", "test", [2*32*128], dtype=de.fp16)
 
 input = adr.var_hbm("input", [1, token, 3584])
+empty = dlavm.nn.empty_f16_hbm([32, token, 128], device=device)
+split = dlavm.split(empty, axis=0, size=[7, 1]*4)
+qout1 = dlavm.nn.mvm_f16xi4(input, qw1, qb1)
+qout1.outs = split[0]
+qout1 = dlavm.reshape(qout1, [7, -1, 128])
+qout2 = dlavm.nn.mvm_f16xi4(input, qw2, qb2)
+qout2.outs = split[2]
+qout2 = dlavm.reshape(qout2, [7, -1, 128])
+qout3 = dlavm.nn.mvm_f16xi4(input, qw3, qb3)
+qout3.outs = split[4]
+qout3 = dlavm.reshape(qout3, [7, -1, 128])
+qout4 = dlavm.nn.mvm_f16xi4(input, qw4, qb4)
+qout4.outs = split[6]
+qout4 = dlavm.reshape(qout4, [7, -1, 128])
+qout = dlavm.concat(qout1, split[1], qout2, split[3], qout3, split[5], qout4, split[7], axis=0)
 
-for i in range(1):
-    input = qwen2_block(input, last_token, pew, silu, i)
+qout = dlavm.reshape(qout, [1, -1, 4096])
+qout = dlavm.nn.rms_norm(qout, ln1)
+qout = dlavm.nn.rms_norm(qout, ln2)
 
-input = dlavm.gather(input)
-out_ln = dlavm.nn.rms_norm(input, outlnw)
-output = dlavm.nn.mvm_f16xi4(out_ln, outw, outb, argmax=True)
-output = output[1]
-
-device = ohbm_accel.OHBM0326
+output = qout
 output = transform.infer_type(output, device)
 print(output)
 
+init_addr = {"hbm": 0x0, "hbm_cache": "hbm", "runtime": "hbm_cache", "onchip": 0x0}
+# mod = backend.build_tb(output, init_addr, "test", targets.hpp, {"wt2hbm":False, "hbm_base": 0x0, "ddr_base": 0x0})
+mod = backend.build(output, init_addr, "test", False, targets.hpp, {"wt2hbm":False, "hbm_base": 0x0, "ddr_base": 0x0, "addr_dtype": "uint64_t"})
+with open("output/atten_dyn.h", "w") as f:
+    print(mod.get_source(), file=f)
+with open("output/atten_dyn.prototxt", "w") as f:
+    print(mod.get_prototxt(), file=f)
 
-if __name__ == "__main__":
-    from dlavm.driver import config
-    config.tb_sim_path = device.tb_sim_path
-    config.sim_tool = "modelsim"
-
-    init_addr = {"hbm": 0x0, "hbm_cache": "hbm", "runtime": "hbm_cache", "onchip": 0x0}
-    # mod = backend.build_tb(output, init_addr, "test", targets.hpp, {"wt2hbm":False, "hbm_base": 0x0, "ddr_base": 0x0})
-    mod = backend.build(output, init_addr, "test", False, targets.hpp, {"wt2hbm":False, "hbm_base": 0x0, "ddr_base": 0x0, "addr_dtype": "uint64_t"})
-    with open("output/qwen2_dyn.h", "w") as f:
-        print(mod.get_source(), file=f)
-    with open("output/qwen2_dyn.prototxt", "w") as f:
-        print(mod.get_prototxt(), file=f)
+log_path = "output/atten.log"
+dlavm.utils.LOG_WITH_PREFIX("expression", str(output))
+dlavm.utils.LOG_WITH_PREFIX("storage", str(mod.storage))
+dlavm.utils.LOG_EXPORT(log_path)

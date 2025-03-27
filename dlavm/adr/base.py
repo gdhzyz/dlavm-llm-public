@@ -85,6 +85,11 @@ class Op:
             attr = self.attrs.get(device.name, {}).get(attr_name)
             if attr is None:
                 attr = self.attrs.get(attr_name)
+        # if attr is None:
+        #     msg = f"op \"{self.name}\" has no attribute \"{attr_name}\""
+        #     if device is not None:
+        #         msg += f" for {device.name}"
+        #     raise RuntimeError(msg)
         return attr
 
     @classmethod
@@ -226,12 +231,13 @@ class Constant(Base):
 
 class Call(Base):
 
-    def __init__(self, op, args, attrs, prefix="runtime", checked_type=None):
+    def __init__(self, op, args, attrs, prefix="runtime", checked_type=None, outs=None):
         self.op = op
         self.args = args
         self.attrs = attrs
         self.checked_type = checked_type
         self.prefix = prefix
+        self.outs = outs # pre set output node/tensor
 
 
 class VM(Base):
@@ -292,7 +298,10 @@ class Functor:
 
     def visit_call(self, expr):
         new_args = [self.visit(arg) for arg in expr.args]
-        return Call(expr.op, new_args, expr.attrs, expr.prefix, expr.checked_type)
+        if expr.outs is None:
+            return Call(expr.op, new_args, expr.attrs, expr.prefix, expr.checked_type)
+        new_outs = self.visit(expr.outs)
+        return Call(expr.op, new_args, expr.attrs, expr.prefix, expr.checked_type, new_outs)
 
     def visit_vm(self, expr):
         new_args = [self.visit(arg) for arg in expr.args]
@@ -364,11 +373,15 @@ class PrintExpr(Functor):
 
     def visit_call(self, expr):
         arg_str = ", ".join([self.visit(arg) for arg in expr.args])
+        if expr.outs is not None:
+            out_str = self.visit(expr.outs)
         ret_name = "%" + str(self.id)
         self.id += 1
         func = f"  {ret_name} = {expr.op.name}({arg_str})"
         if isinstance(expr.attrs, Attrs):
             func += f"{str(expr.attrs)}"
+        if expr.outs is not None:
+            func += " -> " + out_str
         if expr.checked_type:
             func += " " + str(expr.checked_type)
         self.body.append(func)

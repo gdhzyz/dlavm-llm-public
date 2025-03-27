@@ -44,16 +44,16 @@ def transpose(data, new_axis:list):
 
 
 def split(data, axis:int, size:list):
-    attrs = Attrs({"axis":axis, "size":size})
+    attrs = Attrs({"axis":axis, "size":size, "dynamic":True})
     return VM(Op.Get("split"), [data], attrs)
 
 
-def concat(*args):
+def concat(*args, axis=-1):
     '''
     @brief: concat op just support axis -1
     '''
-    attrs = Attrs({"axis":-1})
-    return VM(Op.Get("split"), args, attrs)
+    attrs = Attrs({"axis":axis})
+    return VM(Op.Get("concat"), args, attrs)
 
 
 def gather(data):

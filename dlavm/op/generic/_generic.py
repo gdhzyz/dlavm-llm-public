@@ -60,7 +60,7 @@ def SplitRel(args, attrs):
         return False, "the dim of split data should be same with data shape"
     l_tensor = []
     for n in size:
-        new_shape = [n if i == axis else i for i in range(len(dshape))]
+        new_shape = [n if i == axis else dshape[i] for i in range(len(dshape))]
         l_tensor.append(Tensor(new_shape, dtype, device))
     return True, Tuple(l_tensor)
 
@@ -77,16 +77,20 @@ def ConcatRel(args, attrs):
     axis = attrs["axis"]
     device = args[0].device
     dtype = args[0].dtype
-    if axis != -1:
-        return False, "the axis of concat data should be -1"
+    # if axis != -1:
+    #     return False, "the axis of concat data should be -1"
     oshape = [i for i in args[0].shape]
-    for a in args[1:]:
+    for n in args[1:]:
+        a = n.shape
         if len(a) != len(oshape):
             raise RuntimeError("concat data should have same shape! dim mismatch!")
-        for i in range(len(a)-1):
+        for i in range(len(a)):
+            if i == axis:
+                continue
             if a[i] != oshape[i]:
+                print(a[i], oshape[i])
                 raise RuntimeError("concat data should have same shape!")
-        oshape[-1] += a[-1]
+        oshape[axis] += a[axis]
     return True, Tensor(oshape, dtype, device)
 
 Op.Register("concat", ConcatRel)

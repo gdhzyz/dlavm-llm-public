@@ -73,7 +73,7 @@ token = ne.Var("token", 2048)
 last_token = ne.Var("last_token", 2048)
 # token = 19
 # last_token = 0
-device = ohbm_accel.OHBM0323
+device = ohbm_accel.OHBM0326
 
 pew = adr.const_hbm("pos_emb_weight", "test", [256, 4096], dtype=de.fp16)
 silu = adr.const_hbm("silu_weight", "test", [16*3], dtype=de.fp16)

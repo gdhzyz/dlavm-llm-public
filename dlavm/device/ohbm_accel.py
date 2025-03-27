@@ -140,3 +140,13 @@ class OHBM0323(OHBM):
         *IMPORT VERSION* : update all task driver
     """
     tb_sim_path = "/home/shenao/dlavm-llm-public/tbsim/workspace_2025_0323"
+
+
+class OHBM0326(OHBM):
+
+    version = 20250326
+    description = """
+    """
+    tb_sim_path = "/home/shenao/dlavm-llm-public/tbsim/workspace_2025_0326"
+
+    AXI_BURST_LEN               = 256

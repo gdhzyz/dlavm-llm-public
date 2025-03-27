@@ -80,3 +80,11 @@ class RoPEAttrs(Attrs):
         "mode": RoPEMode.init,
         "last_token": 0,
     }
+
+
+class EmptyAttrs(Attrs):
+
+    default = {
+        "shape": [],
+        "device": ohbm_accel.OHBM,
+    }

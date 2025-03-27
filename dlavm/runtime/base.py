@@ -65,6 +65,10 @@ class ExecutorBase(ir.Functor):
         else:
             self.funcs[stmt.name] = stmt
 
+    def VisitMacroDefine(self, stmt: ir.MacroDefine):
+        # Macro Define just support in C++
+        pass
+
     def VisitBlock(self, stmt: ir.Block):
         new_stmt = deepcopy(stmt)
         [self.Visit(b) for b in new_stmt.body]
@@ -138,10 +142,10 @@ class ExecutorBase(ir.Functor):
 
     def VisitAssignVar(self, stmt: ir.AssignVar):
         new_stmt = deepcopy(stmt)
-        if self.in_func and new_stmt.var in self.tp_vars.keys():
+        if self.in_func and new_stmt.var.name in self.tp_vars.keys():
             self.tp_vars[new_stmt.var.name] = self.Visit(new_stmt.value)
         else:
-            self.rt_vars[new_stmt.var.name] = self.Visit(new_stmt.value)
+            raise RuntimeError("Not support assign var to global var!")
 
     def VisitCSBWrite(self, stmt: ir.CSB_Write):
         raise RuntimeError("no realize CSB Write node!")

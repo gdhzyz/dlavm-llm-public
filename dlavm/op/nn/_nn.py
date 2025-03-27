@@ -255,3 +255,20 @@ def Conv2dRel(args, attrs):
 
 Op.Register("nn.conv2d", Conv2dRel)
 
+
+'''
+@brief: Empty op
+  @args[0]: shape, list
+  @output: Tensor, [Head, token, chin]
+'''
+def EmptyRel(args, attrs):
+    if len(args) not in [0]:
+        return False, "error length arguments! support [0], found " + str(len(args))
+    device = attrs.get("device")
+    dtype = attrs.get("dtype")
+    shape = attrs.get("shape")
+    tensor = Tensor(shape, dtype, device)
+    return True, tensor
+
+Op.Register("nn.empty", EmptyRel)
+

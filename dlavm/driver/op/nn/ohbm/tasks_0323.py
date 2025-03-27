@@ -166,7 +166,7 @@ def AtomMVMSingleTime(block, CHin, Hin, Win, CHout_offset, CHout, Hout, Wout,
 #########################################################################################
 #                                nn.mvm_f16xi4 compute task                             #
 #########################################################################################
-@Tasks.Register("ohbm.nn.mvm", ohbm_accel.OHBM)
+@Tasks.Register("ohbm.nn.mvm", ohbm_accel.OHBM0323)
 def MVM(func, args, outputs, attrs):
     if len(args) > 3:
         raise RuntimeError("not support res in mvm")
@@ -311,7 +311,7 @@ def MVM(func, args, outputs, attrs):
                      feature_in_addr+device.HBM_1Row_Bytes*W_in_offset, feature_in_surface_stride, feature_in_line_stride,
                      wt_base_addr+WT_BYTES_per_CH//device.HBM_Port*out_ch_slice*ch, WT_BYTES_per_CH*8,
                      BN_base_addr + device.HBM_1Row_Bytes*(ch*out_ch_slice//(device.L_Tout//2)),
-                     feature_out_addr+device.HBM_1Row_Bytes*W_out_offset+(device.HBM_1Row_Bytes*out_w_slice)*(ch*out_ch_slice//device.L_Tout),
+                     feature_out_addr+device.HBM_1Row_Bytes*W_out_offset+feature_out_surface_stride*(ch*out_ch_slice//device.L_Tout),
                      feature_out_surface_stride, feature_out_line_stride, mode, device)
             ch_for += w_for
         _then += ch_for
@@ -335,7 +335,7 @@ def MVM(func, args, outputs, attrs):
                      feature_in_addr+device.HBM_1Row_Bytes*W_in_offset, feature_in_surface_stride, feature_in_line_stride,
                      wt_base_addr+WT_BYTES_per_CH//device.HBM_Port*out_ch_slice*ch, WT_BYTES_per_CH*8,
                      BN_base_addr + device.HBM_1Row_Bytes*(ch*out_ch_slice//(device.L_Tout//2)),
-                     feature_out_addr+device.HBM_1Row_Bytes*W_out_offset+(device.HBM_1Row_Bytes*out_w_slice)*(ch*out_ch_slice//device.L_Tout),
+                     feature_out_addr+device.HBM_1Row_Bytes*W_out_offset+feature_out_surface_stride*(ch*out_ch_slice//device.L_Tout),
                      feature_out_surface_stride, feature_out_line_stride, mode, device)
             w_for += ch_for
         _else += w_for
@@ -345,7 +345,7 @@ def MVM(func, args, outputs, attrs):
 #########################################################################################
 #                                nn.conv2d compute task                                 #
 #########################################################################################
-@Tasks.Register("ohbm.nn.conv2d", ohbm_accel.OHBM)
+@Tasks.Register("ohbm.nn.conv2d", ohbm_accel.OHBM0323)
 def Conv2d(func, args, outputs, attrs):
     device = args[0].device
 
@@ -641,6 +641,7 @@ def MVMF16xF16(func, args, outputs, attrs):
 
     if isinstance(out_ch_slice, ne.Expr):
         tp_out_ch_slice=ne.Numb(1) << (out_ch_slice.log2().cast_int())
+        tp_out_ch_slice = func.assign("tp_log_out_ch_slice", tp_out_ch_slice, "int")
         # tp_out_ch_slice=1
         out_ch_slice = ne.If(tp_out_ch_slice>out_ch_slice, tp_out_ch_slice//2, tp_out_ch_slice)
         out_ch_slice = func.assign("tp_out_ch_slice", out_ch_slice, "int")
@@ -716,10 +717,14 @@ def MVMF16xF16(func, args, outputs, attrs):
                     dma_wt_reuse_now = ne.If(w, 1, 0)
                     W_in_now = ne.If(w < Wout_Split_Times_minus1, out_w_slice, out_w_slice_last)
                     W_out_now = ne.If(w < Wout_Split_Times_minus1, out_w_slice, out_w_slice_last)
-                    tp_in_addr =feature_in_addr+device.HBM_1Row_Bytes*W_in_offset+h*feature_in_head_stride*Head_x_CH_div_LTout
-                    tp_wt_addr =wt_base_addr+WT_BYTES_PER_CHOUT//device.HBM_Port*out_ch_slice*ch+h*WT_HEAD_STRIDE;                    
-                    tp_out_addr=feature_out_addr+device.HBM_1Row_Bytes*W_out_offset+(device.HBM_1Row_Bytes*out_w_slice)*(ch*out_ch_slice//device.L_Tout) \
-                                +h*feature_out_head_stride*(Feature_Head//Weight_Head)
+                    tp_in_addr =feature_in_addr+device.HBM_1Row_Bytes*W_in_offset+h*feature_in_head_stride*(Feature_Head//Weight_Head)
+                    tp_wt_addr =wt_base_addr+WT_LINE_STRIDE*ch*out_ch_slice//device.Tout+h*WT_HEAD_STRIDE
+                    tp_out_addr=feature_out_addr+device.HBM_1Row_Bytes*W_out_offset+h*feature_out_head_stride*Head_x_CH_div_LTout
+                    if w_trp:
+                        tp_in_addr =feature_in_addr+device.HBM_1Row_Bytes*W_in_offset+h*feature_in_head_stride*Head_x_CH_div_LTout
+                        tp_wt_addr =wt_base_addr+WT_BYTES_PER_CHOUT*ch*out_ch_slice//device.Tout+h*WT_HEAD_STRIDE
+                        tp_out_addr=feature_out_addr+device.HBM_1Row_Bytes*W_out_offset+(device.HBM_1Row_Bytes*out_w_slice)*(ch*out_ch_slice//device.L_Tout) \
+                                    +h*feature_out_head_stride*(Feature_Head//Weight_Head)
                     task(w_for, CH_in_now, H_in_now, W_in_now, CH_out_offset, CH_out_now, H_out_now, W_out_now,
                          dma_wt_reuse_now, dma_dat_reuse_now, reg_17, reg_18, reg_26, reg_27, reg_28,
                          tp_in_addr, feature_in_head_stride, feature_in_line_stride,
@@ -744,10 +749,14 @@ def MVMF16xF16(func, args, outputs, attrs):
                     dma_dat_reuse_now = ne.If(ch, 1, 0)
                     W_in_now = ne.If(w < Wout_Split_Times_minus1, out_w_slice, out_w_slice_last)
                     W_out_now = ne.If(w < Wout_Split_Times_minus1, out_w_slice, out_w_slice_last)
-                    tp_in_addr =feature_in_addr+device.HBM_1Row_Bytes*W_in_offset+h*feature_in_head_stride*Head_x_CH_div_LTout
-                    tp_wt_addr =wt_base_addr+WT_BYTES_PER_CHOUT//device.HBM_Port*out_ch_slice*ch+h*WT_HEAD_STRIDE;                    
-                    tp_out_addr=feature_out_addr+device.HBM_1Row_Bytes*W_out_offset+(device.HBM_1Row_Bytes*out_w_slice)*(ch*out_ch_slice//device.L_Tout) \
-                                +h*feature_out_head_stride*(Feature_Head//Weight_Head)
+                    tp_in_addr =feature_in_addr+device.HBM_1Row_Bytes*W_in_offset+h*feature_in_head_stride*(Feature_Head//Weight_Head)
+                    tp_wt_addr =wt_base_addr+WT_LINE_STRIDE*ch*out_ch_slice//device.Tout+h*WT_HEAD_STRIDE
+                    tp_out_addr=feature_out_addr+device.HBM_1Row_Bytes*W_out_offset+h*feature_out_head_stride*Head_x_CH_div_LTout
+                    if w_trp:
+                        tp_in_addr =feature_in_addr+device.HBM_1Row_Bytes*W_in_offset+h*feature_in_head_stride*Head_x_CH_div_LTout
+                        tp_wt_addr =wt_base_addr+WT_BYTES_PER_CHOUT*ch*out_ch_slice//device.Tout+h*WT_HEAD_STRIDE
+                        tp_out_addr=feature_out_addr+device.HBM_1Row_Bytes*W_out_offset+(device.HBM_1Row_Bytes*out_w_slice)*(ch*out_ch_slice//device.L_Tout) \
+                                    +h*feature_out_head_stride*(Feature_Head//Weight_Head)
                     task(ch_for, CH_in_now, H_in_now, W_in_now, CH_out_offset, CH_out_now, H_out_now, W_out_now,
                          dma_wt_reuse_now, dma_dat_reuse_now, reg_17, reg_18, reg_26, reg_27, reg_28,
                          tp_in_addr, feature_in_head_stride, feature_in_line_stride,

@@ -30,10 +30,13 @@ class FoldConstant(ir.Functor):
             new_stmt.value = new_stmt.value.simplify()
             if isinstance(new_stmt.value, ne.Numb) and not self.branch:
                 self.var2numb[new_stmt.var.name] = new_stmt.value.data
+                return new_stmt
         elif isinstance(new_stmt.value, (str, int, float)) and not self.branch:
             self.var2numb[new_stmt.var.name] = new_stmt.value
-        if self.branch and new_stmt.var.name in self.var2numb.keys():
-            del self.var2numb[new_stmt.var.name]
+            return new_stmt
+        if new_stmt.var.name in self.var2numb.keys():
+            if self.branch or isinstance(new_stmt.value, ne.Expr):
+                del self.var2numb[new_stmt.var.name]
         return new_stmt
 
     def VisitNe(self, expr: ne.Expr):
