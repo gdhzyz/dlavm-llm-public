@@ -20,17 +20,14 @@ class OHBM(Accel):
     Tout                        = 32
     HBM_Port                    = 32
     base_Tin                    = 128
-    Tin                         = base_Tin
     s_Tin                       = 32
     MAX_DAT_DW                  = 16
     MAX_DW                      = 16
     HBM_AXI_DATA_WIDTH          = 256
-    L_Tout                      = HBM_Port*HBM_AXI_DATA_WIDTH//MAX_DW
+    s_HBM_AXI_DATA_WIDTH        = 256
     ASYN_FACTOR                 = 2
     log2_CH                     = 19
     MAX_CH_per_HEAD             = 128
-    Pixel_Data_Width            = HBM_AXI_DATA_WIDTH
-    HBM_1Row_Bytes              = int((HBM_AXI_DATA_WIDTH)>>3)
     MAX_WT_DW                   = 4
     MAX_BN_DW                   = 16
     T_quant_block               = 128
@@ -44,9 +41,14 @@ class OHBM(Accel):
 
     WT_quant_scale_DW           = 16
     MAX_BN_CH                   = 1024
+    log2_TOTAL_WT_BRAM_BITS     = (24) #24= 16Mb for VCU128, single BRAM buf is 512(depth)*72(width)= 36864 bit
+    log2_TOTAL_DAT_BRAM_BITS    = (23) #23= 8Mb for VCU128, single BRAM buf is 512(depth)*72(width)= 36864 bit
+
+    Pixel_Data_Width            = HBM_AXI_DATA_WIDTH
+    HBM_1Row_Bytes              = int((HBM_AXI_DATA_WIDTH)>>3)
+    Tin                         = base_Tin
     DAT_BRAM_NUM                = HBM_Port
     log2_DAT_BRAM_NUM           = int(math.log2(DAT_BRAM_NUM))
-    log2_TOTAL_DAT_BRAM_BITS    = (23) #23= 8Mb for VCU128, single BRAM buf is 512(depth)*72(width)= 36864 bit
     TOTAL_DAT_BRAM_BITS         = (1<<log2_TOTAL_DAT_BRAM_BITS)
     SINGLE_DAT_BRAM_BITS        = (TOTAL_DAT_BRAM_BITS//DAT_BRAM_NUM)  
     SINGLE_DAT_BRAM_WIDTH       = (HBM_AXI_DATA_WIDTH)
@@ -55,10 +57,7 @@ class OHBM(Accel):
     log2_ID0_BRAM_DEPTH         = (log2_SINGLE_DAT_BRAM_DEPTH   )
     ID0_BRAM_DEPTH              = (1<<log2_ID0_BRAM_DEPTH       )
     ID0_BRAM_WIDTH              = (HBM_AXI_DATA_WIDTH*HBM_Port )
-
-    log2_TOTAL_WT_BRAM_BITS     = (24) #24= 16Mb for VCU128, single BRAM buf is 512(depth)*72(width)= 36864 bit
     TOTAL_WT_BRAM_BITS          = (1<<log2_TOTAL_WT_BRAM_BITS)
-
     WT_BRAM_NUM                 = HBM_Port
     log2_WT_BRAM_NUM            = int(math.log2(WT_BRAM_NUM))
     log2_TOTAL_WT1_BRAM_BITS    = (log2_TOTAL_WT_BRAM_BITS-1)
@@ -70,6 +69,9 @@ class OHBM(Accel):
     log2_ID1_BRAM_DEPTH         = (log2_SINGLE_WT_BRAM_DEPTH    )
     ID1_BRAM_DEPTH              = (1<<log2_ID1_BRAM_DEPTH       )
     ID1_BRAM_WIDTH              = (HBM_AXI_DATA_WIDTH*HBM_Port )
+    L_Tout                      = HBM_Port*HBM_AXI_DATA_WIDTH//MAX_DW
+    # aux build factor
+    aux_dat_width = HBM_AXI_DATA_WIDTH*4//8
 
     @classmethod
     def malloc_bytes(cls, shape, dtype, dynamic=False):
@@ -77,7 +79,7 @@ class OHBM(Accel):
             shape = [i.simplify(1).data if isinstance(i, ne.Expr) else i for i in shape]
         if dtype.dtype == DataEnum.fp16 and dtype.mapped == DataEnum.hbm:
             if len(shape) == 1: # BN: TODO, 2* cls.MAX_BN_DW maybe wrong
-                bsize = (((shape[0] // 2) + cls.Tout - 1)// cls.Tout) * cls.Tout * 2 * 2 * cls.MAX_BN_DW // cls.HBM_Port
+                bsize = (((shape[0] // 2) + cls.L_Tout - 1)// cls.L_Tout) * cls.L_Tout * 2 * cls.MAX_BN_DW // 8 // cls.HBM_Port
             elif len(shape) == 3: # Feature
                 bsize = (((shape[0] * shape[-1]) + cls.L_Tout - 1)// cls.L_Tout) * cls.L_Tout * cls.MAX_DAT_DW // 8 * shape[1] // cls.HBM_Port
             elif len(shape) == 2: # Feature
@@ -142,7 +144,7 @@ class OHBM0323(OHBM):
     tb_sim_path = "/home/shenao/dlavm-llm-public/tbsim/workspace_2025_0323"
 
 
-class OHBM0326(OHBM):
+class OHBM0326Static(OHBM):
 
     version = 20250326
     description = """
@@ -150,3 +152,88 @@ class OHBM0326(OHBM):
     tb_sim_path = "/home/shenao/dlavm-llm-public/tbsim/workspace_2025_0326"
 
     AXI_BURST_LEN               = 256
+
+
+class OHBM0326(OHBM0326Static):
+
+    static = OHBM0326Static
+    Pixel_Data_Width            = static.HBM_AXI_DATA_WIDTH
+    HBM_1Row_Bytes              = int((static.HBM_AXI_DATA_WIDTH)>>3)
+    Tin                         = static.base_Tin
+    DAT_BRAM_NUM                = static.HBM_Port
+    log2_DAT_BRAM_NUM           = int(math.log2(DAT_BRAM_NUM))
+    TOTAL_DAT_BRAM_BITS         = (1<<static.log2_TOTAL_DAT_BRAM_BITS)
+    SINGLE_DAT_BRAM_BITS        = (TOTAL_DAT_BRAM_BITS//DAT_BRAM_NUM)  
+    SINGLE_DAT_BRAM_WIDTH       = (static.HBM_AXI_DATA_WIDTH)
+    SINGLE_DAT_BRAM_DEPTH       = (SINGLE_DAT_BRAM_BITS//SINGLE_DAT_BRAM_WIDTH)
+    log2_SINGLE_DAT_BRAM_DEPTH  = int(math.log2(SINGLE_DAT_BRAM_DEPTH))
+    log2_ID0_BRAM_DEPTH         = (log2_SINGLE_DAT_BRAM_DEPTH   )
+    ID0_BRAM_DEPTH              = (1<<log2_ID0_BRAM_DEPTH       )
+    ID0_BRAM_WIDTH              = (static.HBM_AXI_DATA_WIDTH*static.HBM_Port )
+    TOTAL_WT_BRAM_BITS          = (1<<static.log2_TOTAL_WT_BRAM_BITS)
+    WT_BRAM_NUM                 = static.HBM_Port
+    log2_WT_BRAM_NUM            = int(math.log2(WT_BRAM_NUM))
+    log2_TOTAL_WT1_BRAM_BITS    = (static.log2_TOTAL_WT_BRAM_BITS-1)
+    TOTAL_WT1_BRAM_BITS         = (1<<log2_TOTAL_WT1_BRAM_BITS)
+    SINGLE_WT_BRAM_BITS         = (TOTAL_WT1_BRAM_BITS//WT_BRAM_NUM)  
+    SINGLE_WT_BRAM_WIDTH        = (static.HBM_AXI_DATA_WIDTH)
+    SINGLE_WT_BRAM_DEPTH        = (SINGLE_WT_BRAM_BITS//SINGLE_WT_BRAM_WIDTH)
+    log2_SINGLE_WT_BRAM_DEPTH   = int(math.log2(SINGLE_WT_BRAM_DEPTH) )
+    log2_ID1_BRAM_DEPTH         = (log2_SINGLE_WT_BRAM_DEPTH    )
+    ID1_BRAM_DEPTH              = (1<<log2_ID1_BRAM_DEPTH       )
+    ID1_BRAM_WIDTH              = (static.HBM_AXI_DATA_WIDTH*static.HBM_Port )
+    L_Tout                      = static.HBM_Port*static.HBM_AXI_DATA_WIDTH//static.MAX_DW
+    # aux build factor
+    aux_dat_width = static.HBM_AXI_DATA_WIDTH*4//8
+
+
+class OHBM0326V80Static(OHBM0326):
+
+    version = 20250326
+    tb_sim_path = "/home/shenao/dlavm-llm-public/tbsim/workspace_2025_0326_v80"
+
+    HBM_Port                = 4
+    HBM_AXI_DATA_WIDTH      = 512
+    s_HBM_AXI_DATA_WIDTH    = 256
+    HBM_ADDR_WIDTH          = 44
+    SINGLE_HBM_DEPTH        = 33
+    DDR_ADDR_WIDTH          = 44
+    Tout                    = 32
+    base_Tin                = 64
+    FPCINT_Tin              = 64
+    AXI_BURST_LEN           = 256
+    WT_AXI_BURST_LEN        = 256
+
+
+class OHBM0326V80(OHBM0326V80Static):
+
+    static = OHBM0326V80Static
+    Pixel_Data_Width            = static.HBM_AXI_DATA_WIDTH
+    HBM_1Row_Bytes              = int((static.HBM_AXI_DATA_WIDTH)>>3)
+    Tin                         = static.base_Tin
+    DAT_BRAM_NUM                = static.HBM_Port
+    log2_DAT_BRAM_NUM           = int(math.log2(DAT_BRAM_NUM))
+    TOTAL_DAT_BRAM_BITS         = (1<<static.log2_TOTAL_DAT_BRAM_BITS)
+    SINGLE_DAT_BRAM_BITS        = (TOTAL_DAT_BRAM_BITS//DAT_BRAM_NUM)  
+    SINGLE_DAT_BRAM_WIDTH       = (static.HBM_AXI_DATA_WIDTH)
+    SINGLE_DAT_BRAM_DEPTH       = (SINGLE_DAT_BRAM_BITS//SINGLE_DAT_BRAM_WIDTH)
+    log2_SINGLE_DAT_BRAM_DEPTH  = int(math.log2(SINGLE_DAT_BRAM_DEPTH))
+    log2_ID0_BRAM_DEPTH         = (log2_SINGLE_DAT_BRAM_DEPTH   )
+    ID0_BRAM_DEPTH              = (1<<log2_ID0_BRAM_DEPTH       )
+    ID0_BRAM_WIDTH              = (static.HBM_AXI_DATA_WIDTH*static.HBM_Port )
+    TOTAL_WT_BRAM_BITS          = (1<<static.log2_TOTAL_WT_BRAM_BITS)
+    WT_BRAM_NUM                 = static.HBM_Port
+    log2_WT_BRAM_NUM            = int(math.log2(WT_BRAM_NUM))
+    log2_TOTAL_WT1_BRAM_BITS    = (static.log2_TOTAL_WT_BRAM_BITS-1)
+    TOTAL_WT1_BRAM_BITS         = (1<<log2_TOTAL_WT1_BRAM_BITS)
+    SINGLE_WT_BRAM_BITS         = (TOTAL_WT1_BRAM_BITS//WT_BRAM_NUM)  
+    SINGLE_WT_BRAM_WIDTH        = (static.HBM_AXI_DATA_WIDTH)
+    SINGLE_WT_BRAM_DEPTH        = (SINGLE_WT_BRAM_BITS//SINGLE_WT_BRAM_WIDTH)
+    log2_SINGLE_WT_BRAM_DEPTH   = int(math.log2(SINGLE_WT_BRAM_DEPTH) )
+    log2_ID1_BRAM_DEPTH         = (log2_SINGLE_WT_BRAM_DEPTH    )
+    ID1_BRAM_DEPTH              = (1<<log2_ID1_BRAM_DEPTH       )
+    ID1_BRAM_WIDTH              = (static.HBM_AXI_DATA_WIDTH*static.HBM_Port )
+    L_Tout                      = static.HBM_Port*static.HBM_AXI_DATA_WIDTH//static.MAX_DW
+    # aux build factor
+    aux_dat_width = static.HBM_AXI_DATA_WIDTH*4//8
+

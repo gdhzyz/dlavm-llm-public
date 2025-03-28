@@ -166,7 +166,7 @@ class AuxBuild(RegsBuild, GraphBuild):
                 self.aux_task_ids[i] = task_id[0]
                 self.insts_block.append(insts)
             aux_stmt.name = f"aux_block_{self.aux_block_ids}"
-            aux_func = Tasks.Get("atom.hbm.aux", self.device)
+            aux_func = Tasks.Get(f"atom.{self.device.name}.aux", self.device)
             aux_func(aux_stmt, self.aux_storage, task_numb*task_id[1], task_numb, [upt_call])
             self.model_run += ir.Call(self.aux_opt_pass(aux_stmt))
             self.model_run.update_args(aux_stmt.args)
@@ -189,7 +189,10 @@ class AuxBuild(RegsBuild, GraphBuild):
 
     def build(self, expr, init_addr, mod_name):
         self.device = expr.get_device()
-        self.aux_dat_wth = self.device.AXI_DAT_WIDTH // 8
+        if not hasattr(self.device, "aux_dat_width"):
+            msg = f"*AUX Build Error* : device {self.device.name}-{self.device.version} does NOT support aux module, please add \"aux_dat_width\" factor to support"
+            raise RuntimeError(f"")
+        self.aux_dat_wth = self.device.aux_dat_width
         self.aux_storage = None
         self.aux_max_numb = 16
         self.aux_task_numb = 0

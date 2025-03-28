@@ -151,7 +151,12 @@ class Storage:
                 memo = self.memo_[prefix]
                 source += ir.Annotation(f"{prefix} storage define")
                 for id, storage in memo.items():
-                    addr_hex = "0x%08x" % (storage.address)
+                    if dtype == "uint32_t":
+                        addr_hex = "0x%08x" % (storage.address)
+                    elif dtype == "uint64_t":
+                        addr_hex = "0x%09x" % (storage.address)
+                    else:
+                        raise RuntimeError(f"Storage not support export with the type: {dtype}")
                     source += ir.Assign(str(id), addr_hex, dtype)
         return source
 

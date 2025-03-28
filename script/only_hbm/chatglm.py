@@ -1,3 +1,4 @@
+import os
 import sys
 
 sys.path.append("../..")
@@ -9,11 +10,10 @@ from dlavm import adr
 from dlavm import transform
 from dlavm import backend
 from dlavm.target import targets
-from dlavm.device import ohbm_accel, hbm_accel
+from dlavm.device import ohbm_accel
 from dlavm.adr import DataEnum as de
-import sys
-import dlavm.utils
-sys.setrecursionlimit(3000)  # 将默认的递归深度修改为3000
+from dlavm import utils
+from time import strftime, localtime
 
 
 def chatglm_block(input, last_token, pew, silu, index):
@@ -69,10 +69,10 @@ def chatglm_block(input, last_token, pew, silu, index):
     block_out = dlavm.nn.add(l_data, atten_data)
     return block_out
 
-token = ne.Var("token", 2048)
-last_token = ne.Var("last_token", 2048)
-# token = 19
-# last_token = 0
+# token = ne.Var("token", 2048)
+# last_token = ne.Var("last_token", 2048)
+token = 19
+last_token = 0
 device = ohbm_accel.OHBM0326
 
 pew = adr.const_hbm("pos_emb_weight", "test", [256, 4096], dtype=de.fp16)
@@ -95,16 +95,37 @@ output = output[1]
 output = transform.infer_type(output, device)
 print(output)
 
-
 if __name__ == "__main__":
     from dlavm.driver import config
     config.tb_sim_path = device.tb_sim_path
     config.sim_tool = "modelsim"
 
+    name = f"chatglm_ohbm"
+    name += "_" + strftime('%m%d_%H%M', localtime())
+    cout = utils.StdCout()
+
+    cout += f"device: {device.name}, version: {device.version}"
+
     init_addr = {"hbm": 0x0, "hbm_cache": "hbm", "runtime": "hbm_cache", "onchip": 0x0}
-    # mod = backend.build_tb(output, init_addr, "test", targets.hpp, {"wt2hbm":False, "hbm_base": 0x0, "ddr_base": 0x0})
-    mod = backend.build(output, init_addr, "test", False, targets.hpp, {"wt2hbm":False, "hbm_base": 0x0, "ddr_base": 0x0, "addr_dtype": "uint64_t"})
-    with open("output/chatglm_test_19_0316.h", "w") as f:
+    config = {"wt2hbm":False, "hbm_base": 0x0, "ddr_base": 0x0, "addr_dtype": "uint64_t"}
+
+    cout += f"start build"
+    # mod = backend.build_tb(output, init_addr, "test", targets.hpp, config)
+    mod = backend.build(output, init_addr, "test", False, targets.hpp, config)
+    cout += f"finish build"
+
+    src = os.path.join("output", name+".h")
+    ptx = os.path.join("output", name+".prototxt")
+    log = os.path.join("output", name+".log")
+
+    with open(src, "w") as f:
         print(mod.get_source(), file=f)
-    with open("output/chatglm_test_19_0316.prototxt", "w") as f:
+    cout += f"save in {src}"
+    with open(ptx, "w") as f:
         print(mod.get_prototxt(), file=f)
+    cout += f"save in {ptx}"
+
+    utils.LOG_WITH_PREFIX("expression", str(output))
+    utils.LOG_WITH_PREFIX("storage", str(mod.storage))
+    utils.LOG_EXPORT(log)
+    cout += f"save in {log}"

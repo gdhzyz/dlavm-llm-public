@@ -6,17 +6,19 @@ from dlavm import ne
 
 class TbBuild(GraphBuild):
 
-    def __init__(self, wt2hbm, ddr_base, hbm_base, lite=False, namespace=False, **kwargs):
+    def __init__(self, wt2hbm, ddr_base, hbm_base, lite=False, namespace=False, addr_dtype="uint64_t", **kwargs):
         super().__init__(**kwargs)
         self.org_build = GraphBuild(**kwargs)
         self.wt2hbm = wt2hbm
         self.ddr_base = ddr_base
         self.hbm_base = hbm_base
+        self.addr_dtype = addr_dtype
         self.namespace = namespace
         self.opt_pass = transform.Sequence([
             transform.FoldConstant(),
             transform.LoopSimplify(eliminate=lite),
             transform.DeadCodeEliminate(),
+            transform.AddDebugSign(),
         ])
 
     def _base_addr(self, tensor):
@@ -43,7 +45,7 @@ class TbBuild(GraphBuild):
 
         graphs = super().build(expr)
 
-        lib.body = [self.pre_storage.export(), self.inputs, self.outputs, self.load_params, self.model_run]
+        lib.body = [self.pre_storage.export(self.addr_dtype), self.inputs, self.outputs, self.load_params, self.model_run]
         return lib, graphs, self.storage, None, None
 
     def wrap_output(self, expr):

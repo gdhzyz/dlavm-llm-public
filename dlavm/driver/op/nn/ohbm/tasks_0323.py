@@ -209,14 +209,13 @@ def MVM(func, args, outputs, attrs):
     WT_CHin_Padding_with_Tin = WT_CHin_div_Tin*device.Tin
     WT_CHout_Padding_with_Tout = CHout_div_Tout*device.Tout
 
-    WT_CH_Tgroup = (device.T_quant_block*Sparsity_Factor*device.HBM_AXI_DATA_WIDTH//device.WT_quant_scale_DW)
+    WT_CH_Tgroup = (device.T_quant_block*Sparsity_Factor*device.s_HBM_AXI_DATA_WIDTH//device.WT_quant_scale_DW)
     WT_scale_group_nums = ((WT_CHin_Padding_with_Tin+WT_CH_Tgroup-1)//WT_CH_Tgroup)
-    WT_scale_bits = (WT_CHout_Padding_with_Tout*device.HBM_AXI_DATA_WIDTH*WT_scale_group_nums)
+    WT_scale_bits = (WT_CHout_Padding_with_Tout*device.s_HBM_AXI_DATA_WIDTH*WT_scale_group_nums)
     WT_SIZE_IN_BYTES = (((WT_CHout_Padding_with_Tout*WT_CHin_Padding_with_Tin*WT_DW)>>3)+((WT_scale_bits)>>3))
     WT_BYTES_per_CH = WT_SIZE_IN_BYTES//WT_CHout_Padding_with_Tout
     log2_WT_CH_Tgroup = int(math.log2(WT_CH_Tgroup))
     Last_Group_CHin = ne.If(WT_CHin_Padding_with_Tin%WT_CH_Tgroup, WT_CHin_Padding_with_Tin%WT_CH_Tgroup, WT_CH_Tgroup)
-
     # stride load or compute
     feature_in_line_stride = device.HBM_1Row_Bytes * Win
     feature_in_surface_stride = device.HBM_1Row_Bytes * Win * Hin

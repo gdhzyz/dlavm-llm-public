@@ -17,9 +17,9 @@ from dlavm.utils.tools import RegsCheckSameList
 
 int_token = 213
 int_last_token = 37
-chin, chout = [4096, 4096]
-f_head, w_head = [32, 2]
-device = ohbm_accel.OHBM0326
+chin, chout = [3584, 3584]
+f_head, w_head = [28, 4]
+device = ohbm_accel.OHBM0326V80
 
 from dlavm.driver import config
 config.tb_sim_path = device.tb_sim_path
@@ -31,7 +31,7 @@ token = ne.Var(str_token)
 last_token = ne.Var(str_last_token)
 init_addr = {"hbm": 0x0, "runtime": "hbm", "hbm_cache": "hbm"}
 configs = {"wt2hbm":False, "hbm_base": 0x0, "ddr_base": 0x0}
-name, target = "test", targets.hpp
+name, target = "test", targets.v80
 
 
 def run_expr_check(dyn_arg, sta_arg, main_arg):
@@ -57,7 +57,6 @@ def run_expr_check(dyn_arg, sta_arg, main_arg):
         sta_rt.main(name, **main_arg)
         regs1 = dyn_rt.regs
         regs2 = sta_rt.regs
-        # print(regs1)
         if RegsCheckSameList(regs1, regs2, ignores):
             success = f"\033[36;32m Check Success!\033[36;0m "
             finish = f" Check Finish: \033[36;32m{name}\033[36;0m "
@@ -67,6 +66,7 @@ def run_expr_check(dyn_arg, sta_arg, main_arg):
             finish = f" RT Check Finish: \033[36;31m{name}\033[36;0m "
             print(f"{fail:*^135}")
         print(f"{finish:=^135}\n")
+        # print(dyn_mod.get_source())
     return check
 
 

@@ -39,6 +39,8 @@ class HBM(Accel):
     SINGLE_BN_FIFO_DEP = (AXI_BURST_LEN*MAX_DAT_DW*Tb)//(MAX_BN_DW*2)
     BN_FIFO_DEP = SINGLE_BN_FIFO_DEP * 4
     BN_FIFO_NUM = (MAX_BN_DW*2)//(MAX_DAT_DW*Tb)
+    # compiler factor, to support aux model
+    aux_dat_width = AXI_DAT_WIDTH // 8
 
     @classmethod
     def malloc_bytes(cls, shape, dtype, dynamic=False):

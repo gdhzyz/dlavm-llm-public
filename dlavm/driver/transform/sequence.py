@@ -10,3 +10,6 @@ class Sequence:
         for opt in self.opt_pass:
             stmt = opt.Visit(stmt)
         return stmt
+
+    def __iadd__(self, opt_pass):
+        self.opt_pass.append(opt_pass)

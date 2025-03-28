@@ -97,6 +97,7 @@ def TestbenchSIM(tb_name: str, define: dict, debug: bool=True) -> list:
     for out in out_rtl:
         if "csb_rtl" in out:
             eval(out)
+    # print(saved_out_rtl)
     if len(csb_rtl) == 0:
         raise RuntimeError(saved_out_rtl)
     return csb_rtl
@@ -151,6 +152,8 @@ class Tasks:
                 else:
                     msg = f"no available task version \"{op_name}\" for {device.version}, please register first"
                     raise RuntimeError(msg)
+            version = cls.memo[device.name][op_name][i+1][1]
+            LOG_WITH_PREFIX(log_driver_device, [op_name, device.name, version])
             return cls.memo[device.name][op_name][i+1][0]
         else:
             if cls.memo[device.name][op_name][0][1] <= device.version:

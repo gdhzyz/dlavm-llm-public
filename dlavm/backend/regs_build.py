@@ -6,7 +6,7 @@ from dlavm import ne
 
 class RegsBuild(GraphBuild):
 
-    def __init__(self, wt2hbm, ddr_base, hbm_base, lite=False, namespace=False, min_loop=2, addr_dtype="uint64_t", **kwargs):
+    def __init__(self, wt2hbm, ddr_base, hbm_base, lite=False, namespace=False, min_loop=2, addr_dtype="uint64_t", const={}, **kwargs):
         super().__init__(**kwargs)
         self.wt2hbm = wt2hbm
         self.ddr_base = ddr_base
@@ -14,7 +14,7 @@ class RegsBuild(GraphBuild):
         self.addr_dtype = addr_dtype
         self.namespace = namespace
         self.opt_pass = transform.Sequence([
-            transform.FoldConstant(),
+            transform.FoldConstant(const=const),
             transform.LoopSimplify(min_loop=min_loop, eliminate=lite),
             transform.DeadCodeEliminate(),
             transform.FoldConstant(),
