@@ -197,8 +197,7 @@ class RuntimeBase(ExecutorBase):
 
     def __init__(self, lib):
         super().__init__()
-        self.lib = lib
-        self.Visit(self.lib)
+        self.Visit(lib)
 
     def main(self, name, **kwargs):
         args = {}

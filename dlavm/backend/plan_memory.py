@@ -109,7 +109,8 @@ class Storage:
                 saved_prefix_addr[prefix] = addr
             if len(self.sort_keys) < len(self.memo_.keys()):
                 unassign = ", ".join(list(self.memo_.keys() - self.sort_keys))
-                raise RuntimeError(f"AssignAddress has no [{unassign}] address, please check")
+                msg = f"AssignAddress has no [{unassign}] address, please check"
+                raise RuntimeError(msg)
 
     def get_address(self, id, offset, base_address=0):
         for memo_ in self.memo_.values():

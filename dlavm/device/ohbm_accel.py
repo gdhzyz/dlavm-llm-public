@@ -237,3 +237,13 @@ class OHBM0326V80(OHBM0326V80Static):
     # aux build factor
     aux_dat_width = static.HBM_AXI_DATA_WIDTH*4//8
 
+
+
+class OHBM0329(OHBM0326):
+
+    version = 20250329
+    tb_sim_path = "/home/shenao/dlavm-llm-public/tbsim/workspace_2025_0329"
+
+    description = """
+        tb, kvcache2hbm and trp/f2w change
+    """

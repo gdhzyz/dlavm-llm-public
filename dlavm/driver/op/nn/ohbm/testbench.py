@@ -531,6 +531,7 @@ def MVMF16xF16(args, output, attrs):
         "Last_Token" : wshape[-2] - dshape[-2],
         "This_Token" : wshape[-2],
         "Token_CHin" : dshape[-1],
+        "MAX_CH_per_HEAD" : wshape[-1],
         "Original_Feature_Head" : dshape[0],
         "Weight_Head" : wshape[0],
         "MAX_TOKEN" : dtensor.device.MAX_TOKEN,

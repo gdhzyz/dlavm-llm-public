@@ -27,3 +27,10 @@ class AddDebugSign(ir.Functor):
                 b += new_stmt
             return b
         return new_stmt
+
+    def VisitBlock(self, stmt: ir.Block):
+        new_stmt = deepcopy(stmt)
+        new_stmt.body = self.RmEmpty([self.Visit(b) for b in stmt.body])
+        if len(new_stmt.body) == 1 and isinstance(new_stmt.body, ir.MacroDefine):
+            return ir.Empty
+        return new_stmt

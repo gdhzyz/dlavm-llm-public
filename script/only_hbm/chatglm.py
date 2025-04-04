@@ -69,11 +69,11 @@ def chatglm_block(input, last_token, pew, silu, index):
     block_out = dlavm.nn.add(l_data, atten_data)
     return block_out
 
-# token = ne.Var("token", 2048)
-# last_token = ne.Var("last_token", 2048)
+token = ne.Var("token", 2048)
+last_token = ne.Var("last_token", 2048)
 token = 19
 last_token = 0
-device = ohbm_accel.OHBM0326
+device = ohbm_accel.OHBM0329
 
 pew = adr.const_hbm("pos_emb_weight", "test", [256, 4096], dtype=de.fp16)
 silu = adr.const_hbm("silu_weight", "test", [16*3], dtype=de.fp16)
@@ -106,12 +106,12 @@ if __name__ == "__main__":
 
     cout += f"device: {device.name}, version: {device.version}"
 
-    init_addr = {"hbm": 0x0, "hbm_cache": "hbm", "runtime": "hbm_cache", "onchip": 0x0}
+    init_addr = {"hbm": 0x0, "hbm_cache": "hbm", "runtime": "hbm_cache", "insts": "runtime", "onchip": 0x0}
     config = {"wt2hbm":False, "hbm_base": 0x0, "ddr_base": 0x0, "addr_dtype": "uint64_t"}
 
     cout += f"start build"
-    # mod = backend.build_tb(output, init_addr, "test", targets.hpp, config)
-    mod = backend.build(output, init_addr, "test", False, targets.hpp, config)
+    mod = backend.build_tb(output, init_addr, "test", targets.hpp, config)
+    # mod = backend.build(output, init_addr, "test", False, targets.hpp, config)
     cout += f"finish build"
 
     src = os.path.join("output", name+".h")

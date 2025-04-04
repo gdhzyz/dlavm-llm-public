@@ -265,7 +265,7 @@ class Expr:
         expr_str = new_expr.export("py")
         if self_str == expr_str:
             return True
-        index = [0 for i in range(len(vars0))]
+        index = [i+1 for i in range(len(vars0))]
         while 1:
             self_numb = self_str
             expr_numb = expr_str

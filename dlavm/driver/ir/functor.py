@@ -13,6 +13,8 @@ class Functor:
         for b in body:
             if b == ir.Empty:
                 continue
+            if isinstance(b, ir.Block) and len(b.body) == 0:
+                continue
             new_body.append(b)
         return new_body
 
