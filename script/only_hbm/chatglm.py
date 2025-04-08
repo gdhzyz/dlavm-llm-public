@@ -1,5 +1,6 @@
 import os
 import sys
+from tqdm import tqdm
 
 sys.path.append("../..")
 sys.setrecursionlimit(3000)
@@ -11,6 +12,7 @@ from dlavm import transform
 from dlavm import backend
 from dlavm.target import targets
 from dlavm.device import ohbm_accel
+from dlavm.runtime import AUXGen
 from dlavm.adr import DataEnum as de
 from dlavm import utils
 from time import strftime, localtime
@@ -114,6 +116,12 @@ if __name__ == "__main__":
     # mod = backend.build(output, init_addr, "test", False, targets.hpp, config)
     cout += f"finish build"
 
+    """
+    aux = AUXGen(mod, device)
+    for i in tqdm(range(19, 2048)):
+        aux.main("test", token=1, last_token=i)
+    mod, bins = aux.export(init_addr)
+    """
     src = os.path.join("output", name+".h")
     ptx = os.path.join("output", name+".prototxt")
     log = os.path.join("output", name+".log")

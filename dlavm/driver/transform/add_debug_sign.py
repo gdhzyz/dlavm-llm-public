@@ -22,7 +22,7 @@ class AddDebugSign(ir.Functor):
         if self.sign:
             with ir.Block() as b:
                 with ir.MacroDefine("PRINT_STEP") as m:
-                    m += ir.ExternCall("printf", [f"start {self.func_name}\\n"])
+                    m += ir.ExternCall("printf", [f"\"start {self.func_name}\\n\""])
                 b += m
                 b += new_stmt
             return b

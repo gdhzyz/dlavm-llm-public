@@ -2,8 +2,13 @@ from copy import deepcopy
 from dlavm import ne
 from . import base as ir
 
+def deepcopy(a):
+    return a
+
 
 class Functor:
+
+    _tp = type(ir.Block())
 
     def __init__(self) -> None:
         self.memo = {}
@@ -13,7 +18,8 @@ class Functor:
         for b in body:
             if b == ir.Empty:
                 continue
-            if isinstance(b, ir.Block) and len(b.body) == 0:
+            # TODO: 删除空的ir.Block，但由于父类继承的存在，isinstance不可用
+            if type(b) == self._tp and len(b.body) == 0:
                 continue
             new_body.append(b)
         return new_body

@@ -72,6 +72,9 @@ class OHBM(Accel):
     L_Tout                      = HBM_Port*HBM_AXI_DATA_WIDTH//MAX_DW
     # aux build factor
     aux_dat_width = HBM_AXI_DATA_WIDTH*4//8
+    aux_task_map = {
+        0b001111 : [0b001111, 2],
+    }
 
     @classmethod
     def malloc_bytes(cls, shape, dtype, dynamic=False):

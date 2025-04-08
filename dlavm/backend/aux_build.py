@@ -74,7 +74,6 @@ class CsbUpdate(ir.Functor):
                 else:
                     return []
             arg_vars = _wrap(vars)
-            print(self.vars.keys(), stmt.data, arg_vars)
             stmt = super().VisitCSBWrite(stmt)
             if len(arg_vars) == 1 and arg_vars[0] == self.kvcache_var.name:
                 with ir.If(self.upt_full) as _if:

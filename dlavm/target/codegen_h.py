@@ -25,8 +25,9 @@ class CodeGenH(CodeGenBase):
         return f"// {text}"
 
     def VisitData(self, data):
-        if isinstance(data, str) and "0x" not in data:
-            return "\"" + data + "\""
+        # TODO: 如何更简洁的支持str和利用str存储的data数据
+        # if isinstance(data, str) and "0x" not in data:
+        #     return "\"" + data + "\""
         return str(data)
 
     def VisitOp(self, expr: ir.Op):
