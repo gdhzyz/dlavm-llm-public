@@ -15,11 +15,11 @@ from dlavm.runtime import RuntimeBase
 from dlavm.utils.tools import RegsCheckSameList
 
 
-int_token = 213
-int_last_token = 37
-chin, chout = [3584, 3584]
-f_head, w_head = [28, 4]
-device = ohbm_accel.OHBM0329
+int_token = 423
+int_last_token = 132
+chin, chout = [4096, 4096]
+f_head, w_head = [32, 2]
+device = ohbm_accel.OHBM0407
 
 from dlavm.driver import config
 config.tb_sim_path = device.tb_sim_path
@@ -51,6 +51,7 @@ def run_expr_check(dyn_arg, sta_arg, main_arg):
         print(dyn_out)
         dyn_mod = backend.build(dyn_out, init_addr, name, False, target, configs)
         sta_mod = backend.build_tb(sta_out, init_addr, name, target, configs)
+        # print(dyn_mod.get_source())
         dyn_rt = RuntimeBase(dyn_mod.lib)
         dyn_rt.main(name, **main_arg)
         sta_rt = RuntimeBase(sta_mod.lib)

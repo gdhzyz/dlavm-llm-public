@@ -15,8 +15,8 @@ class RegsBuild(GraphBuild):
         self.namespace = namespace
         self.opt_pass = transform.Sequence([
             transform.FoldConstant(const=const),
-            transform.LoopSimplify(min_loop=min_loop, eliminate=lite),
-            transform.FoldConstant(),
+            # transform.LoopSimplify(min_loop=min_loop, eliminate=False),
+            # transform.FoldConstant(),
             transform.DeadCodeEliminate(),
             transform.AddDebugSign(),
         ])

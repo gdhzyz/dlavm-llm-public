@@ -250,3 +250,12 @@ class OHBM0329(OHBM0326):
     description = """
         tb, kvcache2hbm and trp/f2w change
     """
+
+class OHBM0407(OHBM0329):
+
+    version = 20250407
+    tb_sim_path = "/home/shenao/dlavm-llm-public/tbsim/workspace_2025_0407"
+
+    description = """
+        F2W的编译reg9变了，其它都没变
+    """
