@@ -73,9 +73,9 @@ def chatglm_block(input, last_token, pew, silu, index):
 
 token = ne.Var("token", 2048)
 last_token = ne.Var("last_token", 2048)
-token = 19
-last_token = 0
-device = ohbm_accel.OHBM0329
+# token = 19
+# last_token = 0
+device = ohbm_accel.OHBM0407
 
 pew = adr.const_hbm("pos_emb_weight", "test", [256, 4096], dtype=de.fp16)
 silu = adr.const_hbm("silu_weight", "test", [16*3], dtype=de.fp16)
@@ -112,16 +112,21 @@ if __name__ == "__main__":
     config = {"wt2hbm":False, "hbm_base": 0x0, "ddr_base": 0x0, "addr_dtype": "uint64_t"}
 
     cout += f"start build"
-    mod = backend.build_tb(output, init_addr, "test", targets.hpp, config)
-    # mod = backend.build(output, init_addr, "test", False, targets.hpp, config)
+    # mod = backend.build_tb(output, init_addr, "test", targets.hpp, config)
+    mod = backend.build(output, init_addr, "test", False, targets.hpp, config)
     cout += f"finish build"
 
-    """
+    '''
     aux = AUXGen(mod, device)
-    for i in tqdm(range(19, 2048)):
-        aux.main("test", token=1, last_token=i)
+    aux.main("test", token=19, last_token=0)
+    # for i in tqdm(range(19, 30)):
+    #     aux.main("test", token=1, last_token=i)
     mod, bins = aux.export(init_addr)
-    """
+    ins = os.path.join("output", name+".bin")
+    with open(ins, "wb") as f:
+        f.write(b"".join(bins))
+    '''
+    
     src = os.path.join("output", name+".h")
     ptx = os.path.join("output", name+".prototxt")
     log = os.path.join("output", name+".log")

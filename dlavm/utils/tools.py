@@ -62,6 +62,8 @@ def RegsCheckAddrOffset(addr_dict: dict) -> bool:
         if o1 != o2:
             print(f"*Addr Check Same Error* : offset of addr reg {addr} not same, got {o1} and {o2}")
             match = False
+    if not match:
+        print(addr_dict)
     return match
 
 
